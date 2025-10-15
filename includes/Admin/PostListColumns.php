@@ -92,9 +92,9 @@ class PostListColumns {
 		$has_content = $this->hasGeneratedContent( $post_id );
 
 		if ( $has_content ) {
-			echo '<span class="gen-status gen-status-complete">✅ Generated</span>';
+			echo '<span class="seo-badge seo-badge--published">Published</span>';
 		} else {
-			echo '<span class="gen-status gen-status-empty">⚪ Not Generated</span>';
+			echo '<span class="seo-badge seo-badge--draft">Draft</span>';
 		}
 	}
 
@@ -120,24 +120,24 @@ class PostListColumns {
 						$time_until = ' (ready)';
 					}
 				}
-				echo '<span class="gen-status gen-status-pending">⏳ Queued' . esc_html( $time_until ) . '</span>';
+				echo '<span class="seo-badge seo-badge--pending">Queued' . esc_html( $time_until ) . '</span>';
 				break;
 
 			case 'processing':
-				echo '<span class="gen-status gen-status-processing">⚙️ Generating...</span>';
+				echo '<span class="seo-badge seo-badge--pending">Generating...</span>';
 				break;
 
 			case 'completed':
-				echo '<span class="gen-status gen-status-complete">✅ Generated</span>';
+				echo '<span class="seo-badge seo-badge--published">Published</span>';
 				break;
 
 			case 'failed':
 				$error = isset( $queue_item['error'] ) ? $queue_item['error'] : 'Unknown error';
-				echo '<span class="gen-status gen-status-failed" title="' . esc_attr( $error ) . '">❌ Failed</span>';
+				echo '<span class="seo-badge seo-badge--failed" title="' . esc_attr( $error ) . '">Failed</span>';
 				break;
 
 			default:
-				echo '<span class="gen-status gen-status-empty">⚪ Unknown</span>';
+				echo '<span class="seo-badge seo-badge--draft">Unknown</span>';
 		}
 	}
 
@@ -235,7 +235,7 @@ class PostListColumns {
 	}
 
 	/**
-	 * Add inline styles for status badges.
+	 * Add inline styles for list columns.
 	 *
 	 * @return void
 	 */
@@ -248,40 +248,7 @@ class PostListColumns {
 
 		?>
 		<style>
-			.gen-status {
-				display: inline-block;
-				padding: 4px 10px;
-				border-radius: 12px;
-				font-size: 12px;
-				font-weight: 600;
-				white-space: nowrap;
-			}
-			.gen-status-pending {
-				background: #fff3cd;
-				color: #856404;
-				border: 1px solid #ffeeba;
-			}
-			.gen-status-processing {
-				background: #d1ecf1;
-				color: #0c5460;
-				border: 1px solid #bee5eb;
-			}
-			.gen-status-complete {
-				background: #d4edda;
-				color: #155724;
-				border: 1px solid #c3e6cb;
-			}
-			.gen-status-failed {
-				background: #f8d7da;
-				color: #721c24;
-				border: 1px solid #f5c6cb;
-				cursor: help;
-			}
-			.gen-status-empty {
-				background: #e9ecef;
-				color: #6c757d;
-				border: 1px solid #dee2e6;
-			}
+			/* Column widths */
 			.column-generation_status {
 				width: 140px;
 			}
@@ -290,6 +257,20 @@ class PostListColumns {
 			}
 			.column-topic {
 				width: 150px;
+			}
+
+			/* List table styling */
+			.wp-list-table tbody tr {
+				transition: background-color 150ms ease;
+			}
+
+			.wp-list-table tbody tr:hover {
+				background-color: var(--gray-50);
+			}
+
+			/* Badge cursor for failed status */
+			.seo-badge--failed {
+				cursor: help;
 			}
 		</style>
 		<?php

@@ -77,6 +77,146 @@ register_deactivation_hook( __FILE__, array( 'SEOGenerator\Deactivation', 'deact
 // Initialize the plugin.
 add_action( 'plugins_loaded', array( 'SEOGenerator\Plugin', 'getInstance' ) );
 
+// ============================================================================
+// ADMIN UI STYLES
+// ============================================================================
+
+/**
+ * Enqueue macOS-inspired design system styles for admin pages.
+ *
+ * @since 1.0.0
+ */
+function seo_generator_enqueue_admin_styles( $hook ) {
+	// Check if we're on a plugin page or SEO Pages list.
+	$is_plugin_page = str_contains( $hook, 'seo-generator' ) || str_contains( $hook, 'seo-' );
+	$screen = get_current_screen();
+	$is_seo_page_list = $screen && $screen->post_type === 'seo-page';
+
+	// Only load on our plugin pages.
+	if ( ! $is_plugin_page && ! $is_seo_page_list ) {
+		return;
+	}
+
+	// Enqueue design system CSS (custom properties, typography, utilities).
+	wp_enqueue_style(
+		'seo-generator-design-system',
+		SEO_GENERATOR_PLUGIN_URL . 'assets/css/design-system.css',
+		array(),
+		SEO_GENERATOR_VERSION,
+		'all'
+	);
+
+	// Enqueue animations CSS (keyframes, transitions, micro-interactions).
+	wp_enqueue_style(
+		'seo-generator-animations',
+		SEO_GENERATOR_PLUGIN_URL . 'assets/css/animations.css',
+		array( 'seo-generator-design-system' ),
+		SEO_GENERATOR_VERSION,
+		'all'
+	);
+
+	// Enqueue components CSS.
+	if ( file_exists( SEO_GENERATOR_PLUGIN_DIR . 'assets/css/components.css' ) ) {
+		wp_enqueue_style(
+			'seo-generator-components',
+			SEO_GENERATOR_PLUGIN_URL . 'assets/css/components.css',
+			array( 'seo-generator-design-system', 'seo-generator-animations' ),
+			SEO_GENERATOR_VERSION,
+			'all'
+		);
+	}
+
+	// Enqueue responsive CSS (mobile, tablet, desktop breakpoints).
+	if ( file_exists( SEO_GENERATOR_PLUGIN_DIR . 'assets/css/responsive.css' ) ) {
+		wp_enqueue_style(
+			'seo-generator-responsive',
+			SEO_GENERATOR_PLUGIN_URL . 'assets/css/responsive.css',
+			array( 'seo-generator-components' ),
+			SEO_GENERATOR_VERSION,
+			'all'
+		);
+	}
+
+	// Enqueue accessibility CSS (WCAG 2.1 AA compliance, focus management).
+	if ( file_exists( SEO_GENERATOR_PLUGIN_DIR . 'assets/css/accessibility.css' ) ) {
+		wp_enqueue_style(
+			'seo-generator-accessibility',
+			SEO_GENERATOR_PLUGIN_URL . 'assets/css/accessibility.css',
+			array( 'seo-generator-responsive' ),
+			SEO_GENERATOR_VERSION,
+			'all'
+		);
+	}
+}
+add_action( 'admin_enqueue_scripts', 'seo_generator_enqueue_admin_styles' );
+
+// ============================================================================
+// END ADMIN UI STYLES
+// ============================================================================
+
+// ============================================================================
+// ADMIN UI SCRIPTS
+// ============================================================================
+
+/**
+ * Enqueue macOS-inspired UI scripts for admin pages.
+ *
+ * @since 1.0.0
+ */
+function seo_generator_enqueue_admin_scripts( $hook ) {
+	// Check if we're on a plugin page or SEO Pages list.
+	$is_plugin_page = str_contains( $hook, 'seo-generator' ) || str_contains( $hook, 'seo-' );
+	$screen = get_current_screen();
+	$is_seo_page_list = $screen && $screen->post_type === 'seo-page';
+
+	// Only load on our plugin pages.
+	if ( ! $is_plugin_page && ! $is_seo_page_list ) {
+		return;
+	}
+
+	// Enqueue interactions JS (UI component behaviors).
+	wp_enqueue_script(
+		'seo-generator-interactions',
+		SEO_GENERATOR_PLUGIN_URL . 'assets/js/interactions.js',
+		array(),
+		SEO_GENERATOR_VERSION,
+		true
+	);
+
+	// Enqueue progress tracking JS (AI generation, file uploads).
+	wp_enqueue_script(
+		'seo-generator-progress-tracking',
+		SEO_GENERATOR_PLUGIN_URL . 'assets/js/progress-tracking.js',
+		array(),
+		SEO_GENERATOR_VERSION,
+		true
+	);
+
+	// Enqueue column mapping JS (CSV import).
+	wp_enqueue_script(
+		'seo-generator-column-mapping',
+		SEO_GENERATOR_PLUGIN_URL . 'assets/js/build/column-mapping.js',
+		array(),
+		SEO_GENERATOR_VERSION,
+		true
+	);
+
+	// Localize script with AJAX URL and nonce.
+	wp_localize_script(
+		'seo-generator-interactions',
+		'seoGeneratorData',
+		array(
+			'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			'nonce'   => wp_create_nonce( 'seo-generator-nonce' ),
+		)
+	);
+}
+add_action( 'admin_enqueue_scripts', 'seo_generator_enqueue_admin_scripts' );
+
+// ============================================================================
+// END ADMIN UI SCRIPTS
+// ============================================================================
+
 // Load debug script (temporary - for troubleshooting image assignment).
 if ( is_admin() ) {
 	require_once SEO_GENERATOR_PLUGIN_DIR . 'debug-image-assignment.php';

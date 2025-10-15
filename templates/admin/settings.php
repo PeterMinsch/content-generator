@@ -19,7 +19,7 @@ $tabs = array(
 $page_slug = \SEOGenerator\Admin\SettingsPage::getPageSlug();
 ?>
 
-<div class="wrap">
+<div class="wrap seo-generator-page">
 	<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 
 	<!-- Tab Navigation -->
@@ -52,11 +52,14 @@ $page_slug = \SEOGenerator\Admin\SettingsPage::getPageSlug();
 			case 'defaults':
 				do_settings_sections( $page_slug . '_defaults' );
 				?>
-				<div class="notice notice-info inline">
-					<p>
-						<strong><?php esc_html_e( 'Coming Soon:', 'seo-generator' ); ?></strong>
-						<?php esc_html_e( 'Set default CTA button text, URLs, warranty information, and care instructions that will be used across all generated pages.', 'seo-generator' ); ?>
-					</p>
+				<div class="seo-card mt-4">
+					<h3 class="seo-card__title">ℹ️ Coming Soon</h3>
+					<div class="seo-card__content">
+						<p>
+							<strong><?php esc_html_e( 'Coming Soon:', 'seo-generator' ); ?></strong>
+							<?php esc_html_e( 'Set default CTA button text, URLs, warranty information, and care instructions that will be used across all generated pages.', 'seo-generator' ); ?>
+						</p>
+					</div>
 				</div>
 				<?php
 				break;
@@ -64,11 +67,14 @@ $page_slug = \SEOGenerator\Admin\SettingsPage::getPageSlug();
 			case 'prompts':
 				do_settings_sections( $page_slug . '_prompts' );
 				?>
-				<div class="notice notice-info inline">
-					<p>
-						<strong><?php esc_html_e( 'Coming Soon:', 'seo-generator' ); ?></strong>
-						<?php esc_html_e( 'Customize prompt templates for each of the 12 content blocks. Edit system messages and variable placeholders to fine-tune AI output.', 'seo-generator' ); ?>
-					</p>
+				<div class="seo-card mt-4">
+					<h3 class="seo-card__title">ℹ️ Coming Soon</h3>
+					<div class="seo-card__content">
+						<p>
+							<strong><?php esc_html_e( 'Coming Soon:', 'seo-generator' ); ?></strong>
+							<?php esc_html_e( 'Customize prompt templates for each of the 12 content blocks. Edit system messages and variable placeholders to fine-tune AI output.', 'seo-generator' ); ?>
+						</p>
+					</div>
 				</div>
 				<?php
 				break;
@@ -80,11 +86,14 @@ $page_slug = \SEOGenerator\Admin\SettingsPage::getPageSlug();
 			case 'limits':
 				do_settings_sections( $page_slug . '_limits' );
 				?>
-				<div class="notice notice-info inline">
-					<p>
-						<strong><?php esc_html_e( 'Coming Soon:', 'seo-generator' ); ?></strong>
-						<?php esc_html_e( 'Set rate limits, concurrent generation limits, enable cost tracking, configure monthly budgets, and view current usage statistics.', 'seo-generator' ); ?>
-					</p>
+				<div class="seo-card mt-4">
+					<h3 class="seo-card__title">ℹ️ Coming Soon</h3>
+					<div class="seo-card__content">
+						<p>
+							<strong><?php esc_html_e( 'Coming Soon:', 'seo-generator' ); ?></strong>
+							<?php esc_html_e( 'Set rate limits, concurrent generation limits, enable cost tracking, configure monthly budgets, and view current usage statistics.', 'seo-generator' ); ?>
+						</p>
+					</div>
 				</div>
 				<?php
 				break;
@@ -96,47 +105,25 @@ $page_slug = \SEOGenerator\Admin\SettingsPage::getPageSlug();
 	</form>
 
 	<!-- Help Information -->
-	<div class="card" style="max-width: 100%; margin-top: 20px;">
-		<h2><?php esc_html_e( 'About Settings', 'seo-generator' ); ?></h2>
-		<p>
-			<?php
-			esc_html_e(
-				'This settings page provides configuration options for the SEO Content Generator plugin. Settings will be added progressively in upcoming development stories.',
-				'seo-generator'
-			);
-			?>
-		</p>
-		<p>
-			<strong><?php esc_html_e( 'Next Steps:', 'seo-generator' ); ?></strong>
-		</p>
-		<ul>
-			<li><?php esc_html_e( 'Story 2.1: OpenAI API integration and configuration', 'seo-generator' ); ?></li>
-			<li><?php esc_html_e( 'Story 2.2: Prompt template engine and customization', 'seo-generator' ); ?></li>
-			<li><?php esc_html_e( 'Future: Default content, image settings, and usage limits', 'seo-generator' ); ?></li>
-		</ul>
+	<div class="seo-card mt-6">
+		<h3 class="seo-card__title">📖 About Settings</h3>
+		<div class="seo-card__content">
+			<p>
+				<?php
+				esc_html_e(
+					'This settings page provides configuration options for the SEO Content Generator plugin. Settings will be added progressively in upcoming development stories.',
+					'seo-generator'
+				);
+				?>
+			</p>
+			<p>
+				<strong><?php esc_html_e( 'Next Steps:', 'seo-generator' ); ?></strong>
+			</p>
+			<ul style="margin-left: 20px;">
+				<li><?php esc_html_e( 'Story 2.1: OpenAI API integration and configuration', 'seo-generator' ); ?></li>
+				<li><?php esc_html_e( 'Story 2.2: Prompt template engine and customization', 'seo-generator' ); ?></li>
+				<li><?php esc_html_e( 'Future: Default content, image settings, and usage limits', 'seo-generator' ); ?></li>
+			</ul>
+		</div>
 	</div>
 </div>
-
-<style>
-	/* Ensure inline notices don't have excessive margin */
-	.notice.inline {
-		margin: 20px 0;
-		padding: 12px;
-	}
-
-	.card {
-		background: #fff;
-		border: 1px solid #ccd0d4;
-		box-shadow: 0 1px 1px rgba(0,0,0,.04);
-		padding: 20px;
-		margin-bottom: 20px;
-	}
-
-	.card h2 {
-		margin-top: 0;
-	}
-
-	.card ul {
-		margin-left: 20px;
-	}
-</style>

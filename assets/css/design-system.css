@@ -1,0 +1,299 @@
+/**
+ * SEO Generator Plugin - macOS-Inspired Design System
+ * Design System Foundation - CSS Custom Properties
+ *
+ * Based on macOS Ventura/Sonoma aesthetic with luxury brand colors
+ */
+
+:root {
+  /* ========================================
+     BRAND COLORS
+     ======================================== */
+  --gold: #CA9652;           /* Primary brand - accents, CTAs, highlights */
+  --gold-light: #E5C697;     /* Hover states, subtle highlights */
+  --gold-dark: #A67835;      /* Active states, shadows */
+  --charcoal: #272521;       /* Primary text, dark backgrounds */
+  --charcoal-soft: #3D3935;  /* Secondary backgrounds */
+
+  /* ========================================
+     SYSTEM GRAYS (macOS-inspired)
+     ======================================== */
+  --gray-50: #FAFAF9;        /* Page backgrounds */
+  --gray-100: #F5F5F4;       /* Card backgrounds */
+  --gray-200: #E7E5E4;       /* Borders, dividers */
+  --gray-300: #D6D3D1;       /* Disabled states */
+  --gray-400: #A8A29E;       /* Placeholder text */
+  --gray-500: #78716C;       /* Subtle text */
+  --gray-700: #44403C;       /* Secondary text */
+  --gray-900: #1C1917;       /* Headings */
+
+  /* ========================================
+     SEMANTIC COLORS (macOS system colors)
+     ======================================== */
+  --success: #34C759;        /* macOS green - completed, success */
+  --warning: #FF9500;        /* macOS orange - pending, warnings */
+  --error: #FF3B30;          /* macOS red - errors, failures */
+  --info: #007AFF;           /* macOS blue - info, links */
+
+  /* ========================================
+     GLASSMORPHISM
+     ======================================== */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+  /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+
+  /* Font Stacks */
+  --font-display: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-text: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+
+  /* Type Scale */
+  --text-xs: 11px;     /* Helper text, captions */
+  --text-sm: 13px;     /* Body small, labels */
+  --text-base: 15px;   /* Primary body text */
+  --text-lg: 17px;     /* Large body, subheadings */
+  --text-xl: 22px;     /* Section headings */
+  --text-2xl: 28px;    /* Page titles */
+  --text-3xl: 34px;    /* Hero headings */
+
+  /* Font Weights */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Line Heights */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.75;
+
+  /* Letter Spacing */
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.01em;
+
+  /* ========================================
+     SPACING SYSTEM
+     ======================================== */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+
+  /* ========================================
+     SHADOWS
+     ======================================== */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 32px rgba(0, 0, 0, 0.15);
+  --shadow-gold: 0 2px 8px rgba(202, 150, 82, 0.3);
+  --shadow-gold-lg: 0 4px 12px rgba(202, 150, 82, 0.4);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* ========================================
+     TRANSITIONS
+     ======================================== */
+  --transition-fast: 80ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  --transition-base: 150ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  --transition-slow: 250ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  --transition-page: 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+
+  /* ========================================
+     Z-INDEX SCALE
+     ======================================== */
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+}
+
+/* ========================================
+   BACKDROP FILTER SUPPORT
+   ======================================== */
+@supports (backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px)) {
+  .glass-effect {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not ((backdrop-filter: blur(10px)) or (-webkit-backdrop-filter: blur(10px))) {
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* ========================================
+   BASE RESET & TYPOGRAPHY
+   ======================================== */
+
+/* Ensure box-sizing is inherited */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Base body styling for plugin pages */
+.seo-generator-page {
+  font-family: var(--font-text);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--charcoal);
+  background-color: var(--gray-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Heading styles */
+.seo-generator-page h1,
+.seo-generator-page .heading-1 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--gray-900);
+  letter-spacing: var(--tracking-tight);
+}
+
+.seo-generator-page h2,
+.seo-generator-page .heading-2 {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--gray-900);
+}
+
+.seo-generator-page h3,
+.seo-generator-page .heading-3 {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+  color: var(--gray-900);
+}
+
+.seo-generator-page h4,
+.seo-generator-page .heading-4 {
+  font-family: var(--font-text);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-normal);
+  color: var(--charcoal);
+}
+
+/* Paragraph styles */
+.seo-generator-page p {
+  margin-bottom: var(--space-4);
+  color: var(--charcoal);
+}
+
+/* Link styles */
+.seo-generator-page a {
+  color: var(--info);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.seo-generator-page a:hover {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+/* Code styles */
+.seo-generator-page code,
+.seo-generator-page pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.seo-generator-page code {
+  background-color: var(--gray-100);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--charcoal-soft);
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Text utilities */
+.text-xs { font-size: var(--text-xs); }
+.text-sm { font-size: var(--text-sm); }
+.text-base { font-size: var(--text-base); }
+.text-lg { font-size: var(--text-lg); }
+.text-xl { font-size: var(--text-xl); }
+.text-2xl { font-size: var(--text-2xl); }
+.text-3xl { font-size: var(--text-3xl); }
+
+/* Weight utilities */
+.font-regular { font-weight: var(--weight-regular); }
+.font-medium { font-weight: var(--weight-medium); }
+.font-semibold { font-weight: var(--weight-semibold); }
+.font-bold { font-weight: var(--weight-bold); }
+
+/* Color utilities */
+.text-gold { color: var(--gold); }
+.text-charcoal { color: var(--charcoal); }
+.text-gray { color: var(--gray-700); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }
+.text-error { color: var(--error); }
+.text-info { color: var(--info); }
+
+/* Spacing utilities */
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-6 { margin-top: var(--space-6); }
+.mt-8 { margin-top: var(--space-8); }
+
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.mb-8 { margin-bottom: var(--space-8); }
+
+/* Shadow utilities */
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-gold { box-shadow: var(--shadow-gold); }
+
+/* Border radius utilities */
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+.rounded-full { border-radius: var(--radius-full); }

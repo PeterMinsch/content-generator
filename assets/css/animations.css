@@ -1,0 +1,453 @@
+/**
+ * SEO Generator Plugin - macOS-Inspired Animations
+ * Keyframe animations and micro-interactions
+ *
+ * All animations respect prefers-reduced-motion for accessibility
+ */
+
+/* ========================================
+   KEYFRAME ANIMATIONS
+   ======================================== */
+
+/**
+ * Lift Animation
+ * Used for button and card hover states
+ */
+@keyframes lift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-2px);
+  }
+}
+
+/**
+ * Ripple Animation
+ * Used for success states and confirmations
+ */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/**
+ * Spin Animation
+ * Used for loading spinners
+ */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/**
+ * Fade In Animation
+ * Used for element entrance
+ */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Pulse Animation
+ * Used for active generation items and attention-grabbing elements
+ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/**
+ * Slide Down Animation
+ * Used for dropdown menus
+ */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Slide Up Animation
+ * Used for closing dropdowns
+ */
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+/**
+ * Scale In Animation
+ * Used for modal/dialog entrance
+ */
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/**
+ * Shimmer Animation
+ * Used for skeleton loading states
+ */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/**
+ * Progress Animation
+ * Used for progress bar filling
+ */
+@keyframes progressFill {
+  from {
+    width: 0%;
+  }
+}
+
+/**
+ * Bounce Animation
+ * Used for notification badges
+ */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* ========================================
+   ANIMATION UTILITY CLASSES
+   ======================================== */
+
+.animate-lift {
+  animation: lift 150ms cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.animate-ripple {
+  animation: ripple 600ms cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 300ms cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0.0, 0.6, 1) infinite;
+}
+
+.animate-slideDown {
+  animation: slideDown 250ms cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.animate-slideUp {
+  animation: slideUp 250ms cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 200ms cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 0%,
+    var(--gray-100) 50%,
+    var(--gray-200) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+/* ========================================
+   TRANSITION UTILITIES
+   ======================================== */
+
+/* Instant feedback transitions (80ms) */
+.transition-fast {
+  transition: all var(--transition-fast);
+}
+
+/* Standard interaction transitions (150ms) */
+.transition-base {
+  transition: all var(--transition-base);
+}
+
+/* Panel/modal transitions (250ms) */
+.transition-slow {
+  transition: all var(--transition-slow);
+}
+
+/* Page transitions (300ms) */
+.transition-page {
+  transition: all var(--transition-page);
+}
+
+/* Specific property transitions */
+.transition-colors {
+  transition: color var(--transition-base),
+              background-color var(--transition-base),
+              border-color var(--transition-base);
+}
+
+.transition-opacity {
+  transition: opacity var(--transition-base);
+}
+
+.transition-transform {
+  transition: transform var(--transition-base);
+}
+
+.transition-shadow {
+  transition: box-shadow var(--transition-base);
+}
+
+/* ========================================
+   INTERACTIVE STATE CLASSES
+   ======================================== */
+
+/**
+ * Hover Lift Effect
+ * For buttons and cards
+ */
+.hover-lift {
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+/**
+ * Hover Glow Effect
+ * For primary actions
+ */
+.hover-glow:hover {
+  box-shadow: var(--shadow-gold-lg);
+}
+
+/**
+ * Active Scale Effect
+ * For button press feedback
+ */
+.active-scale:active {
+  transform: scale(0.98);
+}
+
+/**
+ * Focus Ring
+ * Gold focus indicator for accessibility
+ */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(202, 150, 82, 0.3);
+  border-color: var(--gold);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   LOADING STATES
+   ======================================== */
+
+/**
+ * Loading Spinner
+ * Rotating circle for async operations
+ */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-300);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner-sm {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
+
+.loading-spinner-lg {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+/**
+ * Loading Dots
+ * Three pulsing dots
+ */
+.loading-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.loading-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background-color: var(--gold);
+  border-radius: 50%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/**
+ * Skeleton Loading
+ * Shimmer effect for content loading
+ */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--gray-200) 0%,
+    var(--gray-100) 50%,
+    var(--gray-200) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ========================================
+   ENTRANCE ANIMATIONS
+   ======================================== */
+
+/**
+ * Stagger delay for list items
+ */
+.stagger-item {
+  animation: fadeIn 300ms cubic-bezier(0.4, 0.0, 0.2, 1) backwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+.stagger-item:nth-child(7) { animation-delay: 300ms; }
+.stagger-item:nth-child(8) { animation-delay: 350ms; }
+.stagger-item:nth-child(9) { animation-delay: 400ms; }
+.stagger-item:nth-child(10) { animation-delay: 450ms; }
+
+/* ========================================
+   ACCESSIBILITY: REDUCED MOTION
+   ======================================== */
+
+/**
+ * Respect user's motion preferences
+ * Disable all animations for users who prefer reduced motion
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep essential loading indicators but make them static */
+  .loading-spinner {
+    animation: none;
+    border-top-color: var(--gold);
+    opacity: 0.6;
+  }
+
+  .animate-pulse {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Disable stagger delays */
+  .stagger-item {
+    animation-delay: 0ms !important;
+  }
+}
+
+/* ========================================
+   HOVER SUPPORT DETECTION
+   ======================================== */
+
+/**
+ * Only apply hover effects on devices that support hover
+ * Prevents sticky hover states on touch devices
+ */
+@media (hover: none) {
+  .hover-lift:hover {
+    transform: none;
+  }
+
+  .hover-glow:hover {
+    box-shadow: var(--shadow-gold);
+  }
+}

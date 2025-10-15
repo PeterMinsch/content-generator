@@ -53,32 +53,28 @@ wp_enqueue_script(
 );
 ?>
 
-<div class="wrap seo-image-library-wrap">
+<div class="wrap seo-generator-page seo-image-library-wrap">
 	<h1 class="wp-heading-inline"><?php esc_html_e( 'Image Library Manager', 'seo-generator' ); ?></h1>
 
 	<!-- Header Controls -->
-	<div class="image-library-header">
+	<div class="image-library-header" style="display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; margin: var(--space-6) 0;">
 		<!-- Search Form -->
-		<form method="get" class="image-library-search">
+		<form method="get" class="image-library-search seo-search" style="flex: 1; min-width: 300px;">
 			<input type="hidden" name="page" value="seo-image-library">
 			<input
 				type="search"
 				name="s"
+				class="seo-search__input"
 				value="<?php echo esc_attr( $search ); ?>"
 				placeholder="<?php esc_attr_e( 'Search by filename...', 'seo-generator' ); ?>"
 			>
-			<button type="submit" class="button"><?php esc_html_e( 'Search', 'seo-generator' ); ?></button>
-			<?php if ( ! empty( $search ) || ! empty( $tag ) || ! empty( $folder ) ) : ?>
-				<a href="<?php echo esc_url( admin_url( 'admin.php?page=seo-image-library' ) ); ?>" class="button">
-					<?php esc_html_e( 'Clear Filters', 'seo-generator' ); ?>
-				</a>
-			<?php endif; ?>
+			<span class="seo-search__icon">🔍</span>
 		</form>
 
 		<!-- Tag Filter -->
 		<form method="get" class="image-library-filter">
 			<input type="hidden" name="page" value="seo-image-library">
-			<select name="tag" onchange="this.form.submit()">
+			<select name="tag" onchange="this.form.submit()" class="seo-select" style="padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--gray-300);">
 				<option value=""><?php esc_html_e( 'All Tags', 'seo-generator' ); ?></option>
 				<?php foreach ( $all_tags as $term ) : ?>
 					<option value="<?php echo esc_attr( $term->slug ); ?>" <?php selected( $tag, $term->slug ); ?>>
@@ -92,7 +88,7 @@ wp_enqueue_script(
 		<?php if ( ! empty( $all_folders ) ) : ?>
 			<form method="get" class="image-library-filter">
 				<input type="hidden" name="page" value="seo-image-library">
-				<select name="folder" onchange="this.form.submit()">
+				<select name="folder" onchange="this.form.submit()" class="seo-select" style="padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--gray-300);">
 					<option value=""><?php esc_html_e( 'All Folders', 'seo-generator' ); ?></option>
 					<?php foreach ( $all_folders as $folder_name ) : ?>
 						<option value="<?php echo esc_attr( $folder_name ); ?>" <?php selected( $folder, $folder_name ); ?>>
@@ -102,12 +98,18 @@ wp_enqueue_script(
 				</select>
 			</form>
 		<?php endif; ?>
+
+		<?php if ( ! empty( $search ) || ! empty( $tag ) || ! empty( $folder ) ) : ?>
+			<a href="<?php echo esc_url( admin_url( 'admin.php?page=seo-image-library' ) ); ?>" class="seo-btn-secondary">
+				✖️ <?php esc_html_e( 'Clear Filters', 'seo-generator' ); ?>
+			</a>
+		<?php endif; ?>
 	</div>
 
 	<hr class="wp-header-end">
 
 	<!-- Upload Area -->
-	<div class="image-library-upload-area" id="seo-upload-area">
+	<div class="seo-drop-zone image-library-upload-area" id="seo-upload-area">
 		<input
 			type="file"
 			id="seo-file-input"
@@ -126,54 +128,47 @@ wp_enqueue_script(
 			accept="image/jpeg,image/jpg,image/png,image/webp"
 			style="display: none;"
 		>
-		<div class="upload-notice">
-			<p>
-				<span class="dashicons dashicons-upload"></span>
-				<?php esc_html_e( 'Bulk Upload', 'seo-generator' ); ?>
-			</p>
-			<p class="description">
-				<?php esc_html_e( 'Drag and drop images here or click to upload', 'seo-generator' ); ?>
-			</p>
-			<p class="description">
-				<?php esc_html_e( 'Supported formats: JPG, PNG, WEBP', 'seo-generator' ); ?>
-			</p>
-			<div class="upload-buttons">
-				<button type="button" id="seo-upload-files-btn" class="button button-primary">
-					<span class="dashicons dashicons-upload"></span>
-					<?php esc_html_e( 'Upload Files', 'seo-generator' ); ?>
-				</button>
-				<button type="button" id="seo-upload-folder-btn" class="button button-secondary">
-					<span class="dashicons dashicons-category"></span>
-					<?php esc_html_e( 'Upload Folder', 'seo-generator' ); ?>
-				</button>
-			</div>
-			<div id="seo-folder-not-supported" class="notice notice-warning" style="display: none; margin-top: 10px;">
-				<p><?php esc_html_e( 'Your browser does not support folder upload. Please use Chrome, Edge, or Firefox for this feature.', 'seo-generator' ); ?></p>
+		<span class="seo-drop-zone__icon">🖼️</span>
+		<p class="seo-drop-zone__text"><?php esc_html_e( 'Bulk Upload - Drag and drop images here', 'seo-generator' ); ?></p>
+		<p class="seo-drop-zone__hint"><?php esc_html_e( 'Supported formats: JPG, PNG, WEBP', 'seo-generator' ); ?></p>
+		<div class="upload-buttons" style="display: flex; gap: var(--space-3); margin-top: var(--space-4); justify-content: center;">
+			<button type="button" id="seo-upload-files-btn" class="seo-btn-primary">
+				📤 <?php esc_html_e( 'Upload Files', 'seo-generator' ); ?>
+			</button>
+			<button type="button" id="seo-upload-folder-btn" class="seo-btn-secondary">
+				📁 <?php esc_html_e( 'Upload Folder', 'seo-generator' ); ?>
+			</button>
+		</div>
+		<div id="seo-folder-not-supported" class="seo-card mt-4" style="display: none; border-left: 4px solid var(--warning);">
+			<div class="seo-card__content">
+				<p><?php esc_html_e( '⚠️ Your browser does not support folder upload. Please use Chrome, Edge, or Firefox for this feature.', 'seo-generator' ); ?></p>
 			</div>
 		</div>
 	</div>
 
 	<!-- Upload Progress Modal -->
-	<div id="seo-upload-progress" class="seo-upload-progress" style="display: none;">
-		<h3><?php esc_html_e( 'Uploading Images...', 'seo-generator' ); ?></h3>
+	<div id="seo-upload-progress" class="seo-progress-card" style="display: none; margin: var(--space-6) 0;">
+		<div class="seo-progress-card__header">
+			📤 <?php esc_html_e( 'Uploading Images...', 'seo-generator' ); ?>
+		</div>
 		<div id="seo-upload-list" class="seo-upload-list"></div>
-		<div class="seo-upload-summary">
+		<div class="seo-progress-card__footer">
 			<strong id="seo-upload-count">0</strong> <?php esc_html_e( 'images uploaded', 'seo-generator' ); ?>
 		</div>
 	</div>
 
 	<!-- Bulk Actions -->
-	<div class="tablenav top">
-		<div class="alignleft actions bulkactions">
+	<div class="tablenav top" style="display: flex; gap: var(--space-3); align-items: center; margin: var(--space-6) 0;">
+		<div class="alignleft actions bulkactions" style="display: flex; gap: var(--space-2); align-items: center;">
 			<label for="bulk-action-selector-top" class="screen-reader-text"><?php esc_html_e( 'Select bulk action', 'seo-generator' ); ?></label>
-			<select name="action" id="bulk-action-selector-top">
+			<select name="action" id="bulk-action-selector-top" class="seo-select" style="padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--gray-300);">
 				<option value="-1"><?php esc_html_e( 'Bulk Actions', 'seo-generator' ); ?></option>
 				<option value="add-tags"><?php esc_html_e( 'Add Tags', 'seo-generator' ); ?></option>
 				<option value="remove-tags"><?php esc_html_e( 'Remove Tags', 'seo-generator' ); ?></option>
 				<option value="delete"><?php esc_html_e( 'Delete Permanently', 'seo-generator' ); ?></option>
 			</select>
-			<button type="button" id="bulk-action-apply" class="button action"><?php esc_html_e( 'Apply', 'seo-generator' ); ?></button>
-			<span class="selected-count" style="display:none;">
+			<button type="button" id="bulk-action-apply" class="seo-btn-secondary"><?php esc_html_e( 'Apply', 'seo-generator' ); ?></button>
+			<span class="selected-count seo-badge seo-badge--draft" style="display:none;">
 				<strong>0</strong> <?php esc_html_e( 'images selected', 'seo-generator' ); ?>
 			</span>
 		</div>
@@ -189,43 +184,42 @@ wp_enqueue_script(
 				$image_folder = $this->getImageFolder( $image_id );
 				$filename     = basename( get_attached_file( $image_id ) );
 				?>
-				<div class="image-grid-item" data-image-id="<?php echo esc_attr( $image_id ); ?>">
+				<div class="seo-card image-grid-item" data-image-id="<?php echo esc_attr( $image_id ); ?>" style="padding: var(--space-3);">
 					<!-- Checkbox for bulk selection -->
-					<div class="image-checkbox">
+					<div class="image-checkbox" style="position: absolute; top: var(--space-2); left: var(--space-2); z-index: 10;">
 						<input
 							type="checkbox"
-							class="image-select"
+							class="image-select seo-checkbox__input"
 							value="<?php echo esc_attr( $image_id ); ?>"
 							id="image-<?php echo esc_attr( $image_id ); ?>"
 						>
 					</div>
 
 					<!-- Thumbnail -->
-					<div class="image-thumbnail">
-						<label for="image-<?php echo esc_attr( $image_id ); ?>">
-							<?php echo wp_get_attachment_image( $image_id, 'thumbnail', false, array( 'class' => 'library-thumb' ) ); ?>
+					<div class="image-thumbnail" style="margin-bottom: var(--space-3); position: relative;">
+						<label for="image-<?php echo esc_attr( $image_id ); ?>" style="cursor: pointer;">
+							<?php echo wp_get_attachment_image( $image_id, 'thumbnail', false, array( 'class' => 'library-thumb', 'style' => 'width: 100%; height: auto; border-radius: var(--radius-sm);' ) ); ?>
 						</label>
 					</div>
 
 					<!-- Image Info -->
 					<div class="image-info">
-						<div class="image-filename" title="<?php echo esc_attr( $filename ); ?>">
+						<div class="image-filename" title="<?php echo esc_attr( $filename ); ?>" style="font-size: var(--text-sm); color: var(--charcoal); font-weight: 500; margin-bottom: var(--space-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
 							<?php echo esc_html( wp_trim_words( $filename, 3, '...' ) ); ?>
 						</div>
 
 						<!-- Folder Badge -->
 						<?php if ( $image_folder ) : ?>
-							<div class="image-folder-badge" style="background: #0073aa; color: white; padding: 3px 8px; border-radius: 3px; font-size: 11px; margin: 5px 0; display: inline-block;">
-								<span class="dashicons dashicons-category" style="font-size: 12px; width: 12px; height: 12px; vertical-align: middle;"></span>
-								<?php echo esc_html( $image_folder ); ?>
+							<div class="seo-badge" style="background: var(--info); margin-bottom: var(--space-2);">
+								📁 <?php echo esc_html( $image_folder ); ?>
 							</div>
 						<?php endif; ?>
 
 						<!-- Current Tags -->
-						<div class="image-tags" data-image-id="<?php echo esc_attr( $image_id ); ?>">
+						<div class="image-tags" data-image-id="<?php echo esc_attr( $image_id ); ?>" style="display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3);">
 							<?php if ( ! empty( $image_tags ) ) : ?>
 								<?php foreach ( $image_tags as $tag ) : ?>
-									<span class="image-tag" data-tag-id="<?php echo esc_attr( $tag->term_id ); ?>" data-tag-slug="<?php echo esc_attr( $tag->slug ); ?>">
+									<span class="seo-badge seo-badge--draft image-tag" data-tag-id="<?php echo esc_attr( $tag->term_id ); ?>" data-tag-slug="<?php echo esc_attr( $tag->slug ); ?>" style="display: inline-flex; align-items: center; gap: var(--space-1);">
 										<?php echo esc_html( $tag->name ); ?>
 										<button
 											type="button"
@@ -234,13 +228,14 @@ wp_enqueue_script(
 											data-tag-slug="<?php echo esc_attr( $tag->slug ); ?>"
 											aria-label="<?php esc_attr_e( 'Remove tag', 'seo-generator' ); ?>"
 											title="<?php esc_attr_e( 'Remove tag', 'seo-generator' ); ?>"
+											style="background: transparent; border: none; cursor: pointer; padding: 0; line-height: 1;"
 										>
-											<span class="dashicons dashicons-no-alt"></span>
+											✖
 										</button>
 									</span>
 								<?php endforeach; ?>
 							<?php else : ?>
-								<span class="no-tags"><?php esc_html_e( 'No tags', 'seo-generator' ); ?></span>
+								<span class="no-tags" style="color: var(--gray-700); font-size: var(--text-sm);"><?php esc_html_e( 'No tags', 'seo-generator' ); ?></span>
 							<?php endif; ?>
 						</div>
 
@@ -248,12 +243,13 @@ wp_enqueue_script(
 						<div class="image-actions">
 							<button
 								type="button"
-								class="button button-small edit-tags-button"
+								class="seo-btn-secondary edit-tags-button"
 								data-image-id="<?php echo esc_attr( $image_id ); ?>"
 								data-filename="<?php echo esc_attr( $filename ); ?>"
 								title="<?php esc_attr_e( 'Add tags to this image', 'seo-generator' ); ?>"
+								style="width: 100%; font-size: var(--text-sm); padding: var(--space-2) var(--space-3);"
 							>
-								<?php esc_html_e( 'Add Tags', 'seo-generator' ); ?>
+								🏷️ <?php esc_html_e( 'Add Tags', 'seo-generator' ); ?>
 							</button>
 						</div>
 					</div>
@@ -296,16 +292,18 @@ wp_enqueue_script(
 
 	<?php else : ?>
 		<!-- Empty State -->
-		<div class="notice notice-info">
-			<p>
-				<?php
-				if ( ! empty( $search ) || ! empty( $tag ) ) {
-					esc_html_e( 'No images found matching your search criteria.', 'seo-generator' );
-				} else {
-					esc_html_e( 'No images in the library yet. Upload images to get started.', 'seo-generator' );
-				}
-				?>
-			</p>
+		<div class="seo-card mt-4">
+			<div class="seo-card__content" style="text-align: center; padding: var(--space-8);">
+				<p style="font-size: var(--text-lg); color: var(--gray-700);">
+					<?php
+					if ( ! empty( $search ) || ! empty( $tag ) ) {
+						esc_html_e( '🔍 No images found matching your search criteria.', 'seo-generator' );
+					} else {
+						esc_html_e( '📷 No images in the library yet. Upload images to get started.', 'seo-generator' );
+					}
+					?>
+				</p>
+			</div>
 		</div>
 	<?php endif; ?>
 
