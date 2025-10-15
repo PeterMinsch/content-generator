@@ -38,7 +38,25 @@ class ImportPage {
 			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'seo-generator' ) );
 		}
 
-		// Load template.
+		// Check if viewing log details.
+		$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+
+		if ( 'view_log' === $action ) {
+			// Render import details view.
+			$details_template = plugin_dir_path( dirname( __DIR__ ) ) . 'templates/admin/import-details.php';
+
+			if ( file_exists( $details_template ) ) {
+				include $details_template;
+			} else {
+				echo '<div class="wrap">';
+				echo '<h1>' . esc_html__( 'Import Details', 'seo-generator' ) . '</h1>';
+				echo '<p>' . esc_html__( 'Template file not found.', 'seo-generator' ) . '</p>';
+				echo '</div>';
+			}
+			return;
+		}
+
+		// Load main import template.
 		$template_path = plugin_dir_path( dirname( __DIR__ ) ) . 'templates/admin/import.php';
 
 		if ( file_exists( $template_path ) ) {

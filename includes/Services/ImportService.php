@@ -83,6 +83,22 @@ class ImportService {
 	private $image_service = null;
 
 	/**
+	 * Import log data for current import session.
+	 *
+	 * @var array
+	 */
+	private $import_log = array(
+		'filename'        => '',
+		'total_rows'      => 0,
+		'success_count'   => 0,
+		'error_count'     => 0,
+		'error_log'       => array(),
+		'created_posts'   => array(),
+		'image_stats'     => array(),
+		'start_time'      => null,
+	);
+
+	/**
 	 * Constructor.
 	 *
 	 * @param array $options Configuration options.
@@ -511,5 +527,136 @@ class ImportService {
 			default:
 				return $value;
 		}
+	}
+
+	/**
+	 * Initialize import log for new import session.
+	 *
+	 * @param string $filename CSV filename.
+	 * @param int    $total_rows Total number of rows in CSV.
+	 * @return void
+	 */
+	public function startImportLog( string $filename, int $total_rows ): void {
+		$this->import_log = array(
+			'filename'        => $filename,
+			'total_rows'      => $total_rows,
+			'success_count'   => 0,
+			'error_count'     => 0,
+			'error_log'       => array(),
+			'created_posts'   => array(),
+			'image_stats'     => array(),
+			'start_time'      => microtime( true ),
+		);
+
+		error_log( "[SEO Generator] Started import session for file: {$filename} ({$total_rows} rows)" );
+	}
+
+	/**
+	 * Update import log after batch processing.
+	 *
+	 * @param array $batch_results Results from processSingleBatch().
+	 * @return void
+	 */
+	public function updateImportLog( array $batch_results ): void {
+		// Update success count.
+		if ( ! empty( $batch_results['created'] ) ) {
+			$this->import_log['success_count'] += count( $batch_results['created'] );
+
+			// Track created posts with ID and title.
+			foreach ( $batch_results['created'] as $created ) {
+				$this->import_log['created_posts'][] = array(
+					'id'    => $created['post_id'],
+					'title' => $created['title'],
+				);
+			}
+		}
+
+		// Update error count and log.
+		if ( ! empty( $batch_results['errors'] ) ) {
+			$this->import_log['error_count'] += count( $batch_results['errors'] );
+
+			// Add error messages to log.
+			foreach ( $batch_results['errors'] as $error ) {
+				$this->import_log['error_log'][] = sprintf(
+					'Row %d: %s',
+					$error['row'],
+					$error['error']
+				);
+			}
+		}
+
+		// Update image stats.
+		if ( ! empty( $batch_results['images'] ) ) {
+			if ( ! isset( $this->import_log['image_stats']['total'] ) ) {
+				$this->import_log['image_stats']['total'] = 0;
+			}
+			if ( ! isset( $this->import_log['image_stats']['downloaded'] ) ) {
+				$this->import_log['image_stats']['downloaded'] = 0;
+			}
+			if ( ! isset( $this->import_log['image_stats']['failed'] ) ) {
+				$this->import_log['image_stats']['failed'] = 0;
+			}
+			if ( ! isset( $this->import_log['image_stats']['reused'] ) ) {
+				$this->import_log['image_stats']['reused'] = 0;
+			}
+
+			$this->import_log['image_stats']['total']      += count( $batch_results['images']['downloaded'] )
+																+ count( $batch_results['images']['failed'] )
+																+ count( $batch_results['images']['reused'] );
+			$this->import_log['image_stats']['downloaded'] += count( $batch_results['images']['downloaded'] );
+			$this->import_log['image_stats']['failed']     += count( $batch_results['images']['failed'] );
+			$this->import_log['image_stats']['reused']     += count( $batch_results['images']['reused'] );
+		}
+	}
+
+	/**
+	 * Finalize and save import log to database.
+	 *
+	 * @return int|false Import log ID on success, false on failure.
+	 */
+	public function finalizeImportLog() {
+		// Calculate duration.
+		$duration = microtime( true ) - $this->import_log['start_time'];
+
+		// Prepare log data for repository.
+		$log_data = array(
+			'filename'       => $this->import_log['filename'],
+			'total_rows'     => $this->import_log['total_rows'],
+			'success_count'  => $this->import_log['success_count'],
+			'error_count'    => $this->import_log['error_count'],
+			'user_id'        => get_current_user_id(),
+			'error_log'      => $this->import_log['error_log'],
+			'created_posts'  => $this->import_log['created_posts'],
+			'image_stats'    => $this->import_log['image_stats'],
+		);
+
+		// Save to database.
+		$import_log_repo = new \SEOGenerator\Repositories\ImportLogRepository();
+		$log_id          = $import_log_repo->save( $log_data );
+
+		if ( $log_id ) {
+			error_log(
+				sprintf(
+					'[SEO Generator] Import completed: %d successes, %d errors, %.2f seconds (Log ID: %d)',
+					$this->import_log['success_count'],
+					$this->import_log['error_count'],
+					$duration,
+					$log_id
+				)
+			);
+		} else {
+			error_log( '[SEO Generator] Failed to save import log to database' );
+		}
+
+		return $log_id;
+	}
+
+	/**
+	 * Get current import log data.
+	 *
+	 * @return array Current import log.
+	 */
+	public function getImportLog(): array {
+		return $this->import_log;
 	}
 }

@@ -271,6 +271,17 @@ men's tungsten rings,commercial,800,</pre>
 
 	<!-- Live Region for Screen Readers -->
 	<div id="import-announcements" class="sr-live-polite" role="status" aria-live="polite" aria-atomic="true"></div>
+
+	<!-- Import History Section -->
+	<div class="mt-6">
+		<hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--gray-200);">
+		<?php
+		$history_template = plugin_dir_path( __DIR__ ) . 'admin/import-history-table.php';
+		if ( file_exists( $history_template ) ) {
+			include $history_template;
+		}
+		?>
+	</div>
 </div>
 
 <script>
