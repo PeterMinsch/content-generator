@@ -1,0 +1,51 @@
+# Composer
+/vendor/
+composer.lock
+
+# Node
+/node_modules/
+package-lock.json
+npm-debug.log
+yarn.lock
+
+# Build files
+/assets/js/build/
+/assets/css/build/
+
+# WordPress
+wp-config.php
+wp-content/uploads/
+wp-content/cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+debug.log
+
+# Environment
+.env
+.env.local
+
+# Testing
+/tests/coverage/
+.phpunit.result.cache
+
+# Temporary files
+*.tmp
+*.bak
+
+#bmad-method
+web-bundles
+.bmad-core
+
+

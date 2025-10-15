@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/petem/Local Sites/contentgeneratorwpplugin/app/public/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

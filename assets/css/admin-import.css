@@ -1,0 +1,146 @@
+/**
+ * CSV Import Admin Page Styles
+ *
+ * @package SEOGenerator
+ */
+
+/* Import Page Wrapper */
+.seo-import-wrap {
+	max-width: 1200px;
+}
+
+/* Instructions Section */
+.import-instructions {
+	margin-top: 20px;
+	margin-bottom: 30px;
+}
+
+.import-instructions h2 {
+	margin-top: 0;
+}
+
+.import-instructions h3 {
+	margin-top: 20px;
+	margin-bottom: 10px;
+}
+
+.import-instructions ul {
+	margin: 10px 0;
+}
+
+.import-instructions pre {
+	font-size: 13px;
+	line-height: 1.5;
+}
+
+/* Upload Section */
+.import-upload-section {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.import-upload-section h2 {
+	margin-top: 0;
+}
+
+/* Import Sections */
+.import-section {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.import-section h2 {
+	margin-top: 0;
+}
+
+/* Progress Bar */
+#import-progress {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	padding: 20px;
+	margin: 20px 0;
+}
+
+#import-progress h3 {
+	margin-top: 0;
+	margin-bottom: 15px;
+}
+
+.progress-bar {
+	position: relative;
+	margin-bottom: 15px;
+}
+
+.progress-fill {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #fff;
+	font-weight: 600;
+	font-size: 12px;
+}
+
+.progress-text {
+	font-size: 14px;
+	color: #50575e;
+}
+
+/* Results Section */
+#import-results {
+	background: #fff;
+	border: 1px solid #ccd0d4;
+	padding: 20px;
+	margin: 20px 0;
+}
+
+#import-results h3 {
+	margin-top: 0;
+	margin-bottom: 15px;
+}
+
+#import-results .notice {
+	margin: 15px 0;
+}
+
+#error-list {
+	margin-top: 15px;
+}
+
+#error-list h4 {
+	margin-bottom: 10px;
+	color: #d63638;
+}
+
+#error-items {
+	margin: 0;
+	padding-left: 20px;
+}
+
+#error-items li {
+	margin-bottom: 5px;
+}
+
+/* Form Table Enhancements */
+.import-upload-section .form-table th {
+	width: 200px;
+}
+
+/* Button Styles */
+.import-upload-section .button .dashicons {
+	margin-right: 5px;
+}
+
+/* Responsive */
+@media screen and (max-width: 782px) {
+	.seo-import-wrap {
+		margin-right: 10px;
+	}
+
+	.import-upload-section .form-table th {
+		width: auto;
+	}
+}

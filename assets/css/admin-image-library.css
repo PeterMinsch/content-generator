@@ -1,0 +1,556 @@
+/**
+ * Image Library Manager Styles
+ *
+ * @package SEOGenerator
+ */
+
+/* Header Controls */
+.seo-image-library-wrap .image-library-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 20px 0;
+	gap: 15px;
+}
+
+.seo-image-library-wrap .image-library-search {
+	display: flex;
+	gap: 10px;
+	flex: 1;
+}
+
+.seo-image-library-wrap .image-library-search input[type="search"] {
+	max-width: 300px;
+	flex: 1;
+}
+
+.seo-image-library-wrap .image-library-filter select {
+	min-width: 200px;
+}
+
+/* Upload Area */
+.seo-image-library-wrap .image-library-upload-area {
+	margin: 20px 0;
+	border: 2px dashed #c3c4c7;
+	border-radius: 4px;
+	background: #f6f7f7;
+	padding: 40px 20px;
+	text-align: center;
+	transition: all 0.3s ease;
+}
+
+.seo-image-library-wrap .image-library-upload-area:hover,
+.seo-image-library-wrap .image-library-upload-area.drag-over {
+	border-color: #2271b1;
+	background: #f0f6fc;
+	cursor: pointer;
+}
+
+.seo-image-library-wrap .upload-notice .dashicons {
+	font-size: 48px;
+	width: 48px;
+	height: 48px;
+	color: #787c82;
+	margin-bottom: 10px;
+}
+
+.seo-image-library-wrap .upload-notice p:first-of-type {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 10px 0 5px;
+	color: #1d2327;
+}
+
+.seo-image-library-wrap .upload-notice .description {
+	color: #646970;
+	margin: 0;
+}
+
+/* Bulk Actions */
+.seo-image-library-wrap .selected-count {
+	margin-left: 10px;
+	color: #2271b1;
+}
+
+/* Image Grid Layout */
+.seo-image-library-wrap .image-library-grid {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 20px;
+	margin: 20px 0;
+}
+
+/* Grid Item */
+.seo-image-library-wrap .image-grid-item {
+	position: relative;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	background: #fff;
+	padding: 12px;
+	transition: all 0.2s ease;
+}
+
+.seo-image-library-wrap .image-grid-item:hover {
+	border-color: #2271b1;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Checkbox */
+.seo-image-library-wrap .image-checkbox {
+	position: absolute;
+	top: 8px;
+	left: 8px;
+	z-index: 10;
+	background: rgba(255, 255, 255, 0.9);
+	padding: 4px;
+	border-radius: 2px;
+}
+
+.seo-image-library-wrap .image-checkbox input[type="checkbox"] {
+	margin: 0;
+}
+
+/* Thumbnail */
+.seo-image-library-wrap .image-thumbnail {
+	width: 100%;
+	aspect-ratio: 1;
+	overflow: hidden;
+	border-radius: 4px;
+	background: #f0f0f1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 12px;
+	cursor: pointer;
+}
+
+.seo-image-library-wrap .image-thumbnail label {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	margin: 0;
+}
+
+.seo-image-library-wrap .image-thumbnail img {
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+}
+
+/* Image Info */
+.seo-image-library-wrap .image-info {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.seo-image-library-wrap .image-filename {
+	font-weight: 600;
+	color: #1d2327;
+	font-size: 13px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Tags */
+.seo-image-library-wrap .image-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	min-height: 28px;
+}
+
+.seo-image-library-wrap .image-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 8px;
+	background: #2271b1;
+	color: #fff;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1;
+}
+
+.seo-image-library-wrap .image-tag .remove-tag {
+	background: none;
+	border: none;
+	color: #fff;
+	cursor: pointer;
+	padding: 0;
+	margin: 0 0 0 2px;
+	display: inline-flex;
+	align-items: center;
+	transition: opacity 0.2s ease;
+}
+
+.seo-image-library-wrap .image-tag .remove-tag:hover:not(:disabled) {
+	opacity: 0.8;
+}
+
+.seo-image-library-wrap .image-tag .remove-tag .dashicons {
+	font-size: 14px;
+	width: 14px;
+	height: 14px;
+}
+
+.seo-image-library-wrap .image-tag .remove-tag:disabled {
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.seo-image-library-wrap .no-tags {
+	color: #787c82;
+	font-size: 12px;
+	font-style: italic;
+}
+
+/* Tag Input */
+.seo-image-library-wrap .tag-input-wrapper {
+	margin-top: 8px;
+	padding: 10px;
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+
+.seo-image-library-wrap .tag-input-container {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.seo-image-library-wrap .tag-input {
+	flex: 1;
+	padding: 6px 10px;
+	font-size: 13px;
+	border: 1px solid #8c8f94;
+	border-radius: 3px;
+	min-width: 0;
+}
+
+.seo-image-library-wrap .tag-input:focus {
+	border-color: #2271b1;
+	outline: none;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.seo-image-library-wrap .add-tag-submit {
+	padding: 6px 12px;
+	font-size: 13px;
+	line-height: 1;
+	height: auto;
+	min-height: auto;
+}
+
+.seo-image-library-wrap .tag-input-cancel {
+	padding: 6px 12px;
+	font-size: 13px;
+	line-height: 1;
+	height: auto;
+	min-height: auto;
+}
+
+/* Tag Autocomplete */
+.seo-image-library-wrap .tag-autocomplete {
+	position: absolute;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	max-height: 200px;
+	overflow-y: auto;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	z-index: 100;
+	margin-top: 2px;
+	min-width: 200px;
+}
+
+.seo-image-library-wrap .autocomplete-item {
+	padding: 8px 12px;
+	cursor: pointer;
+	font-size: 13px;
+	color: #1d2327;
+	transition: background 0.15s ease;
+}
+
+.seo-image-library-wrap .autocomplete-item:hover {
+	background: #f0f6fc;
+	color: #2271b1;
+}
+
+.seo-image-library-wrap .autocomplete-item:active {
+	background: #e5f2ff;
+}
+
+/* Tag Suggestions */
+.seo-image-library-wrap .tag-suggestions {
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid #dcdcde;
+}
+
+.seo-image-library-wrap .tag-suggestions small {
+	display: block;
+	color: #646970;
+	font-size: 11px;
+	margin-bottom: 6px;
+}
+
+.seo-image-library-wrap .tag-suggestion {
+	display: inline-flex;
+	align-items: center;
+	padding: 4px 10px;
+	margin: 0 4px 4px 0;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 3px;
+	font-size: 12px;
+	color: #2271b1;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	line-height: 1;
+	height: auto;
+	min-height: auto;
+}
+
+.seo-image-library-wrap .tag-suggestion:hover {
+	background: #2271b1;
+	color: #fff;
+	border-color: #2271b1;
+}
+
+/* Tag Color Coding by Category */
+/* Metals - Gold/Yellow tones */
+.seo-image-library-wrap .image-tag[data-tag-slug*="platinum"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="gold"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="white-gold"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="rose-gold"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="yellow-gold"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="silver"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="titanium"] {
+	background: #f39c12;
+	color: #fff;
+}
+
+/* Types - Pink/Rose tones */
+.seo-image-library-wrap .image-tag[data-tag-slug*="wedding"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="engagement"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="band"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="ring"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="necklace"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="bracelet"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="earring"] {
+	background: #e74c3c;
+	color: #fff;
+}
+
+/* Gender - Blue tones */
+.seo-image-library-wrap .image-tag[data-tag-slug*="mens"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="womens"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="unisex"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="male"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="female"] {
+	background: #3498db;
+	color: #fff;
+}
+
+/* Styles - Purple tones */
+.seo-image-library-wrap .image-tag[data-tag-slug*="classic"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="modern"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="vintage"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="contemporary"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="traditional"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="minimalist"] {
+	background: #9b59b6;
+	color: #fff;
+}
+
+/* Finishes - Green tones */
+.seo-image-library-wrap .image-tag[data-tag-slug*="polished"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="brushed"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="hammered"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="matte"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="satin"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="textured"] {
+	background: #27ae60;
+	color: #fff;
+}
+
+/* Gemstones/Features - Teal tones */
+.seo-image-library-wrap .image-tag[data-tag-slug*="diamond"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="gemstone"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="sapphire"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="ruby"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="emerald"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="engraved"],
+.seo-image-library-wrap .image-tag[data-tag-slug*="eternity"] {
+	background: #16a085;
+	color: #fff;
+}
+
+/* Actions */
+.seo-image-library-wrap .image-actions {
+	margin-top: 4px;
+}
+
+.seo-image-library-wrap .edit-tags-button {
+	width: 100%;
+}
+
+/* Responsive: Tablet */
+@media (max-width: 1200px) {
+	.seo-image-library-wrap .image-library-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+@media (max-width: 900px) {
+	.seo-image-library-wrap .image-library-header {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.seo-image-library-wrap .image-library-search {
+		flex-direction: column;
+	}
+
+	.seo-image-library-wrap .image-library-search input[type="search"] {
+		max-width: none;
+	}
+}
+
+/* Responsive: Mobile */
+@media (max-width: 768px) {
+	.seo-image-library-wrap .image-library-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 15px;
+	}
+
+	.seo-image-library-wrap .image-grid-item {
+		padding: 10px;
+	}
+
+	.seo-image-library-wrap .image-library-filter select {
+		min-width: auto;
+		width: 100%;
+	}
+}
+
+/* Pagination */
+.seo-image-library-wrap .tablenav-pages {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 20px 0;
+}
+
+.seo-image-library-wrap .tablenav-pages .displaying-num {
+	margin-right: auto;
+	color: #646970;
+}
+
+/* Empty State */
+.seo-image-library-wrap .notice {
+	margin: 20px 0;
+}
+
+/* Upload Progress */
+.seo-upload-progress {
+	margin: 20px 0;
+	padding: 20px;
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+}
+
+.seo-upload-progress h3 {
+	margin: 0 0 15px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.seo-upload-list {
+	max-height: 300px;
+	overflow-y: auto;
+	margin-bottom: 15px;
+}
+
+.seo-upload-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
+	border-bottom: 1px solid #f0f0f1;
+}
+
+.seo-upload-item:last-child {
+	border-bottom: none;
+}
+
+.seo-upload-item-info {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.seo-upload-filename {
+	font-weight: 500;
+	color: #1d2327;
+}
+
+.seo-upload-filesize {
+	color: #787c82;
+	font-size: 12px;
+}
+
+.seo-upload-status {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.seo-upload-status .dashicons.spin {
+	animation: rotation 2s infinite linear;
+}
+
+@keyframes rotation {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(359deg);
+	}
+}
+
+.seo-upload-status-text {
+	font-size: 13px;
+	color: #646970;
+}
+
+.seo-upload-item.success .seo-upload-status-text {
+	color: #46b450;
+}
+
+.seo-upload-item.error .seo-upload-status-text {
+	color: #dc3232;
+}
+
+.seo-upload-summary {
+	padding: 10px;
+	background: #f0f6fc;
+	border-radius: 4px;
+	text-align: center;
+}
+
+.seo-upload-summary strong {
+	color: #2271b1;
+	font-size: 18px;
+}

@@ -1,0 +1,66 @@
+/**
+ * Settings Page Styles
+ *
+ * @package SEOGenerator
+ */
+
+/* Temperature slider styling */
+#temperature {
+	width: 300px;
+	vertical-align: middle;
+	margin-right: 10px;
+}
+
+#temperature-value {
+	display: inline-block;
+	min-width: 30px;
+	font-weight: 600;
+	color: #2271b1;
+}
+
+/* Test connection section */
+#test-connection-btn {
+	margin-top: 10px;
+}
+
+#test-results {
+	max-width: 600px;
+}
+
+#test-results .notice {
+	margin: 10px 0;
+}
+
+#test-results .dashicons {
+	vertical-align: middle;
+	margin-right: 5px;
+}
+
+/* API key field styling */
+#api_key {
+	font-family: monospace;
+	letter-spacing: 0.5px;
+}
+
+/* Settings form table improvements */
+.form-table th {
+	padding-top: 20px;
+}
+
+.form-table td {
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+
+/* Model dropdown styling */
+#model {
+	max-width: 500px;
+}
+
+/* Spinner styling in test results */
+.spinner.is-active {
+	float: none;
+	margin: 0;
+	display: inline-block;
+	vertical-align: middle;
+}
