@@ -51,16 +51,38 @@ class BlockContentParser {
 	 * @return array|null Parsed JSON or null if not valid JSON.
 	 */
 	private function tryParseJson( string $content ): ?array {
+		error_log( '🔍 [JSON Parser] Starting parse attempt' );
+		error_log( 'Raw content length: ' . strlen( $content ) );
+		error_log( 'Raw content (first 200 chars): ' . substr( $content, 0, 200 ) );
+		error_log( 'Raw content (last 200 chars): ' . substr( $content, -200 ) );
+
 		// Extract JSON from markdown code blocks if present.
 		if ( preg_match( '/```json\s*(.*?)\s*```/s', $content, $matches ) ) {
+			error_log( '✅ Matched ```json code block' );
 			$content = $matches[1];
+			error_log( 'Extracted JSON length: ' . strlen( $content ) );
+			error_log( 'Extracted JSON (first 200 chars): ' . substr( $content, 0, 200 ) );
 		} elseif ( preg_match( '/```\s*(.*?)\s*```/s', $content, $matches ) ) {
+			error_log( '✅ Matched generic ``` code block' );
 			$content = $matches[1];
+			error_log( 'Extracted content length: ' . strlen( $content ) );
+			error_log( 'Extracted content (first 200 chars): ' . substr( $content, 0, 200 ) );
+		} else {
+			error_log( '⚠️  No code block markers found, treating as raw JSON' );
 		}
 
 		$decoded = json_decode( trim( $content ), true );
 
-		return ( JSON_ERROR_NONE === json_last_error() ) ? $decoded : null;
+		if ( JSON_ERROR_NONE === json_last_error() ) {
+			error_log( '✅ JSON decoded successfully' );
+			error_log( 'Decoded keys: ' . implode( ', ', array_keys( $decoded ) ) );
+			return $decoded;
+		} else {
+			error_log( '❌ JSON decode failed!' );
+			error_log( 'JSON Error: ' . json_last_error_msg() );
+			error_log( 'Content being decoded (first 500 chars): ' . substr( trim( $content ), 0, 500 ) );
+			return null;
+		}
 	}
 
 	/**
@@ -194,6 +216,11 @@ class BlockContentParser {
 	 */
 	private function parseMaterials( ?array $json, string $raw_content ): array {
 		if ( null === $json || ! isset( $json['introduction'], $json['materials'] ) ) {
+			error_log( '❌ [Materials Parser] Invalid JSON structure' );
+			error_log( 'Raw content (first 500 chars): ' . substr( $raw_content, 0, 500 ) );
+			error_log( 'Parsed JSON: ' . wp_json_encode( $json ) );
+			error_log( 'Has introduction key: ' . ( isset( $json['introduction'] ) ? 'YES' : 'NO' ) );
+			error_log( 'Has materials key: ' . ( isset( $json['materials'] ) ? 'YES' : 'NO' ) );
 			throw new \Exception( 'Invalid materials format. Expected JSON with introduction and materials array.' );
 		}
 
@@ -227,6 +254,11 @@ class BlockContentParser {
 	 */
 	private function parseProcess( ?array $json, string $raw_content ): array {
 		if ( null === $json || ! isset( $json['introduction'], $json['steps'] ) ) {
+			error_log( '❌ [Process Parser] Invalid JSON structure' );
+			error_log( 'Raw content (first 500 chars): ' . substr( $raw_content, 0, 500 ) );
+			error_log( 'Parsed JSON: ' . wp_json_encode( $json ) );
+			error_log( 'Has introduction key: ' . ( isset( $json['introduction'] ) ? 'YES' : 'NO' ) );
+			error_log( 'Has steps key: ' . ( isset( $json['steps'] ) ? 'YES' : 'NO' ) );
 			throw new \Exception( 'Invalid process format. Expected JSON with introduction and steps array.' );
 		}
 
@@ -417,6 +449,11 @@ class BlockContentParser {
 	 */
 	private function parseFaqs( ?array $json, string $raw_content ): array {
 		if ( null === $json || ! isset( $json['faqs'] ) || ! is_array( $json['faqs'] ) ) {
+			error_log( '❌ [FAQs Parser] Invalid JSON structure' );
+			error_log( 'Raw content (first 500 chars): ' . substr( $raw_content, 0, 500 ) );
+			error_log( 'Parsed JSON: ' . wp_json_encode( $json ) );
+			error_log( 'Has faqs key: ' . ( isset( $json['faqs'] ) ? 'YES' : 'NO' ) );
+			error_log( 'Is faqs an array: ' . ( isset( $json['faqs'] ) && is_array( $json['faqs'] ) ? 'YES' : 'NO' ) );
 			throw new \Exception( 'Invalid FAQs format. Expected JSON with faqs array.' );
 		}
 

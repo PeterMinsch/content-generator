@@ -23,6 +23,7 @@ class ImportPage {
 		add_action( 'wp_ajax_seo_get_column_mapping', array( $this, 'handleColumnMapping' ) );
 		add_action( 'wp_ajax_seo_validate_mapping', array( $this, 'handleMappingValidation' ) );
 		add_action( 'wp_ajax_seo_parse_csv', array( $this, 'handleCSVParsing' ) );
+		add_action( 'wp_ajax_seo_save_block_order', array( $this, 'handleSaveBlockOrder' ) );
 		add_action( 'wp_ajax_seo_import_batch', array( $this, 'handleBatchImport' ) );
 		add_action( 'wp_ajax_seo_import_progress', array( $this, 'handleImportProgress' ) );
 	}
@@ -549,6 +550,96 @@ class ImportPage {
 	}
 
 	/**
+	 * Handle AJAX request to save block order.
+	 *
+	 * Saves the custom block order to a transient for later use during import.
+	 *
+	 * @return void
+	 */
+	public function handleSaveBlockOrder(): void {
+		// Verify nonce.
+		check_ajax_referer( 'seo_csv_upload', 'nonce' );
+
+		// Check user capabilities.
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'You do not have sufficient permissions.', 'seo-generator' ) )
+			);
+		}
+
+		// Get block order from request.
+		$block_order_json = isset( $_POST['block_order'] ) ? sanitize_text_field( wp_unslash( $_POST['block_order'] ) ) : '';
+		$block_order      = json_decode( $block_order_json, true );
+
+		if ( ! is_array( $block_order ) || empty( $block_order ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'Invalid block order data.', 'seo-generator' ) )
+			);
+		}
+
+		// Validate block order contains only valid block types.
+		$valid_blocks = array( 'hero', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta' );
+		$invalid_blocks = array_diff( $block_order, $valid_blocks );
+
+		if ( ! empty( $invalid_blocks ) ) {
+			wp_send_json_error(
+				array(
+					'message' => __( 'Invalid block order: contains unknown blocks.', 'seo-generator' ),
+					'invalid' => $invalid_blocks,
+				)
+			);
+		}
+
+		// Get blocks to generate (enabled blocks).
+		$blocks_to_generate_json = isset( $_POST['blocks_to_generate'] ) ? sanitize_text_field( wp_unslash( $_POST['blocks_to_generate'] ) ) : '';
+		$blocks_to_generate      = json_decode( $blocks_to_generate_json, true );
+
+		// Validate blocks_to_generate is subset of block_order.
+		if ( is_array( $blocks_to_generate ) ) {
+			$invalid_blocks = array_diff( $blocks_to_generate, $block_order );
+			if ( ! empty( $invalid_blocks ) ) {
+				wp_send_json_error(
+					array(
+						'message' => __( 'Invalid blocks to generate: contains blocks not in the order list.', 'seo-generator' ),
+						'invalid' => $invalid_blocks,
+					)
+				);
+			}
+		}
+
+		// Get apply_to_all flag.
+		$apply_to_all = isset( $_POST['apply_to_all'] ) ? filter_var( $_POST['apply_to_all'], FILTER_VALIDATE_BOOLEAN ) : true;
+
+		// Save block order to transient.
+		$user_id = get_current_user_id();
+		$block_order_data = array(
+			'order'              => $block_order,
+			'blocks_to_generate' => $blocks_to_generate,
+			'apply_to_all'       => $apply_to_all,
+		);
+
+		set_transient( 'csv_import_block_order_' . $user_id, $block_order_data, HOUR_IN_SECONDS );
+
+		// Also update import_options transient with blocks_to_generate.
+		$import_options = get_transient( 'import_options_' . $user_id );
+		if ( ! $import_options ) {
+			$import_options = array();
+		}
+		$import_options['blocks_to_generate'] = $blocks_to_generate;
+		set_transient( 'import_options_' . $user_id, $import_options, HOUR_IN_SECONDS );
+
+		// Send success response.
+		wp_send_json_success(
+			array(
+				'message'            => __( 'Block order saved successfully.', 'seo-generator' ),
+				'block_order'        => $block_order,
+				'blocks_to_generate' => $blocks_to_generate,
+				'apply_to_all'       => $apply_to_all,
+			)
+		);
+	}
+
+	/**
 	 * Handle AJAX request for batch import.
 	 *
 	 * Processes a single batch of CSV rows and creates posts.
@@ -574,6 +665,7 @@ class ImportPage {
 		$parsed_data     = get_transient( 'import_data_' . $user_id );
 		$column_mapping  = get_transient( 'import_mapping_' . $user_id );
 		$import_options  = get_transient( 'import_options_' . $user_id );
+		$block_order_data = get_transient( 'csv_import_block_order_' . $user_id );
 
 		if ( ! $parsed_data || ! $column_mapping ) {
 			wp_send_json_error(
@@ -585,6 +677,22 @@ class ImportPage {
 		$generation_mode    = isset( $import_options['generation_mode'] ) ? $import_options['generation_mode'] : 'drafts_only';
 		$check_duplicates   = isset( $import_options['check_duplicates'] ) ? $import_options['check_duplicates'] : true;
 		$blocks_to_generate = isset( $import_options['blocks_to_generate'] ) ? $import_options['blocks_to_generate'] : null;
+
+		// Get custom block order if saved.
+		// IMPORTANT: Use blocks_to_generate (only enabled blocks) NOT order (all blocks including removed ones).
+		$custom_block_order = null;
+		if ( $block_order_data && isset( $block_order_data['blocks_to_generate'] ) && $block_order_data['apply_to_all'] ) {
+			$custom_block_order = $block_order_data['blocks_to_generate'];
+		}
+
+		// DEBUG: Log what we're passing to ImportService.
+		error_log( '========== IMPORT PAGE DEBUG ==========' );
+		error_log( 'import_options: ' . wp_json_encode( $import_options ) );
+		error_log( 'block_order_data: ' . wp_json_encode( $block_order_data ) );
+		error_log( 'generation_mode: ' . $generation_mode );
+		error_log( 'blocks_to_generate: ' . wp_json_encode( $blocks_to_generate ) );
+		error_log( 'custom_block_order: ' . wp_json_encode( $custom_block_order ) );
+		error_log( '=======================================' );
 
 		// Split rows into batches.
 		$batches = array_chunk( $parsed_data['rows'], 10 );
@@ -602,6 +710,7 @@ class ImportPage {
 				'check_duplicates'   => $check_duplicates,
 				'generation_mode'    => $generation_mode,
 				'blocks_to_generate' => $blocks_to_generate,
+				'custom_block_order' => $custom_block_order,
 			)
 		);
 

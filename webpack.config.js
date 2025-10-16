@@ -17,6 +17,7 @@ module.exports = {
 		'image-tags': path.resolve(process.cwd(), 'assets/js/src', 'image-tags.js'),
 		'column-mapping': path.resolve(process.cwd(), 'assets/js/src', 'column-mapping.js'),
 		'queue-status': path.resolve(process.cwd(), 'assets/js/src', 'queue-status.js'),
+		'block-ordering': path.resolve(process.cwd(), 'assets/js/src', 'block-ordering.js'),
 	},
 	output: {
 		path: path.resolve(process.cwd(), 'assets/js/build'),

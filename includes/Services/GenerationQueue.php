@@ -81,6 +81,7 @@ class GenerationQueue {
 		update_option( self::QUEUE_OPTION, $queue );
 
 		// Schedule WordPress Cron event.
+		// For the first job, we still respect rate limiting by scheduling it normally.
 		wp_schedule_single_event( $scheduled_time, 'seo_generate_queued_page', array( $post_id ) );
 
 		return true;

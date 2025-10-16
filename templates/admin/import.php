@@ -112,94 +112,8 @@ men's tungsten rings,commercial,800,</pre>
 			<!-- Import Options -->
 			<h4 class="mt-6 mb-3"><?php esc_html_e( '⚙️ Import Settings', 'seo-generator' ); ?></h4>
 
-			<!-- Generation Mode -->
-			<h5 class="mb-3"><?php esc_html_e( 'Content Generation:', 'seo-generator' ); ?></h5>
-			<div class="seo-radio mb-4">
-				<label class="seo-radio__option">
-					<input type="radio" name="generation_mode" value="drafts_only" class="seo-radio__input" checked>
-					<span class="seo-radio__label"><?php esc_html_e( 'Create drafts only (generate content manually later)', 'seo-generator' ); ?></span>
-				</label>
-				<label class="seo-radio__option">
-					<input type="radio" name="generation_mode" value="auto_generate" class="seo-radio__input">
-					<span class="seo-radio__label"><?php esc_html_e( 'Auto-generate content in background', 'seo-generator' ); ?></span>
-					<span class="seo-radio__badge">⭐</span>
-				</label>
-			</div>
-			<p class="text-sm text-gray mb-4">
-				<?php esc_html_e( 'Background generation processes one page every 3 minutes to respect API rate limits. Requires WordPress Cron or server cron to be active.', 'seo-generator' ); ?>
-			</p>
-
-			<!-- Block Selection (hidden initially) -->
-			<div id="block-selection" style="display: none;" class="mt-4 p-4" style="background: var(--gray-50); border-radius: var(--radius-md);">
-				<h4 class="mb-3"><?php esc_html_e( 'Select Blocks to Generate:', 'seo-generator' ); ?></h4>
-				<p class="text-sm text-gray mb-4">
-					<?php esc_html_e( 'Choose which content blocks to generate. Generating fewer blocks is faster and costs less. Leave all unchecked to generate all 12 blocks.', 'seo-generator' ); ?>
-				</p>
-
-				<div class="seo-checkbox" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3);">
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="hero" class="seo-checkbox__input" checked>
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Hero Section', 'seo-generator' ); ?> ⭐</span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="serp_answer" class="seo-checkbox__input" checked>
-						<span class="seo-checkbox__label"><?php esc_html_e( 'SERP Answer', 'seo-generator' ); ?> ⭐</span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="product_criteria" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Product Criteria', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="materials" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Materials', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="process" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Process', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="comparison" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Comparison', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="product_showcase" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Product Showcase', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="size_fit" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Size & Fit', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="care_warranty" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Care & Warranty', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="ethics" class="seo-checkbox__input">
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Ethics & Origin', 'seo-generator' ); ?></span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="faqs" class="seo-checkbox__input" checked>
-						<span class="seo-checkbox__label"><?php esc_html_e( 'FAQs', 'seo-generator' ); ?> ⭐</span>
-					</label>
-					<label class="seo-checkbox__option">
-						<input type="checkbox" name="blocks_to_generate[]" value="cta" class="seo-checkbox__input" checked>
-						<span class="seo-checkbox__label"><?php esc_html_e( 'Call to Action', 'seo-generator' ); ?> ⭐</span>
-					</label>
-				</div>
-
-				<p class="text-sm text-gray mt-4">
-					<?php esc_html_e( '⭐ = Recommended for faster imports. Hero, SERP Answer, FAQs, and CTA are essential blocks (4 blocks = ~$0.03-0.05 per page).', 'seo-generator' ); ?>
-				</p>
-
-				<div class="seo-btn-group mt-4" style="gap: var(--space-2);">
-					<button type="button" id="select-all-blocks" class="seo-btn-secondary"><?php esc_html_e( 'Select All', 'seo-generator' ); ?></button>
-					<button type="button" id="select-recommended-blocks" class="seo-btn-secondary"><?php esc_html_e( 'Recommended Only', 'seo-generator' ); ?></button>
-					<button type="button" id="clear-all-blocks" class="seo-btn-secondary"><?php esc_html_e( 'Clear All', 'seo-generator' ); ?></button>
-				</div>
-			</div>
-
 			<!-- Additional Options -->
-			<div class="seo-checkbox mt-4">
+			<div class="seo-checkbox">
 				<label class="seo-checkbox__option">
 					<input type="checkbox" name="check_duplicates" value="1" class="seo-checkbox__input" checked>
 					<span class="seo-checkbox__label"><?php esc_html_e( 'Skip duplicate posts (check if page with same title exists)', 'seo-generator' ); ?></span>
@@ -210,13 +124,67 @@ men's tungsten rings,commercial,800,</pre>
 				</label>
 			</div>
 
+			<p class="text-sm text-gray mt-4">
+				<?php esc_html_e( 'Content will be auto-generated in the background. Background generation processes one page every 3 minutes to respect API rate limits.', 'seo-generator' ); ?>
+			</p>
+		</div>
+	</div>
+
+	<!-- Step 2b: Block Ordering (hidden initially) -->
+	<div class="seo-card mt-4" id="block-ordering-section" style="display: none;">
+		<h3 class="seo-card__title">
+			<?php esc_html_e( 'Customize Block Order', 'seo-generator' ); ?>
+		</h3>
+		<div class="seo-card__content">
+			<p class="mb-4"><?php esc_html_e( 'Drag blocks to reorder how content will be generated on your pages. This order will be applied to all pages in this import.', 'seo-generator' ); ?></p>
+
+			<!-- Sortable Block List -->
+			<ul id="sortable-blocks" class="seo-sortable-list">
+				<?php
+				// Get block definitions
+				$block_config = require plugin_dir_path( dirname( __DIR__ ) ) . 'config/block-definitions.php';
+				$blocks       = $block_config['blocks'] ?? array();
+
+				// Define default order (excluding seo_metadata which is internal)
+				$default_order = array( 'hero', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta' );
+
+				foreach ( $default_order as $block_key ) :
+					if ( isset( $blocks[ $block_key ] ) ) :
+						$block = $blocks[ $block_key ];
+						?>
+						<li class="seo-sortable-item" data-block="<?php echo esc_attr( $block_key ); ?>" data-enabled="true">
+							<span class="seo-sortable-handle" aria-label="<?php esc_attr_e( 'Drag to reorder', 'seo-generator' ); ?>">⋮⋮</span>
+							<div class="seo-sortable-content">
+								<strong class="seo-sortable-label"><?php echo esc_html( $block['label'] ); ?></strong>
+								<span class="seo-sortable-desc"><?php echo esc_html( $block['description'] ); ?></span>
+							</div>
+							<button type="button" class="seo-sortable-remove" aria-label="<?php esc_attr_e( 'Remove block', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Click to remove this block', 'seo-generator' ); ?>">
+								<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+									<path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+								</svg>
+							</button>
+						</li>
+						<?php
+					endif;
+				endforeach;
+				?>
+			</ul>
+
+			<!-- Options -->
+			<div class="seo-checkbox mt-4">
+				<label class="seo-checkbox__option">
+					<input type="checkbox" id="apply-order-to-all" class="seo-checkbox__input" checked>
+					<span class="seo-checkbox__label"><?php esc_html_e( 'Use this order for all pages in this import', 'seo-generator' ); ?></span>
+				</label>
+			</div>
+
 			<!-- Action Buttons -->
 			<div class="seo-btn-group mt-6">
-				<button type="button" id="cancel-mapping" class="seo-btn-secondary">
-					<?php esc_html_e( 'Cancel', 'seo-generator' ); ?>
+				<button type="button" id="reset-order-btn" class="seo-btn-secondary">
+					<?php esc_html_e( 'Reset to Default Order', 'seo-generator' ); ?>
 				</button>
-				<button type="button" id="proceed-import" class="seo-btn-primary">
-					<?php esc_html_e( 'Import CSV', 'seo-generator' ); ?> ✨
+				<button type="button" id="proceed-import-btn" class="seo-btn-primary">
+					<?php esc_html_e( 'Proceed with Import', 'seo-generator' ); ?> →
 				</button>
 			</div>
 		</div>
@@ -334,6 +302,19 @@ men's tungsten rings,commercial,800,</pre>
 </script>
 
 <?php
+// Enqueue block ordering script
+$block_ordering_asset_file = plugin_dir_path( dirname( __DIR__ ) ) . 'assets/js/build/block-ordering.asset.php';
+if ( file_exists( $block_ordering_asset_file ) ) {
+	$block_ordering_asset = require $block_ordering_asset_file;
+	wp_enqueue_script(
+		'seo-block-ordering',
+		plugin_dir_url( dirname( __DIR__ ) ) . 'assets/js/build/block-ordering.js',
+		$block_ordering_asset['dependencies'],
+		$block_ordering_asset['version'],
+		true
+	);
+}
+
 // Localize script with AJAX data for column-mapping.js
 wp_localize_script(
 	'seo-generator-interactions',

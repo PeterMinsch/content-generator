@@ -14,13 +14,21 @@ $import_log_repo = new \SEOGenerator\Repositories\ImportLogRepository();
 
 // Get pagination parameters.
 $paged    = isset( $_GET['log_paged'] ) ? absint( $_GET['log_paged'] ) : 1;
-$per_page = 10;
+$per_page = 5; // Reduced from 10 to 5 for faster loading
 $offset   = ( $paged - 1 ) * $per_page;
 
 // Get import logs and total count.
-$logs        = $import_log_repo->findAll( $per_page, $offset );
-$total_count = $import_log_repo->count();
-$total_pages = ceil( $total_count / $per_page );
+// Add error handling to prevent page hangs.
+try {
+	$logs        = $import_log_repo->findAll( $per_page, $offset );
+	$total_count = $import_log_repo->count();
+	$total_pages = ceil( $total_count / $per_page );
+} catch ( \Exception $e ) {
+	error_log( '[SEO Generator] Import history query failed: ' . $e->getMessage() );
+	$logs        = array();
+	$total_count = 0;
+	$total_pages = 0;
+}
 
 ?>
 

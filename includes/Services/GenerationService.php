@@ -181,8 +181,30 @@ class GenerationService {
 		$failed    = 0;
 		$errors    = array();
 
-		// Use specified blocks or default to all blocks.
-		$blocks_to_generate = $blocks !== null ? $blocks : $this->block_types;
+		// Determine which blocks to generate with proper fallback priority:
+		// 1. Use $blocks parameter if provided (from queue item)
+		// 2. Check post meta _seo_block_order for custom block order
+		// 3. Fall back to all blocks as default
+		if ( $blocks !== null ) {
+			$blocks_to_generate = $blocks;
+			error_log( "[SEO Generator] Using blocks from queue parameter for post {$post_id}: " . wp_json_encode( $blocks ) );
+		} else {
+			// Check post meta for custom block order.
+			$custom_order_json = get_post_meta( $post_id, '_seo_block_order', true );
+			if ( ! empty( $custom_order_json ) ) {
+				$custom_order = json_decode( $custom_order_json, true );
+				if ( is_array( $custom_order ) && ! empty( $custom_order ) ) {
+					$blocks_to_generate = $custom_order;
+					error_log( "[SEO Generator] Using post meta block order for post {$post_id}: " . wp_json_encode( $custom_order ) );
+				} else {
+					$blocks_to_generate = $this->block_types;
+					error_log( "[SEO Generator] Invalid post meta block order, using all blocks for post {$post_id}" );
+				}
+			} else {
+				$blocks_to_generate = $this->block_types;
+				error_log( "[SEO Generator] No custom block order found, using all blocks for post {$post_id}" );
+			}
+		}
 
 		// ALWAYS ensure seo_metadata is generated first (if not already in list).
 		if ( ! in_array( 'seo_metadata', $blocks_to_generate, true ) ) {

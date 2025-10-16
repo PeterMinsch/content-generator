@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	let currentMappings = {};
 	let currentHeaders = [];
+	let parsedMetadata = null; // Store parsed CSV metadata
 
 	/**
 	 * Handle form submission.
@@ -79,8 +80,13 @@ document.addEventListener('DOMContentLoaded', () => {
 				renderColumnMapping(data.data.headers, data.data.mappings);
 				renderPreviewTable(data.data.headers, data.data.preview_rows);
 
-				// Show mapping section.
+				// Show mapping section AND block ordering section.
 				columnMappingSection.style.display = 'block';
+
+				const blockOrderingSection = document.getElementById('block-ordering-section');
+				if (blockOrderingSection) {
+					blockOrderingSection.style.display = 'block';
+				}
 			} else {
 				throw new Error(data.data.message || 'Failed to load column mapping');
 			}
@@ -247,12 +253,8 @@ document.addEventListener('DOMContentLoaded', () => {
 			}
 
 			// Capture import options.
-			const generationMode = document.querySelector('input[name="generation_mode"]:checked')?.value || 'drafts_only';
+			const generationMode = 'auto_generate'; // Always use auto_generate mode
 			const checkDuplicates = document.querySelector('input[name="check_duplicates"]')?.checked || false;
-
-			// Capture blocks to generate (if auto_generate mode).
-			const blocksCheckboxes = document.querySelectorAll('input[name="blocks_to_generate[]"]:checked');
-			const blocksToGenerate = Array.from(blocksCheckboxes).map(cb => cb.value);
 
 			// Disable button during processing.
 			proceedImportBtn.disabled = true;
@@ -271,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
 						mappings: JSON.stringify(currentMappings),
 						generation_mode: generationMode,
 						check_duplicates: checkDuplicates ? '1' : '0',
-						blocks_to_generate: JSON.stringify(blocksToGenerate),
 					}),
 				});
 
@@ -302,6 +303,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				// Display parsing results.
 				displayParsingResults(parseData.data);
 
+				// After parsing, show block ordering section.
+				showBlockOrderingSection();
+
 			} catch (error) {
 				console.error('Processing error:', error);
 				alert('Processing failed: ' + error.message);
@@ -314,13 +318,30 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	/**
+	 * Show block ordering section.
+	 */
+	function showBlockOrderingSection() {
+		// Hide column mapping section.
+		columnMappingSection.style.display = 'none';
+
+		// Show block ordering section.
+		const blockOrderingSection = document.getElementById('block-ordering-section');
+		if (blockOrderingSection) {
+			blockOrderingSection.style.display = 'block';
+		}
+	}
+
+	/**
 	 * Display CSV parsing results to user.
 	 *
 	 * @param {Object} data Parsing results from server.
 	 */
-	async function displayParsingResults(data) {
+	function displayParsingResults(data) {
 		const metadata = data.metadata;
 		const errors = data.errors || [];
+
+		// Store metadata for later use
+		parsedMetadata = metadata;
 
 		let message = `CSV parsed successfully!\n\n`;
 		message += `Total rows: ${metadata.total_rows}\n`;
@@ -340,18 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
 			message += `\nValid rows will still be imported.`;
 		}
 
-		message += `\n\nProceed with import?`;
-
-		const confirmed = confirm(message);
-
-		if (confirmed) {
-			// Start batch import
-			await startBatchImport(metadata.valid_rows);
-		} else {
-			// Re-enable button
-			proceedImportBtn.disabled = false;
-			proceedImportBtn.innerHTML = '<span class="dashicons dashicons-yes" style="vertical-align: middle;"></span> Proceed to Import';
-		}
+		// Just display results, don't ask for confirmation yet.
+		// User will proceed via block ordering section.
+		console.log('CSV parsing results:', message);
 	}
 
 	/**
@@ -362,13 +374,25 @@ document.addEventListener('DOMContentLoaded', () => {
 	async function startBatchImport(totalRows) {
 		const totalBatches = Math.ceil(totalRows / 10);
 
-		// Update button text
-		proceedImportBtn.textContent = 'Importing...';
+		// Get the proceed button from block ordering section (different from column mapping button)
+		const blockOrderProceedBtn = document.getElementById('proceed-import-btn');
+		const progressSection = document.getElementById('import-progress');
+		const progressText = document.getElementById('progress-text');
+
+		// Show progress section
+		if (progressSection) {
+			progressSection.style.display = 'block';
+		}
 
 		try {
 			for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
 				// Update progress text
-				proceedImportBtn.textContent = `Importing batch ${batchIndex + 1} of ${totalBatches}...`;
+				if (progressText) {
+					progressText.textContent = `Importing batch ${batchIndex + 1} of ${totalBatches}...`;
+				}
+				if (blockOrderProceedBtn) {
+					blockOrderProceedBtn.textContent = `Importing batch ${batchIndex + 1} of ${totalBatches}...`;
+				}
 
 				// Get current options
 				const checkDuplicates = document.querySelector('input[name="check_duplicates"]')?.checked || false;
@@ -403,8 +427,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			alert('Import failed: ' + error.message);
 
 			// Re-enable button
-			proceedImportBtn.disabled = false;
-			proceedImportBtn.innerHTML = '<span class="dashicons dashicons-yes" style="vertical-align: middle;"></span> Proceed to Import';
+			if (blockOrderProceedBtn) {
+				blockOrderProceedBtn.disabled = false;
+				blockOrderProceedBtn.textContent = 'Proceed with Import →';
+			}
+			if (proceedImportBtn) {
+				proceedImportBtn.disabled = false;
+				proceedImportBtn.innerHTML = '<span class="dashicons dashicons-yes" style="vertical-align: middle;"></span> Proceed to Import';
+			}
 		}
 	}
 
@@ -433,9 +463,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		alert(message);
 
-		// Re-enable and reset button
-		proceedImportBtn.disabled = false;
-		proceedImportBtn.innerHTML = '<span class="dashicons dashicons-yes" style="vertical-align: middle;"></span> Proceed to Import';
+		// Re-enable and reset buttons (if they exist)
+		const blockOrderProceedBtn = document.getElementById('proceed-import-btn');
+		if (blockOrderProceedBtn) {
+			blockOrderProceedBtn.disabled = false;
+			blockOrderProceedBtn.textContent = 'Proceed with Import →';
+		}
+		if (proceedImportBtn) {
+			proceedImportBtn.disabled = false;
+			proceedImportBtn.innerHTML = '<span class="dashicons dashicons-yes" style="vertical-align: middle;"></span> Proceed to Import';
+		}
 
 		// Optionally redirect to posts list
 		if (confirm('Would you like to view the created posts?')) {
@@ -453,4 +490,80 @@ document.addEventListener('DOMContentLoaded', () => {
 			uploadForm.reset();
 		});
 	}
+
+	// Listen for custom event from block-ordering.js to start batch import.
+	document.addEventListener('seo-start-batch-import', async () => {
+		console.log('seo-start-batch-import event triggered');
+		console.log('parsedMetadata:', parsedMetadata);
+
+		// If metadata doesn't exist, we need to parse the CSV first
+		if (!parsedMetadata) {
+			console.log('No parsed metadata found. Parsing CSV first...');
+
+			try {
+				// Step 1: Validate mappings and save options
+				const checkDuplicates = document.querySelector('input[name="check_duplicates"]')?.checked || false;
+
+				const validateResponse = await fetch(seoImportData.ajaxUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: new URLSearchParams({
+						action: 'seo_validate_mapping',
+						nonce: seoImportData.nonce,
+						mappings: JSON.stringify(currentMappings),
+						generation_mode: 'auto_generate',
+						check_duplicates: checkDuplicates ? '1' : '0',
+					}),
+				});
+
+				const validateData = await validateResponse.json();
+
+				if (!validateData.success) {
+					throw new Error(validateData.data.message || 'Validation failed');
+				}
+
+				// Step 2: Parse CSV
+				const parseResponse = await fetch(seoImportData.ajaxUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: new URLSearchParams({
+						action: 'seo_parse_csv',
+						nonce: seoImportData.nonce,
+					}),
+				});
+
+				const parseData = await parseResponse.json();
+
+				if (!parseData.success) {
+					throw new Error(parseData.data.message || 'CSV parsing failed');
+				}
+
+				// Store the metadata
+				displayParsingResults(parseData.data);
+				console.log('CSV parsed successfully. Metadata:', parsedMetadata);
+			} catch (error) {
+				console.error('Failed to parse CSV:', error);
+				alert('Failed to parse CSV: ' + error.message);
+				return;
+			}
+		}
+
+		// Check again after potential parsing
+		if (!parsedMetadata || !parsedMetadata.valid_rows) {
+			console.error('Still no parsed metadata available after parsing attempt.');
+			alert('Import data not found. Please try uploading the CSV again.');
+			return;
+		}
+
+		console.log('Starting batch import with', parsedMetadata.valid_rows, 'rows');
+		// Use valid_rows (not total_rows) to avoid processing invalid rows
+		await startBatchImport(parsedMetadata.valid_rows);
+	});
+
+	// Make startBatchImport available globally for block-ordering.js.
+	window.seoStartBatchImport = startBatchImport;
 });

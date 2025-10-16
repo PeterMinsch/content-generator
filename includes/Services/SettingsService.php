@@ -97,7 +97,7 @@ class SettingsService {
 	public function getMaxTokens(): int {
 		$settings = $this->getApiSettings();
 
-		return intval( $settings['max_tokens'] ?? 1000 );
+		return intval( $settings['max_tokens'] ?? 4096 );
 	}
 
 	/**
@@ -170,7 +170,7 @@ class SettingsService {
 			'openai_api_key'           => '',
 			'model'                    => 'gpt-4-turbo-preview',
 			'temperature'              => 0.7,
-			'max_tokens'               => 1000,
+			'max_tokens'               => 4096,
 			'enable_cost_tracking'     => true,
 			'monthly_budget'           => 100.00,
 			'alert_threshold_percent'  => 80,

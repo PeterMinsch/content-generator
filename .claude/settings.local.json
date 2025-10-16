@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Read(//c/Users/petem/Local Sites/contentgeneratorwpplugin/app/public/**)"
+      "Read(//c/Users/petem/Local Sites/contentgeneratorwpplugin/app/public/**)",
+      "Bash(npm run build:*)",
+      "Bash(php:*)"
     ],
     "deny": [],
     "ask": []

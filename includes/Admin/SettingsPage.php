@@ -142,6 +142,7 @@ class SettingsPage {
 		$this->registerPromptTemplatesSection();
 		$this->registerImageLibrarySection();
 		$this->registerLimitsTrackingSection();
+		$this->registerReviewsSection();
 	}
 
 	/**
@@ -377,6 +378,47 @@ class SettingsPage {
 	}
 
 	/**
+	 * Register Review Integration section (Apify).
+	 *
+	 * @return void
+	 */
+	private function registerReviewsSection(): void {
+		add_settings_section(
+			'seo_reviews_section',
+			__( 'Review Integration (Apify)', 'seo-generator' ),
+			array( $this, 'renderReviewsSectionDescription' ),
+			self::PAGE_SLUG . '_reviews'
+		);
+
+		// Apify API Token field.
+		add_settings_field(
+			'apify_api_token',
+			__( 'Apify API Token', 'seo-generator' ),
+			array( $this, 'renderApifyApiTokenField' ),
+			self::PAGE_SLUG . '_reviews',
+			'seo_reviews_section'
+		);
+
+		// Google Maps Place URL field.
+		add_settings_field(
+			'place_url',
+			__( 'Google Maps Place URL', 'seo-generator' ),
+			array( $this, 'renderPlaceUrlField' ),
+			self::PAGE_SLUG . '_reviews',
+			'seo_reviews_section'
+		);
+
+		// Max Reviews field.
+		add_settings_field(
+			'max_reviews',
+			__( 'Maximum Reviews', 'seo-generator' ),
+			array( $this, 'renderMaxReviewsField' ),
+			self::PAGE_SLUG . '_reviews',
+			'seo_reviews_section'
+		);
+	}
+
+	/**
 	 * Render API section description.
 	 *
 	 * @return void
@@ -401,6 +443,28 @@ class SettingsPage {
 	 */
 	public function renderImageLibrarySectionDescription(): void {
 		echo '<p>' . esc_html__( 'Configure automatic image assignment during content generation.', 'seo-generator' ) . '</p>';
+	}
+
+	/**
+	 * Render Review Integration section description.
+	 *
+	 * @return void
+	 */
+	public function renderReviewsSectionDescription(): void {
+		?>
+		<p><?php esc_html_e( 'Configure Apify integration to fetch Google Maps reviews for your business.', 'seo-generator' ); ?></p>
+		<p>
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %s: link to Apify setup guide */
+					__( 'Need help? See the <a href="%s" target="_blank">Apify Setup Guide</a> for detailed instructions.', 'seo-generator' ),
+					plugins_url( 'docs/apify-setup-guide.md', dirname( __DIR__ ) )
+				)
+			);
+			?>
+		</p>
+		<?php
 	}
 
 	/**
@@ -698,6 +762,93 @@ class SettingsPage {
 	}
 
 	/**
+	 * Render Apify API Token field.
+	 *
+	 * @return void
+	 */
+	public function renderApifyApiTokenField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$has_key  = ! empty( $settings['apify_api_token'] );
+
+		?>
+		<input
+			type="password"
+			id="apify_api_token"
+			name="<?php echo esc_attr( self::OPTION_NAME ); ?>[apify_api_token]"
+			value="<?php echo $has_key ? esc_attr( '****************************************' ) : ''; ?>"
+			class="regular-text"
+			placeholder="<?php esc_attr_e( 'apify_api_...', 'seo-generator' ); ?>"
+		/>
+		<p class="description">
+			<?php esc_html_e( 'Your Apify API token. Get it from Apify Console → Settings → Integrations. ', 'seo-generator' ); ?>
+			<a href="https://console.apify.com/account/integrations" target="_blank">
+				<?php esc_html_e( 'Get your token', 'seo-generator' ); ?>
+			</a>
+		</p>
+		<?php if ( $has_key ) : ?>
+			<p class="description">
+				<em><?php esc_html_e( 'API token is already configured. Enter a new token to replace it.', 'seo-generator' ); ?></em>
+			</p>
+		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * Render Place URL field.
+	 *
+	 * @return void
+	 */
+	public function renderPlaceUrlField(): void {
+		$settings  = get_option( self::OPTION_NAME, array() );
+		$place_url = $settings['place_url'] ?? '';
+
+		?>
+		<input
+			type="url"
+			id="place_url"
+			name="<?php echo esc_attr( self::OPTION_NAME ); ?>[place_url]"
+			value="<?php echo esc_attr( $place_url ); ?>"
+			class="regular-text"
+			placeholder="<?php esc_attr_e( 'https://www.google.com/maps/place/...', 'seo-generator' ); ?>"
+		/>
+		<p class="description">
+			<?php esc_html_e( 'Your business Google Maps URL. Go to Google Maps, search for your business, and copy the URL.', 'seo-generator' ); ?>
+		</p>
+		<p class="description">
+			<strong><?php esc_html_e( 'Example:', 'seo-generator' ); ?></strong>
+			<code>https://www.google.com/maps/place/Bravo+Jewelers/@40.7580,-73.9855,17z/...</code>
+		</p>
+		<?php
+	}
+
+	/**
+	 * Render Max Reviews field.
+	 *
+	 * @return void
+	 */
+	public function renderMaxReviewsField(): void {
+		$settings    = get_option( self::OPTION_NAME, array() );
+		$max_reviews = $settings['max_reviews'] ?? 50;
+
+		?>
+		<input
+			type="number"
+			id="max_reviews"
+			name="<?php echo esc_attr( self::OPTION_NAME ); ?>[max_reviews]"
+			value="<?php echo esc_attr( $max_reviews ); ?>"
+			min="5"
+			max="100"
+			step="5"
+			class="small-text"
+		/>
+		<span><?php esc_html_e( 'reviews', 'seo-generator' ); ?></span>
+		<p class="description">
+			<?php esc_html_e( 'Maximum number of reviews to fetch per request. Default: 50. Higher values may increase scraper run time and cost.', 'seo-generator' ); ?>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Render API Key field.
 	 *
 	 * @return void
@@ -904,6 +1055,68 @@ class SettingsPage {
 
 		// Auto-assignment checkbox.
 		$sanitized['enable_auto_assignment'] = isset( $input['enable_auto_assignment'] ) && '1' === $input['enable_auto_assignment'];
+
+		// Apify API Token - encrypt before storage (same as OpenAI key).
+		if ( isset( $input['apify_api_token'] ) && ! empty( $input['apify_api_token'] ) ) {
+			$apify_token = sanitize_text_field( $input['apify_api_token'] );
+
+			// Check if it's the masked value (already encrypted).
+			if ( str_starts_with( $apify_token, '***' ) ) {
+				// Keep existing token.
+				$sanitized['apify_api_token'] = $existing['apify_api_token'] ?? '';
+			} elseif ( str_starts_with( $apify_token, 'apify_api_' ) ) {
+				// New token - encrypt it.
+				$encrypted = seo_generator_encrypt_api_key( $apify_token );
+				if ( false !== $encrypted ) {
+					$sanitized['apify_api_token'] = $encrypted;
+				} else {
+					add_settings_error(
+						self::OPTION_NAME,
+						'apify_encryption_failed',
+						__( 'Failed to encrypt Apify API token. Please try again.', 'seo-generator' )
+					);
+					$sanitized['apify_api_token'] = $existing['apify_api_token'] ?? '';
+				}
+			} else {
+				// Invalid token format.
+				add_settings_error(
+					self::OPTION_NAME,
+					'invalid_apify_token',
+					__( 'Invalid Apify API token format. Tokens start with "apify_api_".', 'seo-generator' )
+				);
+				$sanitized['apify_api_token'] = $existing['apify_api_token'] ?? '';
+			}
+		} else {
+			// No token provided - keep existing.
+			$sanitized['apify_api_token'] = $existing['apify_api_token'] ?? '';
+		}
+
+		// Place URL - validate URL format.
+		if ( isset( $input['place_url'] ) && ! empty( $input['place_url'] ) ) {
+			$place_url = sanitize_text_field( $input['place_url'] );
+
+			// Validate it's a URL (either full Google Maps URL or Place ID).
+			if ( filter_var( $place_url, FILTER_VALIDATE_URL ) || preg_match( '/^ChIJ[A-Za-z0-9_-]+$/', $place_url ) ) {
+				$sanitized['place_url'] = $place_url;
+			} else {
+				add_settings_error(
+					self::OPTION_NAME,
+					'invalid_place_url',
+					__( 'Invalid Place URL format. Enter a full Google Maps URL or Place ID.', 'seo-generator' )
+				);
+				$sanitized['place_url'] = $existing['place_url'] ?? '';
+			}
+		} else {
+			$sanitized['place_url'] = $existing['place_url'] ?? '';
+		}
+
+		// Max Reviews - validate range.
+		if ( isset( $input['max_reviews'] ) ) {
+			$max_reviews              = intval( $input['max_reviews'] );
+			$sanitized['max_reviews'] = max( 5, min( 100, $max_reviews ) );
+		} else {
+			$sanitized['max_reviews'] = $existing['max_reviews'] ?? 50;
+		}
 
 		// Preserve other existing settings (from other tabs/stories).
 		foreach ( $existing as $key => $value ) {

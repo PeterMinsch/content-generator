@@ -58,6 +58,14 @@ class ImportService {
 	private $blocks_to_generate = null;
 
 	/**
+	 * Custom block order for generation.
+	 * If set, this order will be saved to post meta for content generation.
+	 *
+	 * @var array|null
+	 */
+	private $custom_block_order = null;
+
+	/**
 	 * Queue index for scheduling offset.
 	 *
 	 * @var int
@@ -106,12 +114,14 @@ class ImportService {
 	 *                       - check_duplicates: Check for existing posts (default: true)
 	 *                       - generation_mode: Generation mode (drafts_only or auto_generate, default: drafts_only)
 	 *                       - blocks_to_generate: Array of specific blocks to generate, or null for all blocks (default: null)
+	 *                       - custom_block_order: Custom block order for generation, or null for default (default: null)
 	 */
 	public function __construct( array $options = array() ) {
 		$this->batch_size         = isset( $options['batch_size'] ) ? (int) $options['batch_size'] : 10;
 		$this->check_duplicates   = isset( $options['check_duplicates'] ) ? (bool) $options['check_duplicates'] : true;
 		$this->generation_mode    = isset( $options['generation_mode'] ) ? $options['generation_mode'] : 'drafts_only';
 		$this->blocks_to_generate = isset( $options['blocks_to_generate'] ) ? $options['blocks_to_generate'] : null;
+		$this->custom_block_order = isset( $options['custom_block_order'] ) ? $options['custom_block_order'] : null;
 		$this->image_service      = new ImageDownloadService();
 	}
 
@@ -124,6 +134,13 @@ class ImportService {
 	 * @return array Batch results with created, skipped, errors, and images.
 	 */
 	public function processSingleBatch( array $rows, array $headers, array $mapping ): array {
+		// DEBUG: Log what blocks configuration we have.
+		error_log( '========== IMPORT SERVICE DEBUG ==========' );
+		error_log( 'blocks_to_generate: ' . wp_json_encode( $this->blocks_to_generate ) );
+		error_log( 'custom_block_order: ' . wp_json_encode( $this->custom_block_order ) );
+		error_log( 'generation_mode: ' . $this->generation_mode );
+		error_log( '==========================================' );
+
 		// Suspend cache to prevent memory bloat.
 		wp_suspend_cache_addition( true );
 
@@ -294,6 +311,29 @@ class ImportService {
 			$this->assignTaxonomy( $post_id, $topic );
 		}
 
+		// Save blocks to generate (enabled blocks only) if specified.
+		// This takes precedence over custom_block_order.
+		error_log( "[Import Service] Saving block config for post {$post_id}" );
+		error_log( "[Import Service] blocks_to_generate: " . wp_json_encode( $this->blocks_to_generate ) );
+		error_log( "[Import Service] custom_block_order: " . wp_json_encode( $this->custom_block_order ) );
+
+		if ( ! empty( $this->blocks_to_generate ) && is_array( $this->blocks_to_generate ) ) {
+			// Prepend seo_metadata to the blocks list (it's always generated first).
+			$blocks_with_metadata = array_merge( array( 'seo_metadata' ), $this->blocks_to_generate );
+			// Remove duplicates in case seo_metadata was already in the list.
+			$blocks_with_metadata = array_unique( $blocks_with_metadata );
+			update_post_meta( $post_id, '_seo_block_order', wp_json_encode( $blocks_with_metadata ) );
+			error_log( "[Import Service] Saved blocks_to_generate to post meta: " . wp_json_encode( $blocks_with_metadata ) );
+		} elseif ( ! empty( $this->custom_block_order ) && is_array( $this->custom_block_order ) ) {
+			// Fallback: Save custom block order if specified (for backward compatibility).
+			// Prepend seo_metadata to the custom order (it's always generated first).
+			$full_block_order = array_merge( array( 'seo_metadata' ), $this->custom_block_order );
+			update_post_meta( $post_id, '_seo_block_order', wp_json_encode( $full_block_order ) );
+			error_log( "[Import Service] Saved custom_block_order to post meta: " . wp_json_encode( $full_block_order ) );
+		} else {
+			error_log( "[Import Service] No block configuration provided - will use default order" );
+		}
+
 		// Handle image URL download (Story 6.6).
 		$image_url = $this->extractValue( $row, $headers, $mapping, 'image_url' );
 		if ( ! empty( $image_url ) && filter_var( $image_url, FILTER_VALIDATE_URL ) ) {
@@ -407,9 +447,9 @@ class ImportService {
 	 */
 	private function mapIntentToTopic( string $intent ): string {
 		$mapping = array(
-			'commercial'     => 'Product Reviews',
+			'commercial'     => 'Product Pages',
 			'informational'  => 'How-To Guides',
-			'transactional'  => 'Product Reviews',
+			'transactional'  => 'Product Pages',
 			'navigational'   => 'Resources',
 		);
 

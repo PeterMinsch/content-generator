@@ -44,6 +44,9 @@ class BlockDefinitionParser {
 	 * @return void
 	 */
 	private function loadBlockDefinitions(): void {
+		// Check if already validated in this request (request-scoped cache).
+		static $validation_done = false;
+
 		$config_file = SEO_GENERATOR_PLUGIN_DIR . 'config/block-definitions.php';
 
 		if ( ! file_exists( $config_file ) ) {
@@ -59,39 +62,45 @@ class BlockDefinitionParser {
 		$this->blocks   = apply_filters( 'seo_generator_block_definitions', $config['blocks'] ?? [] );
 		$this->settings = $config['settings'] ?? [];
 
-		// Validate block definitions.
-		$validator = new BlockDefinitionValidator();
+		// Only validate once per request to prevent multiple validation runs.
+		if ( ! $validation_done ) {
+			// Validate block definitions.
+			$validator = new BlockDefinitionValidator();
 
-		if ( ! $validator->validate( $this->blocks ) ) {
-			$errors = $validator->getErrors();
+			if ( ! $validator->validate( $this->blocks ) ) {
+				$errors = $validator->getErrors();
 
-			// Log errors.
-			if ( function_exists( 'error_log' ) ) {
-				error_log( 'SEO Generator - Block configuration validation errors:' );
-				foreach ( $errors as $error ) {
-					error_log( '  - ' . $error );
+				// Log errors.
+				if ( function_exists( 'error_log' ) ) {
+					error_log( 'SEO Generator - Block configuration validation errors:' );
+					foreach ( $errors as $error ) {
+						error_log( '  - ' . $error );
+					}
+				}
+
+				// In debug mode, throw exception to alert developer.
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+					trigger_error(
+						'Block configuration validation failed: ' . implode( '; ', $errors ),
+						E_USER_WARNING
+					);
 				}
 			}
 
-			// In debug mode, throw exception to alert developer.
+			// Log warnings in debug mode.
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-				trigger_error(
-					'Block configuration validation failed: ' . implode( '; ', $errors ),
-					E_USER_WARNING
-				);
-			}
-		}
-
-		// Log warnings in debug mode.
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$warnings = $validator->getWarnings( $this->blocks );
-			if ( ! empty( $warnings ) && function_exists( 'error_log' ) ) {
-				error_log( 'SEO Generator - Block configuration warnings:' );
-				foreach ( $warnings as $warning ) {
-					error_log( '  - ' . $warning );
+				$warnings = $validator->getWarnings( $this->blocks );
+				if ( ! empty( $warnings ) && function_exists( 'error_log' ) ) {
+					error_log( 'SEO Generator - Block configuration warnings:' );
+					foreach ( $warnings as $warning ) {
+						error_log( '  - ' . $warning );
+					}
 				}
 			}
+
+			// Mark validation as done for this request.
+			$validation_done = true;
 		}
 	}
 

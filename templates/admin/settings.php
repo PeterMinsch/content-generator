@@ -13,6 +13,7 @@ $tabs = array(
 	'defaults' => __( 'Default Content', 'seo-generator' ),
 	'prompts'  => __( 'Prompt Templates', 'seo-generator' ),
 	'images'   => __( 'Image Library', 'seo-generator' ),
+	'reviews'  => __( 'Review Integration', 'seo-generator' ),
 	'limits'   => __( 'Limits & Tracking', 'seo-generator' ),
 );
 
@@ -81,6 +82,10 @@ $page_slug = \SEOGenerator\Admin\SettingsPage::getPageSlug();
 
 			case 'images':
 				do_settings_sections( $page_slug . '_images' );
+				break;
+
+			case 'reviews':
+				do_settings_sections( $page_slug . '_reviews' );
 				break;
 
 			case 'limits':

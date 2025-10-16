@@ -134,6 +134,159 @@
 	margin-right: 5px;
 }
 
+/* Sortable Block List */
+.seo-sortable-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	max-width: 800px;
+	position: relative; /* For absolute positioning of removing items */
+}
+
+.seo-sortable-item {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 16px;
+	margin-bottom: 8px;
+	background: #fff;
+	border: 1px solid var(--gray-200, #e5e7eb);
+	border-radius: var(--radius-md, 8px);
+	cursor: move;
+	transition: all 150ms ease;
+	overflow: hidden;
+}
+
+.seo-sortable-item:hover {
+	border-color: var(--primary-color, #2563eb);
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.seo-sortable-handle {
+	font-size: 18px;
+	color: var(--gray-400, #9ca3af);
+	cursor: grab;
+	user-select: none;
+	line-height: 1;
+}
+
+.seo-sortable-handle:active {
+	cursor: grabbing;
+}
+
+.seo-sortable-content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.seo-sortable-label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--gray-900, #111827);
+}
+
+.seo-sortable-desc {
+	font-size: 13px;
+	color: var(--gray-600, #4b5563);
+}
+
+/* Remove Button - Apple Style */
+.seo-sortable-remove {
+	flex-shrink: 0;
+	width: 20px;
+	height: 20px;
+	border: none;
+	background: rgba(142, 142, 147, 0.12);
+	color: rgba(60, 60, 67, 0.6);
+	border-radius: 50%;
+	cursor: pointer;
+	transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	opacity: 0;
+}
+
+.seo-sortable-item:hover .seo-sortable-remove {
+	opacity: 1;
+}
+
+.seo-sortable-remove:hover {
+	background: rgba(255, 59, 48, 0.15);
+	color: #ff3b30;
+	transform: scale(1.1);
+}
+
+.seo-sortable-remove:active {
+	transform: scale(0.95);
+	background: rgba(255, 59, 48, 0.25);
+}
+
+.seo-sortable-remove svg {
+	width: 10px;
+	height: 10px;
+	transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.seo-sortable-remove:hover svg {
+	transform: rotate(90deg);
+}
+
+/* Removing State - Collapse Animation */
+.seo-sortable-item.removing {
+	opacity: 0;
+	transform: translateX(-10px);
+	transition: opacity 200ms ease, transform 200ms ease,
+	            height 300ms ease, margin 300ms ease, padding 300ms ease;
+}
+
+/* Removed/Disabled State */
+.seo-sortable-item[data-enabled="false"] {
+	display: none;
+}
+
+/* Sortable States */
+.seo-sortable-ghost {
+	opacity: 0.4;
+	background: var(--gray-100, #f3f4f6);
+}
+
+.seo-sortable-drag {
+	opacity: 1;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	transform: rotate(2deg);
+}
+
+.seo-sortable-chosen {
+	background: var(--gray-50, #f9fafb);
+	border-color: var(--primary-color, #2563eb);
+}
+
+.seo-sortable-dragging {
+	user-select: none;
+}
+
+/* Reset Animation */
+.seo-sortable-reset .seo-sortable-item {
+	animation: sortable-reset 300ms ease;
+}
+
+@keyframes sortable-reset {
+	0% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(0.95);
+		background: var(--gray-100, #f3f4f6);
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
 /* Responsive */
 @media screen and (max-width: 782px) {
 	.seo-import-wrap {
@@ -142,5 +295,21 @@
 
 	.import-upload-section .form-table th {
 		width: auto;
+	}
+
+	.seo-sortable-item {
+		padding: 12px;
+	}
+
+	.seo-sortable-handle {
+		font-size: 16px;
+	}
+
+	.seo-sortable-label {
+		font-size: 13px;
+	}
+
+	.seo-sortable-desc {
+		font-size: 12px;
 	}
 }

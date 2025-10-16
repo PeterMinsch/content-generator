@@ -468,3 +468,112 @@ function seo_generator_output_schema(): void {
 	echo $json . "\n";
 	echo '</script>' . "\n";
 }
+
+/**
+ * Get reviews for a page.
+ *
+ * Retrieves reviews stored in post meta during page generation.
+ * Reviews are automatically fetched from Google Business Profile API
+ * when a page with review_section block is generated.
+ *
+ * @param int $post_id Post ID.
+ * @return array Array of review data (empty if no reviews).
+ *
+ * @example
+ * ```php
+ * $reviews = seo_get_page_reviews(get_the_ID());
+ * foreach ($reviews as $review) {
+ *     echo '<p>' . esc_html($review['reviewer_name']) . ': ' . esc_html($review['review_text']) . '</p>';
+ * }
+ * ```
+ */
+function seo_get_page_reviews( int $post_id ): array {
+	$json = get_post_meta( $post_id, '_seo_reviews_data', true );
+
+	if ( empty( $json ) ) {
+		return array();
+	}
+
+	$reviews = json_decode( $json, true );
+
+	return is_array( $reviews ) ? $reviews : array();
+}
+
+/**
+ * Format review rating as star HTML.
+ *
+ * Converts numeric rating (1.0-5.0) to star emoji/HTML display.
+ * Supports half stars for ratings like 4.5.
+ *
+ * @param float $rating Rating value (1.0 to 5.0).
+ * @return string HTML string with star emojis.
+ *
+ * @example
+ * ```php
+ * echo seo_format_review_rating(4.5); // ⭐⭐⭐⭐☆
+ * echo seo_format_review_rating(5.0); // ⭐⭐⭐⭐⭐
+ * ```
+ */
+function seo_format_review_rating( float $rating ): string {
+	$full_stars  = floor( $rating );
+	$half_star   = ( $rating - $full_stars ) >= 0.5;
+	$empty_stars = 5 - $full_stars - ( $half_star ? 1 : 0 );
+
+	$html = '<span class="seo-review-stars" aria-label="' . esc_attr( $rating . ' out of 5 stars' ) . '">';
+
+	// Full stars.
+	for ( $i = 0; $i < $full_stars; $i++ ) {
+		$html .= '⭐';
+	}
+
+	// Half star.
+	if ( $half_star ) {
+		$html .= '<span class="half-star">⭐</span>';
+	}
+
+	// Empty stars.
+	for ( $i = 0; $i < $empty_stars; $i++ ) {
+		$html .= '☆';
+	}
+
+	$html .= '</span>';
+
+	return $html;
+}
+
+/**
+ * Get review avatar HTML.
+ *
+ * Returns img tag for reviewer avatar with fallback to default avatar.
+ * Includes lazy loading attribute for performance.
+ *
+ * @param string $url  Avatar URL (can be empty).
+ * @param int    $size Avatar size in pixels (default: 64).
+ * @return string HTML img tag.
+ *
+ * @example
+ * ```php
+ * echo seo_get_review_avatar($review['reviewer_avatar_url'], 80);
+ * // <img src="https://..." alt="Reviewer avatar" width="80" height="80" class="seo-review-avatar">
+ * ```
+ */
+function seo_get_review_avatar( string $url, int $size = 64 ): string {
+	// Use default avatar if URL empty.
+	if ( empty( $url ) ) {
+		$url = get_avatar_url(
+			0,
+			array(
+				'size'    => $size,
+				'default' => 'mystery',
+			)
+		);
+	}
+
+	return sprintf(
+		'<img src="%s" alt="%s" width="%d" height="%d" class="seo-review-avatar" loading="lazy">',
+		esc_url( $url ),
+		esc_attr__( 'Reviewer avatar', 'seo-generator' ),
+		$size,
+		$size
+	);
+}

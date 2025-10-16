@@ -119,6 +119,11 @@ class ContentGenerationService {
 			throw new \Exception( 'Invalid post ID or post type. Must be seo-page.' );
 		}
 
+		// Special case: review_section doesn't use OpenAI.
+		if ( 'review_section' === $block_type ) {
+			return $this->generateReviewBlock( $post_id );
+		}
+
 		// Check budget limit before generation.
 		$this->cost_tracking->checkBudgetLimit();
 
@@ -500,6 +505,108 @@ class ContentGenerationService {
 	}
 
 	/**
+	 * Get block order for a post.
+	 *
+	 * Returns custom block order from post meta if it exists, otherwise returns default.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array Block order array.
+	 */
+	private function getBlockOrder( int $post_id ): array {
+		// Try to get custom block order from post meta.
+		$custom_order_json = get_post_meta( $post_id, '_seo_block_order', true );
+
+		if ( ! empty( $custom_order_json ) ) {
+			$custom_order = json_decode( $custom_order_json, true );
+
+			// Validate that it's a valid array.
+			if ( is_array( $custom_order ) && ! empty( $custom_order ) ) {
+				error_log(
+					sprintf(
+						'[SEO Generator] Using custom block order for post %d: %s',
+						$post_id,
+						wp_json_encode( $custom_order )
+					)
+				);
+				return $custom_order;
+			} else {
+				error_log(
+					sprintf(
+						'[SEO Generator] WARNING: Invalid custom block order for post %d - falling back to default. Raw meta: %s',
+						$post_id,
+						$custom_order_json
+					)
+				);
+			}
+		}
+
+		// Fall back to default order.
+		error_log(
+			sprintf(
+				'[SEO Generator] Using default block order for post %d',
+				$post_id
+			)
+		);
+		return self::BLOCK_ORDER;
+	}
+
+	/**
+	 * Check if page includes review block in block order.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return bool True if review block present.
+	 */
+	private function hasReviewBlock( int $post_id ): bool {
+		$block_order = $this->getBlockOrder( $post_id );
+		return in_array( 'review_section', $block_order, true );
+	}
+
+	/**
+	 * Generate review block by fetching and storing review data.
+	 *
+	 * Does not use OpenAI - simply fetches reviews from Google API via
+	 * ReviewFetchService and stores them in post meta for block template.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return array Generation result with success status.
+	 */
+	private function generateReviewBlock( int $post_id ): array {
+		$start_time = microtime( true );
+
+		error_log( '[Review Integration] Fetching reviews for post ' . $post_id );
+
+		// Get review fetch service.
+		$review_service = \SEOGenerator\Plugin::getReviewFetchService();
+
+		// Fetch top 5 reviews (cached or fresh from API).
+		$reviews = $review_service->getReviews( 5 );
+
+		// Store in post meta.
+		update_post_meta( $post_id, '_seo_reviews_data', wp_json_encode( $reviews ) );
+
+		$review_count = count( $reviews );
+		error_log( sprintf( '[Review Integration] Stored %d reviews for post %d', $review_count, $post_id ) );
+
+		$elapsed = microtime( true ) - $start_time;
+
+		// Return result in same format as other blocks.
+		return array(
+			'success'  => true,
+			'content'  => array( 'review_count' => $review_count ),
+			'metadata' => array(
+				'promptTokens'     => 0, // No AI used.
+				'completionTokens' => 0,
+				'totalTokens'      => 0,
+				'cost'             => 0.0,
+				'generationTime'   => $elapsed,
+				'model'            => 'none',
+				'timestamp'        => current_time( 'mysql' ),
+				'reviewCount'      => $review_count,
+			),
+		);
+	}
+
+	/**
 	 * Generate all blocks for a post.
 	 *
 	 * @param int $post_id Post ID.
@@ -524,10 +631,43 @@ class ContentGenerationService {
 			'totalCost'   => 0.0,
 		);
 
+		// Track API request timing for RPM calculation.
+		$api_requests = array();
+
+		// Get block order (custom or default).
+		$block_order = $this->getBlockOrder( $post_id );
+		$total_blocks = count( $block_order );
+
+		// Check if review block present.
+		if ( $this->hasReviewBlock( $post_id ) ) {
+			error_log( '[Review Integration] Review block detected in generation plan for post ' . $post_id );
+		}
+
+		error_log( '========================================' );
+		error_log( '📊 STARTING BULK GENERATION - RPM TRACKING' );
+		error_log( sprintf( 'Post ID: %d | Total Blocks: %d', $post_id, $total_blocks ) );
+		error_log( '========================================' );
+
 		// Process each block sequentially.
-		foreach ( self::BLOCK_ORDER as $index => $block_type ) {
+		foreach ( $block_order as $index => $block_type ) {
+			// Add small delay between blocks to avoid rate limiting (skip for first block and review_section).
+			if ( $index > 0 && 'review_section' !== $block_type ) {
+				error_log( '[SEO Generator] Waiting 2 seconds before next block to avoid rate limit...' );
+				sleep( 2 );
+			}
+
 			try {
+				// Track API request timestamp (only for blocks that use OpenAI).
+				$request_start = microtime( true );
+				$uses_openai = ( 'review_section' !== $block_type );
+
 				$result = $this->generateSingleBlock( $post_id, $block_type );
+
+				// Log API request timing.
+				if ( $uses_openai ) {
+					$api_requests[] = $request_start;
+					$this->logRPM( $api_requests, $block_type, $index + 1, $total_blocks );
+				}
 
 				$results['successful'][]  = $block_type;
 				$results['totalTokens']  += $result['metadata']['totalTokens'];
@@ -579,10 +719,10 @@ class ContentGenerationService {
 				array(
 					'currentBlock'            => $block_type,
 					'currentBlockIndex'       => $index + 1,
-					'totalBlocks'             => 13,
-					'completionPercentage'    => round( ( ( $index + 1 ) / 13 ) * 100, 2 ),
+					'totalBlocks'             => $total_blocks,
+					'completionPercentage'    => round( ( ( $index + 1 ) / $total_blocks ) * 100, 2 ),
 					'timeElapsed'             => round( $time_elapsed, 2 ),
-					'estimatedTimeRemaining'  => $this->calculateETA( $index + 1, $start_time ),
+					'estimatedTimeRemaining'  => $this->calculateETA( $index + 1, $start_time, $total_blocks ),
 					'completedBlocks'         => $results['successful'],
 					'failedBlocks'            => array_column( $results['failed'], 'block' ),
 				)
@@ -606,7 +746,7 @@ class ContentGenerationService {
 		$total_time = round( microtime( true ) - $start_time, 2 );
 
 		return new BulkGenerationResult(
-			13,
+			$total_blocks,
 			count( $results['successful'] ),
 			$results['failed'],
 			$results['totalTokens'],
@@ -719,16 +859,17 @@ class ContentGenerationService {
 	 *
 	 * @param int   $completed_blocks Number of completed blocks.
 	 * @param float $start_time Generation start time.
+	 * @param int   $total_blocks Total number of blocks to generate.
 	 * @return int Estimated seconds remaining.
 	 */
-	private function calculateETA( int $completed_blocks, float $start_time ): int {
+	private function calculateETA( int $completed_blocks, float $start_time, int $total_blocks ): int {
 		if ( 0 === $completed_blocks ) {
 			return 0;
 		}
 
 		$time_elapsed          = microtime( true ) - $start_time;
 		$average_time_per_block = $time_elapsed / $completed_blocks;
-		$remaining_blocks      = 13 - $completed_blocks;
+		$remaining_blocks      = $total_blocks - $completed_blocks;
 
 		return (int) ceil( $average_time_per_block * $remaining_blocks );
 	}
@@ -812,6 +953,61 @@ class ContentGenerationService {
 			error_log( '[SEO Generator] Failed to update Block Editor content: ' . $result->get_error_message() );
 		} else {
 			error_log( '[SEO Generator] Successfully updated Block Editor content for post ' . $post_id );
+		}
+	}
+
+	/**
+	 * Log current RPM (requests per minute) based on API request timestamps.
+	 *
+	 * @param array  $api_requests Array of request timestamps.
+	 * @param string $block_type Current block type.
+	 * @param int    $current_block Current block number.
+	 * @param int    $total_blocks Total number of blocks.
+	 * @return void
+	 */
+	private function logRPM( array $api_requests, string $block_type, int $current_block, int $total_blocks ): void {
+		$now = microtime( true );
+		$total_requests = count( $api_requests );
+
+		// Calculate requests in last 60 seconds.
+		$recent_requests = array_filter(
+			$api_requests,
+			function ( $timestamp ) use ( $now ) {
+				return ( $now - $timestamp ) <= 60;
+			}
+		);
+
+		$rpm_last_minute = count( $recent_requests );
+
+		// Calculate overall average RPM.
+		if ( $total_requests > 1 ) {
+			$time_elapsed = $now - $api_requests[0];
+			$avg_rpm = $time_elapsed > 0 ? round( ( $total_requests / $time_elapsed ) * 60, 2 ) : 0;
+		} else {
+			$avg_rpm = 0;
+		}
+
+		// Calculate time since last request.
+		$time_since_last = $total_requests > 1 ? round( $now - $api_requests[ $total_requests - 2 ], 2 ) : 0;
+
+		error_log(
+			sprintf(
+				'📊 [RPM Tracker] Block: %s (%d/%d) | RPM (last 60s): %d | Avg RPM: %s | Time since last: %ss | Total requests: %d',
+				$block_type,
+				$current_block,
+				$total_blocks,
+				$rpm_last_minute,
+				$avg_rpm,
+				$time_since_last,
+				$total_requests
+			)
+		);
+
+		// Warn if approaching rate limits.
+		if ( $rpm_last_minute >= 400 ) {
+			error_log( '⚠️  [RPM Tracker] WARNING: Approaching Tier 1 rate limit (500 RPM)!' );
+		} elseif ( $rpm_last_minute >= 450 ) {
+			error_log( '🚨 [RPM Tracker] CRITICAL: Very close to rate limit! Reduce request frequency!' );
 		}
 	}
 }

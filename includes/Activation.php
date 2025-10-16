@@ -91,6 +91,9 @@ class Activation {
 
 		// Create import log table (Story 6.7).
 		self::createImportLogTable();
+
+		// Create review cache table (Story 9.1).
+		self::createReviewTable();
 	}
 
 	/**
@@ -225,6 +228,11 @@ class Activation {
 				'enable_auto_assignment' => true,
 				'image_matching_mode'  => 'tag-based',
 
+				// Review Integration (Story 9.x - Apify).
+				'apify_api_token'      => '',
+				'place_url'            => '',
+				'max_reviews'          => 50,
+
 				// Limits & Tracking (Story 2.5).
 				'enable_cost_tracking'      => true,
 				'monthly_budget'            => 100.00,
@@ -258,5 +266,43 @@ class Activation {
 
 			error_log( '[SEO Generator] Migrated auto_assign_images to enable_auto_assignment setting.' );
 		}
+	}
+
+	/**
+	 * Create review cache table (Story 9.1).
+	 *
+	 * @return void
+	 */
+	private static function createReviewTable(): void {
+		global $wpdb;
+
+		$table_name      = $wpdb->prefix . 'seo_reviews';
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE $table_name (
+			id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+			source VARCHAR(50) NOT NULL DEFAULT 'google',
+			external_review_id VARCHAR(255) NOT NULL,
+			reviewer_name VARCHAR(255),
+			reviewer_avatar_url VARCHAR(500),
+			reviewer_profile_url VARCHAR(500),
+			rating DECIMAL(2,1),
+			review_text TEXT,
+			review_date DATETIME,
+			last_fetched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE KEY unique_review (source, external_review_id),
+			INDEX idx_source (source),
+			INDEX idx_last_fetched (last_fetched_at),
+			INDEX idx_rating (rating)
+		) $charset_collate;";
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+
+		// Update database version.
+		update_option( 'seo_generator_review_db_version', '1.0' );
+
+		// Log table creation.
+		error_log( '[SEO Generator] Review table created/updated' );
 	}
 }

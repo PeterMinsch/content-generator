@@ -145,6 +145,14 @@ class Plugin {
 		$this->container->set( 'service.keyword_matcher', $keyword_matcher );
 		$this->container->set( 'service.internal_linking', $internal_linking_service );
 
+		// Register review services (Story 9.1, 9.2, 9.3).
+		$google_business_service = new Services\GoogleBusinessService();
+		$review_repository       = new Repositories\ReviewRepository();
+		$review_fetch_service    = new Services\ReviewFetchService( $google_business_service, $review_repository );
+		$this->container->set( 'service.google_business', $google_business_service );
+		$this->container->set( 'repository.review', $review_repository );
+		$this->container->set( 'service.review_fetch', $review_fetch_service );
+
 		// Register link refresh cron job (Story 8.1).
 		$link_refresh_handler = new Cron\LinkRefreshHandler();
 		$link_refresh_handler->register();
@@ -281,6 +289,16 @@ class Plugin {
 	 */
 	public function getContainer(): Container {
 		return $this->container;
+	}
+
+	/**
+	 * Get ReviewFetchService instance (singleton).
+	 *
+	 * @return Services\ReviewFetchService
+	 */
+	public static function getReviewFetchService(): Services\ReviewFetchService {
+		$instance = self::getInstance();
+		return $instance->getContainer()->get( 'service.review_fetch' );
 	}
 
 	/**
