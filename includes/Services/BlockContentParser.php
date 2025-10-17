@@ -29,6 +29,7 @@ class BlockContentParser {
 		return match ( $block_type ) {
 			'seo_metadata' => $this->parseSeoMetadata( $json_data, $raw_content ),
 			'hero' => $this->parseHero( $json_data, $raw_content ),
+			'about_section' => $this->parseAboutSection( $json_data, $raw_content ),
 			'serp_answer' => $this->parseSerpAnswer( $json_data, $raw_content ),
 			'product_criteria' => $this->parseProductCriteria( $json_data, $raw_content ),
 			'materials' => $this->parseMaterials( $json_data, $raw_content ),
@@ -135,6 +136,42 @@ class BlockContentParser {
 			'hero_title'    => sanitize_text_field( $json['headline'] ),
 			'hero_subtitle' => sanitize_text_field( $json['subheadline'] ),
 			'hero_summary'  => isset( $json['summary'] ) ? sanitize_textarea_field( $json['summary'] ) : '',
+		);
+	}
+
+	/**
+	 * Parse about section content.
+	 *
+	 * @param array|null $json JSON data.
+	 * @param string     $raw_content Raw content.
+	 * @return array Parsed content.
+	 * @throws \Exception If parsing fails.
+	 */
+	private function parseAboutSection( ?array $json, string $raw_content ): array {
+		// Only expect features array from AI (heading and description are hardcoded)
+		if ( null === $json || ! isset( $json['features'] ) ) {
+			error_log( '[SEO Generator] About section parse failed. Raw content: ' . substr( $raw_content, 0, 500 ) );
+			error_log( '[SEO Generator] About section parse failed. JSON data: ' . print_r( $json, true ) );
+			throw new \Exception( 'Invalid about section format. Expected JSON with features array.' );
+		}
+
+		// Parse AI-generated features
+		$features = array();
+		foreach ( $json['features'] as $item ) {
+			if ( isset( $item['icon_type'], $item['title'], $item['description'] ) ) {
+				$features[] = array(
+					'icon_type'   => sanitize_text_field( $item['icon_type'] ),
+					'title'       => sanitize_text_field( $item['title'] ),
+					'description' => sanitize_text_field( $item['description'] ),
+				);
+			}
+		}
+
+		// Return hardcoded heading and description with AI-generated features
+		return array(
+			'about_heading'     => 'ABOUT BRAVO JEWELERS',
+			'about_description' => 'Family-run and handcrafted in Carlsbad, Bravo Jewelers has over 25 years of experience serving San Diego County with timeless craftsmanship.',
+			'about_features'    => $features,
 		);
 	}
 

@@ -525,23 +525,25 @@ return [
 
 		/**
 		 * Block 13: About Section
+		 * NOTE: Heading and description are hardcoded in BlockContentParser.
+		 * Only the features are AI-generated.
 		 */
 		'about_section' => [
 			'label'             => __( 'About Section', 'seo-generator' ),
-			'description'       => __( 'About company with features grid', 'seo-generator' ),
+			'description'       => __( 'About company with AI-generated contextual guarantees (heading/description hardcoded)', 'seo-generator' ),
 			'order'             => 13,
 			'enabled'           => true,
 			'acf_wrapper_class' => 'acf-block-about-section',
-			'ai_prompt'         => 'Generate about section for {page_title}. Include company heading (max 100 chars), description (max 300 chars), and 4 key features with titles and descriptions.',
+			'ai_prompt'         => 'Generate 4 contextual trust factors/guarantees for {page_title}. Choose relevant icons: shipping, returns, warranty, finance, quality, secure, support, eco, diamond, resize, gift, repair. Titles: 2-3 words. Descriptions: 3-6 words.',
 			'frontend_template' => 'blocks/about-section.php',
 			'fields'            => [
 				'about_heading'     => [
-					'label'     => __( 'About Heading', 'seo-generator' ),
+					'label'     => __( 'About Heading (Auto-filled)', 'seo-generator' ),
 					'type'      => 'text',
 					'maxlength' => 100,
 				],
 				'about_description' => [
-					'label'     => __( 'About Description', 'seo-generator' ),
+					'label'     => __( 'About Description (Auto-filled)', 'seo-generator' ),
 					'type'      => 'textarea',
 					'maxlength' => 300,
 					'rows'      => 4,
@@ -557,10 +559,18 @@ return [
 							'label'   => __( 'Icon Type', 'seo-generator' ),
 							'type'    => 'select',
 							'choices' => [
-								'shipping' => __( 'Free Shipping', 'seo-generator' ),
-								'returns'  => __( 'Returns', 'seo-generator' ),
-								'warranty' => __( 'Warranty', 'seo-generator' ),
-								'finance'  => __( 'Financing', 'seo-generator' ),
+								'shipping' => __( 'Shipping', 'seo-generator' ),
+								'returns'  => __( 'Returns/Exchanges', 'seo-generator' ),
+								'warranty' => __( 'Warranty/Protection', 'seo-generator' ),
+								'finance'  => __( 'Financing/Payment', 'seo-generator' ),
+								'quality'  => __( 'Quality/Craftsmanship', 'seo-generator' ),
+								'secure'   => __( 'Secure Shopping', 'seo-generator' ),
+								'support'  => __( 'Customer Support', 'seo-generator' ),
+								'eco'      => __( 'Eco-Friendly/Sustainable', 'seo-generator' ),
+								'diamond'  => __( 'Diamond Certification', 'seo-generator' ),
+								'resize'   => __( 'Sizing/Adjustments', 'seo-generator' ),
+								'gift'     => __( 'Gift Services', 'seo-generator' ),
+								'repair'   => __( 'Repair/Maintenance', 'seo-generator' ),
 							],
 						],
 						'title'       => [

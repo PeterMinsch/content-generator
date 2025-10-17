@@ -241,6 +241,17 @@ if ( empty( $hero_image_url ) ) {
     </div>
 
     <?php
+    // Render additional content blocks (about_section, serp_answer, etc.)
+    $blocks_to_render = array( 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta' );
+
+    foreach ( $blocks_to_render as $block_type ) {
+        if ( function_exists( 'seo_generator_render_block' ) ) {
+            seo_generator_render_block( $block_type, $post_id );
+        }
+    }
+    ?>
+
+    <?php
     // Output JSON-LD Schema.
     if ( function_exists( 'seo_generator_output_schema' ) ) {
         seo_generator_output_schema();

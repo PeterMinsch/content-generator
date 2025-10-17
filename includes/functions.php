@@ -123,6 +123,7 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 	// Map block types to their field groups.
 	$field_map = array(
 		'hero'              => array( 'hero_title', 'hero_subtitle', 'hero_summary', 'hero_image' ),
+		'about_section'     => array( 'about_heading', 'about_description', 'about_features' ),
 		'serp_answer'       => array( 'answer_heading', 'answer_paragraph', 'answer_bullets' ),
 		'product_criteria'  => array( 'criteria_heading', 'criteria_items' ),
 		'materials'         => array( 'materials_heading', 'materials_items' ),
@@ -143,7 +144,50 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 
 	// Retrieve field values.
 	foreach ( $field_map[ $block_type ] as $field_name ) {
-		$fields[ $field_name ] = get_field( $field_name, $post_id );
+		$field_value = get_field( $field_name, $post_id );
+
+		// WORKAROUND: If ACF get_field returns empty but data exists in post_meta, use get_post_meta
+		if ( empty( $field_value ) ) {
+			$direct_value = get_post_meta( $post_id, $field_name, true );
+			if ( ! empty( $direct_value ) ) {
+				// For repeater fields, decode JSON if needed
+				if ( is_string( $direct_value ) && ( $field_name === 'about_features' || strpos( $field_name, '_items' ) !== false || strpos( $field_name, '_steps' ) !== false || strpos( $field_name, '_bullets' ) !== false ) ) {
+					$decoded = json_decode( $direct_value, true );
+					$field_value = is_array( $decoded ) ? $decoded : $direct_value;
+				} else {
+					$field_value = $direct_value;
+				}
+
+				error_log( "[Field Retrieval Fallback] Using get_post_meta for {$field_name} on post {$post_id}" );
+			}
+		}
+
+		$fields[ $field_name ] = $field_value;
+	}
+
+	// DEBUG: Log about_section fields
+	if ( $block_type === 'about_section' ) {
+		error_log( '=== ABOUT SECTION DEBUG ===' );
+		error_log( 'Post ID: ' . $post_id );
+		error_log( 'ACF function exists: ' . ( function_exists( 'get_field' ) ? 'YES' : 'NO' ) );
+		error_log( 'Fields retrieved: ' . print_r( $fields, true ) );
+
+		// Try getting fields with different methods
+		error_log( 'Direct get_post_meta about_heading: ' . get_post_meta( $post_id, 'about_heading', true ) );
+		error_log( 'ACF get_field about_heading: ' . get_field( 'about_heading', $post_id ) );
+		error_log( 'ACF get_field with false encode about_heading: ' . get_field( 'about_heading', $post_id, false ) );
+
+		// Check raw post meta
+		$meta = get_post_meta( $post_id );
+		error_log( 'All post meta keys with "about": ' . print_r( array_filter( $meta, function( $key ) {
+			return strpos( $key, 'about' ) !== false;
+		}, ARRAY_FILTER_USE_KEY ), true ) );
+
+		// Check if ACF field exists
+		if ( function_exists( 'acf_get_field' ) ) {
+			$field_obj = acf_get_field( 'about_heading' );
+			error_log( 'ACF field object for about_heading: ' . print_r( $field_obj, true ) );
+		}
 	}
 
 	// Check if block has content (skip if empty).
@@ -156,7 +200,16 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 	}
 
 	if ( ! $has_content ) {
+		// DEBUG: Log when block is skipped
+		if ( $block_type === 'about_section' ) {
+			error_log( 'ABOUT SECTION SKIPPED - No content found' );
+		}
 		return; // Skip empty blocks.
+	}
+
+	// DEBUG: Log when block will render
+	if ( $block_type === 'about_section' ) {
+		error_log( 'ABOUT SECTION WILL RENDER' );
 	}
 
 	// Allow filtering of block data.

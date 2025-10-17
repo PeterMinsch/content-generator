@@ -228,6 +228,58 @@ add_action( 'admin_enqueue_scripts', 'seo_generator_enqueue_admin_scripts' );
 // END ADMIN UI SCRIPTS
 // ============================================================================
 
+// ============================================================================
+// FRONTEND STYLES
+// ============================================================================
+
+/**
+ * Enqueue frontend styles for seo-page post type.
+ *
+ * @since 1.0.0
+ */
+function seo_generator_enqueue_frontend_styles() {
+	// Only enqueue on single seo-page posts.
+	if ( ! is_singular( 'seo-page' ) ) {
+		return;
+	}
+
+	// TEMPORARY: Use unminified CSS because frontend.min.css is empty
+	$suffix = '';
+
+	wp_enqueue_style(
+		'seo-generator-frontend',
+		SEO_GENERATOR_PLUGIN_URL . "assets/css/frontend{$suffix}.css",
+		array(),
+		SEO_GENERATOR_VERSION . '-' . time(), // Force reload
+		'all'
+	);
+
+	// Add inline test CSS to verify styles are loading
+	$inline_css = '
+		.seo-block--about-section {
+			background-color: #FEF9F4 !important;
+			padding: 4rem 1.5rem !important;
+		}
+		.about-section__heading {
+			font-size: 2.5rem !important;
+			color: #272521 !important;
+			text-align: center !important;
+		}
+		.about-section__features {
+			display: grid !important;
+			grid-template-columns: repeat(4, 1fr) !important;
+			gap: 2rem !important;
+			margin-top: 3rem !important;
+		}
+	';
+	wp_add_inline_style( 'seo-generator-frontend', $inline_css );
+}
+add_action( 'wp_enqueue_scripts', 'seo_generator_enqueue_frontend_styles', 99 );
+
+// ============================================================================
+// END FRONTEND STYLES
+// ============================================================================
+
 // Load debug script (temporary - for troubleshooting image assignment).
 if ( is_admin() ) {
 	require_once SEO_GENERATOR_PLUGIN_DIR . 'debug-image-assignment.php';

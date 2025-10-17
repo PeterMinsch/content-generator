@@ -135,7 +135,7 @@ class BlockOrderingManager {
 				const widths = {
 					mobile: '375px',
 					tablet: '768px',
-					desktop: '100%',
+					desktop: '1200px',
 				};
 
 				if ( iframe ) {

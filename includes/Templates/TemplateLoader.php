@@ -21,8 +21,10 @@ class TemplateLoader {
 	 * @return void
 	 */
 	public function register(): void {
+		error_log( '[TemplateLoader] register() called' );
 		add_filter( 'single_template', array( $this, 'loadSingleTemplate' ), 10 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueueFrontendStyles' ) );
+		error_log( '[TemplateLoader] Hooks registered: single_template filter and wp_enqueue_scripts action' );
 	}
 
 	/**
@@ -80,18 +82,28 @@ class TemplateLoader {
 	public function enqueueFrontendStyles(): void {
 		// Only enqueue on single seo-page posts.
 		if ( ! is_singular( 'seo-page' ) ) {
+			error_log( '[TemplateLoader] Not enqueueing frontend styles - not on seo-page' );
 			return;
 		}
 
 		// Use minified CSS in production, unminified when debugging.
 		$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
 
+		$css_url = plugins_url( "assets/css/frontend{$suffix}.css", SEO_GENERATOR_PLUGIN_FILE );
+		$css_path = SEO_GENERATOR_PLUGIN_DIR . "assets/css/frontend{$suffix}.css";
+
+		error_log( '[TemplateLoader] Enqueueing frontend styles' );
+		error_log( '[TemplateLoader] CSS URL: ' . $css_url );
+		error_log( '[TemplateLoader] CSS file exists: ' . ( file_exists( $css_path ) ? 'YES' : 'NO' ) );
+
 		wp_enqueue_style(
 			'seo-generator-frontend',
-			plugins_url( "assets/css/frontend{$suffix}.css", SEO_GENERATOR_PLUGIN_FILE ),
+			$css_url,
 			array(),
 			SEO_GENERATOR_VERSION,
 			'all'
 		);
+
+		error_log( '[TemplateLoader] Frontend styles enqueued successfully' );
 	}
 }
