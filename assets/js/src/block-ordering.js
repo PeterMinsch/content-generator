@@ -97,6 +97,60 @@ class BlockOrderingManager {
 				this.removeBlock( listItem );
 			}
 		} );
+
+		// Device toggle buttons
+		this.bindDeviceToggle();
+	}
+
+	/**
+	 * Bind device toggle button events
+	 */
+	bindDeviceToggle() {
+		const deviceButtons = document.querySelectorAll( '.device-toggle-btn' );
+		const previewContainer = document.getElementById( 'block-preview-container' );
+		const deviceFrame = previewContainer?.querySelector( '.device-frame' );
+		const iframe = document.getElementById( 'block-preview-iframe' );
+
+		if ( ! deviceButtons.length || ! previewContainer || ! deviceFrame ) {
+			return;
+		}
+
+		deviceButtons.forEach( ( button ) => {
+			button.addEventListener( 'click', () => {
+				const device = button.dataset.device;
+
+				// Update active state
+				deviceButtons.forEach( ( btn ) => {
+					btn.classList.remove( 'active' );
+					btn.setAttribute( 'aria-selected', 'false' );
+				} );
+				button.classList.add( 'active' );
+				button.setAttribute( 'aria-selected', 'true' );
+
+				// Update device frame
+				deviceFrame.className = `device-frame ${ device }-frame`;
+				previewContainer.dataset.device = device;
+
+				// Update iframe width based on device
+				const widths = {
+					mobile: '375px',
+					tablet: '768px',
+					desktop: '100%',
+				};
+
+				if ( iframe ) {
+					iframe.style.width = widths[ device ] || '100%';
+				}
+
+				// Announce to screen readers
+				const announcement = document.querySelector( '.preview-sr-announcements' );
+				if ( announcement ) {
+					announcement.textContent = `Preview switched to ${ device } view`;
+				}
+
+				console.log( `[Device Toggle] Switched to ${ device } view` );
+			} );
+		} );
 	}
 
 	/**

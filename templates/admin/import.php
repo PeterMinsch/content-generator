@@ -197,16 +197,50 @@ men's tungsten rings,commercial,800,</pre>
 				<!-- Right Pane: Preview Container -->
 				<div class="block-preview-pane" aria-label="<?php esc_attr_e( 'Page Preview', 'seo-generator' ); ?>">
 					<div class="block-preview-header">
-						<h3><?php esc_html_e( 'Page Preview', 'seo-generator' ); ?></h3>
-						<p class="preview-disclaimer"><?php esc_html_e( 'This is a simplified preview. Actual styling may vary based on your theme.', 'seo-generator' ); ?></p>
+						<div class="preview-header-content">
+							<div>
+								<h3><?php esc_html_e( 'Page Preview', 'seo-generator' ); ?></h3>
+								<p class="preview-disclaimer"><?php esc_html_e( 'This is a simplified preview. Actual styling may vary based on your theme.', 'seo-generator' ); ?></p>
+							</div>
+							<!-- Device Toggle Buttons -->
+							<div class="device-toggle-buttons" role="tablist" aria-label="<?php esc_attr_e( 'Preview device type', 'seo-generator' ); ?>">
+								<button type="button" class="device-toggle-btn" data-device="mobile" role="tab" aria-selected="false" aria-label="<?php esc_attr_e( 'Mobile preview', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Preview on mobile device', 'seo-generator' ); ?>">
+									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect x="5" y="2" width="10" height="16" rx="1" stroke="currentColor" stroke-width="1.5"/>
+										<line x1="8" y1="15.5" x2="12" y2="15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+									</svg>
+									<span class="device-label"><?php esc_html_e( 'Mobile', 'seo-generator' ); ?></span>
+								</button>
+								<button type="button" class="device-toggle-btn" data-device="tablet" role="tab" aria-selected="false" aria-label="<?php esc_attr_e( 'Tablet preview', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Preview on tablet device', 'seo-generator' ); ?>">
+									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect x="3" y="2" width="14" height="16" rx="1" stroke="currentColor" stroke-width="1.5"/>
+										<circle cx="10" cy="15.5" r="0.75" fill="currentColor"/>
+									</svg>
+									<span class="device-label"><?php esc_html_e( 'Tablet', 'seo-generator' ); ?></span>
+								</button>
+								<button type="button" class="device-toggle-btn active" data-device="desktop" role="tab" aria-selected="true" aria-label="<?php esc_attr_e( 'Desktop preview', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Preview on desktop device', 'seo-generator' ); ?>">
+									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+										<rect x="2" y="3" width="16" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/>
+										<path d="M6 17H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+										<path d="M10 14V17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+									</svg>
+									<span class="device-label"><?php esc_html_e( 'Desktop', 'seo-generator' ); ?></span>
+								</button>
+							</div>
+						</div>
 					</div>
-					<div id="block-preview-container">
-						<iframe
-							id="block-preview-iframe"
-							sandbox="allow-same-origin"
-							title="<?php esc_attr_e( 'Block preview iframe', 'seo-generator' ); ?>"
-							aria-label="<?php esc_attr_e( 'Live preview of page layout', 'seo-generator' ); ?>"
-						></iframe>
+					<div id="block-preview-container" class="preview-device-wrapper" data-device="desktop">
+						<!-- Device Frame Container -->
+						<div class="device-frame desktop-frame">
+							<div class="device-screen">
+								<iframe
+									id="block-preview-iframe"
+									sandbox="allow-same-origin"
+									title="<?php esc_attr_e( 'Block preview iframe', 'seo-generator' ); ?>"
+									aria-label="<?php esc_attr_e( 'Live preview of page layout', 'seo-generator' ); ?>"
+								></iframe>
+							</div>
+						</div>
 					</div>
 					<!-- ARIA Live Region for Screen Reader Announcements -->
 					<div class="preview-sr-announcements" role="status" aria-live="polite" aria-atomic="true"></div>
