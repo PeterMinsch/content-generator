@@ -210,6 +210,17 @@ function seo_generator_enqueue_admin_scripts( $hook ) {
 			'nonce'   => wp_create_nonce( 'seo-generator-nonce' ),
 		)
 	);
+
+	// Localize column-mapping script with import-specific data.
+	wp_localize_script(
+		'seo-generator-column-mapping',
+		'seoImportData',
+		array(
+			'nonce'         => wp_create_nonce( 'seo_csv_upload' ),
+			'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+			'maxUploadSize' => wp_max_upload_size(),
+		)
+	);
 }
 add_action( 'admin_enqueue_scripts', 'seo_generator_enqueue_admin_scripts' );
 

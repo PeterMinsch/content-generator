@@ -1,0 +1,103 @@
+/**
+ * Admin Block Preview Styles
+ * Split-pane layout for block ordering with live preview
+ *
+ * @package SEOGenerator
+ */
+
+/* ============================================
+   Split-Pane Layout
+   ============================================ */
+
+.block-ordering-split-layout {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 20px;
+	margin-top: 20px;
+}
+
+.block-ordering-pane,
+.block-preview-pane {
+	background: #fff;
+	padding: 20px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* ============================================
+   Preview Header
+   ============================================ */
+
+.block-preview-header {
+	margin-bottom: 15px;
+	padding-bottom: 15px;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.block-preview-header h3 {
+	margin: 0 0 8px 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.4;
+}
+
+.preview-disclaimer {
+	margin: 0;
+	font-size: 13px;
+	color: #646970;
+	font-style: italic;
+	line-height: 1.5;
+}
+
+/* ============================================
+   Preview Iframe Container
+   ============================================ */
+
+#block-preview-container {
+	position: relative;
+	background: #f6f7f7;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	overflow: hidden;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+#block-preview-iframe {
+	width: 100%;
+	min-height: 600px;
+	border: none;
+	display: block;
+	background: #fff;
+}
+
+/* ============================================
+   Responsive Behavior
+   ============================================ */
+
+@media (max-width: 1279px) {
+	.block-ordering-split-layout {
+		grid-template-columns: 1fr;
+	}
+
+	.block-preview-pane {
+		order: 2;
+	}
+
+	.block-ordering-pane {
+		order: 1;
+	}
+}
+
+/* ============================================
+   ARIA Live Region for Screen Readers
+   ============================================ */
+
+.preview-sr-announcements {
+	position: absolute;
+	left: -10000px;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}

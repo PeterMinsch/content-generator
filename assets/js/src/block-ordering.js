@@ -33,6 +33,9 @@ class BlockOrderingManager {
 
 		// Bind event listeners
 		this.bindEvents();
+
+		// Trigger initial preview render
+		this.triggerInitialPreview();
 	}
 
 	/**
@@ -60,6 +63,8 @@ class BlockOrderingManager {
 			},
 			onEnd: () => {
 				this.sortableList.classList.remove( 'seo-sortable-dragging' );
+				// Update preview after drag-drop completes
+				this.updatePreview();
 			},
 		} );
 	}
@@ -143,6 +148,9 @@ class BlockOrderingManager {
 			if ( placeholder.parentNode ) {
 				placeholder.parentNode.removeChild( placeholder );
 			}
+
+			// Update preview after block is removed
+			this.updatePreview();
 		}, 300 );
 	}
 
@@ -155,6 +163,36 @@ class BlockOrderingManager {
 		return Array.from( this.sortableList.children ).map(
 			( li ) => li.dataset.block
 		);
+	}
+
+	/**
+	 * Update the preview iframe with current block order
+	 */
+	updatePreview() {
+		const blockOrder = this.getBlockOrder();
+
+		if ( window.blockPreviewManager ) {
+			window.blockPreviewManager.updatePreview( blockOrder );
+			console.log(
+				'[Block Ordering] Preview updated with blocks:',
+				blockOrder
+			);
+		} else {
+			console.warn(
+				'[Block Ordering] BlockPreviewManager not available'
+			);
+		}
+	}
+
+	/**
+	 * Trigger initial preview render
+	 */
+	triggerInitialPreview() {
+		// Wait for iframe to be ready before triggering initial preview
+		setTimeout( () => {
+			this.updatePreview();
+			console.log( '[Block Ordering] Initial preview rendered' );
+		}, 500 );
 	}
 
 	/**
@@ -189,6 +227,9 @@ class BlockOrderingManager {
 		setTimeout( () => {
 			this.sortableList.classList.remove( 'seo-sortable-reset' );
 		}, 300 );
+
+		// Update preview after reset
+		this.updatePreview();
 	}
 
 	/**
@@ -300,10 +341,28 @@ if ( document.readyState === 'loading' ) {
 	document.addEventListener( 'DOMContentLoaded', () => {
 		// eslint-disable-next-line no-new
 		new BlockOrderingManager();
+
+		// Initialize Block Preview Manager
+		const previewIframe = document.getElementById( 'block-preview-iframe' );
+		if ( previewIframe && window.BlockPreviewManager ) {
+			window.blockPreviewManager = new window.BlockPreviewManager(
+				previewIframe
+			);
+			console.log( '[Block Preview] Preview manager initialized' );
+		}
 	} );
 } else {
 	// eslint-disable-next-line no-new
 	new BlockOrderingManager();
+
+	// Initialize Block Preview Manager
+	const previewIframe = document.getElementById( 'block-preview-iframe' );
+	if ( previewIframe && window.BlockPreviewManager ) {
+		window.blockPreviewManager = new window.BlockPreviewManager(
+			previewIframe
+		);
+		console.log( '[Block Preview] Preview manager initialized' );
+	}
 }
 
 export default BlockOrderingManager;

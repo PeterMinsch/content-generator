@@ -523,6 +523,61 @@ return [
 			],
 		],
 
+		/**
+		 * Block 13: About Section
+		 */
+		'about_section' => [
+			'label'             => __( 'About Section', 'seo-generator' ),
+			'description'       => __( 'About company with features grid', 'seo-generator' ),
+			'order'             => 13,
+			'enabled'           => true,
+			'acf_wrapper_class' => 'acf-block-about-section',
+			'ai_prompt'         => 'Generate about section for {page_title}. Include company heading (max 100 chars), description (max 300 chars), and 4 key features with titles and descriptions.',
+			'frontend_template' => 'blocks/about-section.php',
+			'fields'            => [
+				'about_heading'     => [
+					'label'     => __( 'About Heading', 'seo-generator' ),
+					'type'      => 'text',
+					'maxlength' => 100,
+				],
+				'about_description' => [
+					'label'     => __( 'About Description', 'seo-generator' ),
+					'type'      => 'textarea',
+					'maxlength' => 300,
+					'rows'      => 4,
+				],
+				'about_features'    => [
+					'label'      => __( 'Features', 'seo-generator' ),
+					'type'       => 'repeater',
+					'layout'     => 'row',
+					'max'        => 4,
+					'min'        => 4,
+					'sub_fields' => [
+						'icon_type'   => [
+							'label'   => __( 'Icon Type', 'seo-generator' ),
+							'type'    => 'select',
+							'choices' => [
+								'shipping' => __( 'Free Shipping', 'seo-generator' ),
+								'returns'  => __( 'Returns', 'seo-generator' ),
+								'warranty' => __( 'Warranty', 'seo-generator' ),
+								'finance'  => __( 'Financing', 'seo-generator' ),
+							],
+						],
+						'title'       => [
+							'label'     => __( 'Feature Title', 'seo-generator' ),
+							'type'      => 'text',
+							'maxlength' => 50,
+						],
+						'description' => [
+							'label'     => __( 'Feature Description', 'seo-generator' ),
+							'type'      => 'text',
+							'maxlength' => 100,
+						],
+					],
+				],
+			],
+		],
+
 	],
 
 	/**

@@ -131,22 +131,27 @@ men's tungsten rings,commercial,800,</pre>
 	</div>
 
 	<!-- Step 2b: Block Ordering (hidden initially) -->
-	<div class="seo-card mt-4" id="block-ordering-section" style="display: none;">
+	<!-- TEMP: Removed display:none for testing -->
+	<div class="seo-card mt-4" id="block-ordering-section">
 		<h3 class="seo-card__title">
 			<?php esc_html_e( 'Customize Block Order', 'seo-generator' ); ?>
 		</h3>
 		<div class="seo-card__content">
-			<p class="mb-4"><?php esc_html_e( 'Drag blocks to reorder how content will be generated on your pages. This order will be applied to all pages in this import.', 'seo-generator' ); ?></p>
+			<!-- Split-Pane Layout -->
+			<div class="block-ordering-split-layout">
+				<!-- Left Pane: Block Ordering Controls -->
+				<div class="block-ordering-pane">
+					<p class="mb-4"><?php esc_html_e( 'Drag blocks to reorder how content will be generated on your pages. This order will be applied to all pages in this import.', 'seo-generator' ); ?></p>
 
-			<!-- Sortable Block List -->
-			<ul id="sortable-blocks" class="seo-sortable-list">
+					<!-- Sortable Block List -->
+					<ul id="sortable-blocks" class="seo-sortable-list">
 				<?php
 				// Get block definitions
 				$block_config = require plugin_dir_path( dirname( __DIR__ ) ) . 'config/block-definitions.php';
 				$blocks       = $block_config['blocks'] ?? array();
 
 				// Define default order (excluding seo_metadata which is internal)
-				$default_order = array( 'hero', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta' );
+				$default_order = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta' );
 
 				foreach ( $default_order as $block_key ) :
 					if ( isset( $blocks[ $block_key ] ) ) :
@@ -178,14 +183,34 @@ men's tungsten rings,commercial,800,</pre>
 				</label>
 			</div>
 
-			<!-- Action Buttons -->
-			<div class="seo-btn-group mt-6">
-				<button type="button" id="reset-order-btn" class="seo-btn-secondary">
-					<?php esc_html_e( 'Reset to Default Order', 'seo-generator' ); ?>
-				</button>
-				<button type="button" id="proceed-import-btn" class="seo-btn-primary">
-					<?php esc_html_e( 'Proceed with Import', 'seo-generator' ); ?> →
-				</button>
+					<!-- Action Buttons -->
+					<div class="seo-btn-group mt-6">
+						<button type="button" id="reset-order-btn" class="seo-btn-secondary">
+							<?php esc_html_e( 'Reset to Default Order', 'seo-generator' ); ?>
+						</button>
+						<button type="button" id="proceed-import-btn" class="seo-btn-primary">
+							<?php esc_html_e( 'Proceed with Import', 'seo-generator' ); ?> →
+						</button>
+					</div>
+				</div>
+
+				<!-- Right Pane: Preview Container -->
+				<div class="block-preview-pane" aria-label="<?php esc_attr_e( 'Page Preview', 'seo-generator' ); ?>">
+					<div class="block-preview-header">
+						<h3><?php esc_html_e( 'Page Preview', 'seo-generator' ); ?></h3>
+						<p class="preview-disclaimer"><?php esc_html_e( 'This is a simplified preview. Actual styling may vary based on your theme.', 'seo-generator' ); ?></p>
+					</div>
+					<div id="block-preview-container">
+						<iframe
+							id="block-preview-iframe"
+							sandbox="allow-same-origin"
+							title="<?php esc_attr_e( 'Block preview iframe', 'seo-generator' ); ?>"
+							aria-label="<?php esc_attr_e( 'Live preview of page layout', 'seo-generator' ); ?>"
+						></iframe>
+					</div>
+					<!-- ARIA Live Region for Screen Reader Announcements -->
+					<div class="preview-sr-announcements" role="status" aria-live="polite" aria-atomic="true"></div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -300,29 +325,3 @@ men's tungsten rings,commercial,800,</pre>
 
 })();
 </script>
-
-<?php
-// Enqueue block ordering script
-$block_ordering_asset_file = plugin_dir_path( dirname( __DIR__ ) ) . 'assets/js/build/block-ordering.asset.php';
-if ( file_exists( $block_ordering_asset_file ) ) {
-	$block_ordering_asset = require $block_ordering_asset_file;
-	wp_enqueue_script(
-		'seo-block-ordering',
-		plugin_dir_url( dirname( __DIR__ ) ) . 'assets/js/build/block-ordering.js',
-		$block_ordering_asset['dependencies'],
-		$block_ordering_asset['version'],
-		true
-	);
-}
-
-// Localize script with AJAX data for column-mapping.js
-wp_localize_script(
-	'seo-generator-interactions',
-	'seoImportData',
-	array(
-		'nonce'          => wp_create_nonce( 'seo_csv_upload' ),
-		'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-		'maxUploadSize'  => $max_upload_size,
-	)
-);
-?>

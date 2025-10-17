@@ -26,6 +26,68 @@ class ImportPage {
 		add_action( 'wp_ajax_seo_save_block_order', array( $this, 'handleSaveBlockOrder' ) );
 		add_action( 'wp_ajax_seo_import_batch', array( $this, 'handleBatchImport' ) );
 		add_action( 'wp_ajax_seo_import_progress', array( $this, 'handleImportProgress' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueueAssets' ) );
+	}
+
+	/**
+	 * Enqueue CSS and JavaScript assets for the import page.
+	 *
+	 * @param string $hook The current admin page hook.
+	 * @return void
+	 */
+	public function enqueueAssets( string $hook ): void {
+		// Only enqueue on the import page.
+		// Hook format: {parent_slug}_page_{page_slug}
+		// Parent: content-generator, Page: seo-import-keywords
+		if ( 'content-generator_page_seo-import-keywords' !== $hook ) {
+			return;
+		}
+
+		// Enqueue block preview CSS.
+		wp_enqueue_style(
+			'seo-admin-block-preview',
+			plugin_dir_url( dirname( __DIR__ ) ) . 'assets/css/admin-block-preview.css',
+			array(),
+			'1.0.2'
+		);
+
+		// Enqueue block preview JS (must load before block-ordering.js).
+		$block_preview_asset_file = plugin_dir_path( dirname( __DIR__ ) ) . 'assets/js/build/block-preview.asset.php';
+		if ( file_exists( $block_preview_asset_file ) ) {
+			$block_preview_asset = require $block_preview_asset_file;
+			wp_enqueue_script(
+				'seo-block-preview',
+				plugin_dir_url( dirname( __DIR__ ) ) . 'assets/js/build/block-preview.js',
+				$block_preview_asset['dependencies'],
+				$block_preview_asset['version'],
+				true
+			);
+		} else {
+			// Fallback to src if build doesn't exist.
+			wp_enqueue_script(
+				'seo-block-preview',
+				plugin_dir_url( dirname( __DIR__ ) ) . 'assets/js/src/block-preview.js',
+				array(),
+				'1.0.1',
+				true
+			);
+		}
+
+		// Enqueue block ordering JS (depends on block-preview).
+		$block_ordering_asset_file = plugin_dir_path( dirname( __DIR__ ) ) . 'assets/js/build/block-ordering.asset.php';
+		if ( file_exists( $block_ordering_asset_file ) ) {
+			$block_ordering_asset = require $block_ordering_asset_file;
+			wp_enqueue_script(
+				'seo-block-ordering',
+				plugin_dir_url( dirname( __DIR__ ) ) . 'assets/js/build/block-ordering.js',
+				array_merge( $block_ordering_asset['dependencies'], array( 'seo-block-preview' ) ),
+				$block_ordering_asset['version'],
+				true
+			);
+		}
+
+		// Note: seoImportData is localized in content-generator.php to seo-generator-column-mapping.
+		// Both column-mapping.js and block-ordering.js can access it globally.
 	}
 
 	/**
