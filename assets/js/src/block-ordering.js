@@ -52,12 +52,32 @@ class BlockOrderingManager {
 	 */
 	initSortable() {
 		this.sortable = Sortable.create( this.sortableList, {
-			animation: 150,
+			animation: 200, // Smooth animation when dropping
+			easing: 'cubic-bezier(0.4, 0, 0.2, 1)', // Apple's easing curve
 			handle: '.seo-sortable-handle',
 			ghostClass: 'seo-sortable-ghost',
 			dragClass: 'seo-sortable-drag',
 			chosenClass: 'seo-sortable-chosen',
-			forceFallback: true, // For better mobile support
+
+			// Make the card follow cursor
+			forceFallback: false, // Use native HTML5 drag
+			fallbackOnBody: true, // Append drag element to body
+			swapThreshold: 0.65, // Percentage of target that must be covered before swap
+
+			// Custom drag image - makes card follow cursor smoothly
+			setData: function( dataTransfer, dragEl ) {
+				// Create a custom drag preview
+				const rect = dragEl.getBoundingClientRect();
+				const clone = dragEl.cloneNode( true );
+
+				// Style the clone to look elevated
+				clone.style.width = rect.width + 'px';
+				clone.style.transform = 'rotate(2deg) scale(1.05)';
+				clone.style.opacity = '0.95';
+
+				dataTransfer.setDragImage( clone, rect.width / 2, rect.height / 2 );
+			},
+
 			onStart: () => {
 				this.sortableList.classList.add( 'seo-sortable-dragging' );
 			},

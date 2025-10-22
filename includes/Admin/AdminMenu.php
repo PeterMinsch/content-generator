@@ -49,18 +49,27 @@ class AdminMenu {
 	private $queue_status_page;
 
 	/**
+	 * Geographic title generator page instance.
+	 *
+	 * @var GeographicTitleGeneratorPage
+	 */
+	private $geo_titles_page;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param SettingsPage      $settings_page Settings page instance.
-	 * @param ImageLibraryPage  $image_library_page Image library page instance.
-	 * @param ImportPage        $import_page Import page instance.
-	 * @param QueueStatusPage   $queue_status_page Queue status page instance.
+	 * @param SettingsPage                  $settings_page Settings page instance.
+	 * @param ImageLibraryPage              $image_library_page Image library page instance.
+	 * @param ImportPage                    $import_page Import page instance.
+	 * @param QueueStatusPage               $queue_status_page Queue status page instance.
+	 * @param GeographicTitleGeneratorPage  $geo_titles_page Geographic title generator page instance.
 	 */
-	public function __construct( SettingsPage $settings_page, ImageLibraryPage $image_library_page, ImportPage $import_page, QueueStatusPage $queue_status_page ) {
+	public function __construct( SettingsPage $settings_page, ImageLibraryPage $image_library_page, ImportPage $import_page, QueueStatusPage $queue_status_page, GeographicTitleGeneratorPage $geo_titles_page ) {
 		$this->settings_page       = $settings_page;
 		$this->image_library_page  = $image_library_page;
 		$this->import_page         = $import_page;
 		$this->queue_status_page   = $queue_status_page;
+		$this->geo_titles_page     = $geo_titles_page;
 	}
 
 	/**
@@ -127,6 +136,16 @@ class AdminMenu {
 			'edit_posts',
 			'seo-import-keywords',
 			array( $this, 'renderImportPage' )
+		);
+
+		// Add "Geographic Title Generator" submenu.
+		add_submenu_page(
+			self::MENU_SLUG,
+			__( 'Geographic Title Generator', 'seo-generator' ),
+			__( 'Geographic Titles', 'seo-generator' ),
+			'edit_posts',
+			'seo-geographic-titles',
+			array( $this, 'renderGeoTitlesPage' )
 		);
 
 		// Add "Generation Queue" submenu.
@@ -240,5 +259,14 @@ class AdminMenu {
 	 */
 	public function renderQueueStatusPage(): void {
 		$this->queue_status_page->render();
+	}
+
+	/**
+	 * Render the Geographic Title Generator page.
+	 *
+	 * @return void
+	 */
+	public function renderGeoTitlesPage(): void {
+		$this->geo_titles_page->render();
 	}
 }

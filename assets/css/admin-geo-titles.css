@@ -1,0 +1,177 @@
+/**
+ * Geographic Title Generator Admin Page Styles
+ */
+
+.seo-geo-titles-container {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue',
+		sans-serif;
+}
+
+.seo-geo-titles-container .card {
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
+	border: 1px solid #e5e5e5;
+	border-radius: 4px;
+}
+
+.seo-geo-titles-container h2 {
+	margin-top: 0;
+	padding-bottom: 10px;
+	border-bottom: 1px solid #e5e5e5;
+	font-size: 18px;
+	font-weight: 600;
+}
+
+#keyword-csv-file {
+	padding: 8px;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	font-size: 14px;
+}
+
+#titles-list table {
+	background: white;
+	border-collapse: collapse;
+}
+
+#titles-list th {
+	padding: 12px 10px;
+	background: #f9f9f9;
+	font-weight: 600;
+	text-align: left;
+	border-bottom: 2px solid #e5e5e5;
+}
+
+#titles-list td {
+	padding: 10px;
+	border-bottom: 1px solid #f0f0f0;
+}
+
+/* DISABLED: Hover effects cause repaints at low FPS */
+/* #titles-list tr:hover {
+	background-color: #f9f9f9;
+} */
+
+#titles-list code {
+	font-family: Consolas, Monaco, monospace;
+	word-break: break-all;
+}
+
+#search-titles {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	font-size: 14px;
+}
+
+#search-titles:focus {
+	border-color: #2271b1;
+	outline: none;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.notice {
+	border-left-width: 4px;
+	border-left-style: solid;
+}
+
+.notice-info {
+	border-left-color: #72aee6;
+	background: #f0f6fc;
+}
+
+.notice-success {
+	border-left-color: #00a32a;
+	background: #f0f6f0;
+}
+
+.notice-error {
+	border-left-color: #d63638;
+	background: #fcf0f1;
+}
+
+/* Pagination Styles */
+.pagination-wrapper {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 15px;
+	background: #f9f9f9;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	gap: 15px;
+	flex-wrap: wrap;
+}
+
+.pagination-info {
+	font-size: 14px;
+	color: #333;
+}
+
+.pagination-nav {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.pagination-nav .pagination-current {
+	margin: 0 10px;
+	font-size: 14px;
+	color: #555;
+}
+
+.pagination-btn {
+	padding: 6px 12px !important;
+	font-size: 13px !important;
+	line-height: 1.5 !important;
+	min-height: 32px !important;
+	cursor: pointer;
+}
+
+.pagination-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.pagination-per-page {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+}
+
+.pagination-per-page label {
+	margin: 0;
+	font-weight: normal;
+}
+
+.pagination-per-page select {
+	padding: 4px 8px;
+	font-size: 13px;
+	height: auto;
+	min-height: 30px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+	.seo-geo-titles-container {
+		margin: 0 -10px;
+	}
+
+	.seo-geo-titles-container .card {
+		margin: 10px 0;
+		border-radius: 0;
+	}
+
+	.pagination-wrapper {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.pagination-nav {
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+
+	.pagination-per-page {
+		justify-content: center;
+	}
+}

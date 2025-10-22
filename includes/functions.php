@@ -146,9 +146,26 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 	foreach ( $field_map[ $block_type ] as $field_name ) {
 		$field_value = get_field( $field_name, $post_id );
 
+		// DEBUG: Log hero field retrieval
+		if ( $block_type === 'hero' ) {
+			error_log( "[Hero Field] {$field_name} - ACF get_field result: " . ( empty( $field_value ) ? 'EMPTY' : gettype( $field_value ) ) );
+			if ( ! empty( $field_value ) ) {
+				error_log( "[Hero Field] {$field_name} value: " . print_r( $field_value, true ) );
+			}
+		}
+
 		// WORKAROUND: If ACF get_field returns empty but data exists in post_meta, use get_post_meta
 		if ( empty( $field_value ) ) {
 			$direct_value = get_post_meta( $post_id, $field_name, true );
+
+			// DEBUG: Log meta retrieval for hero
+			if ( $block_type === 'hero' ) {
+				error_log( "[Hero Field] {$field_name} - get_post_meta result: " . ( empty( $direct_value ) ? 'EMPTY' : gettype( $direct_value ) ) );
+				if ( ! empty( $direct_value ) ) {
+					error_log( "[Hero Field] {$field_name} meta value: " . print_r( $direct_value, true ) );
+				}
+			}
+
 			if ( ! empty( $direct_value ) ) {
 				// For repeater fields, decode JSON if needed
 				if ( is_string( $direct_value ) && ( $field_name === 'about_features' || strpos( $field_name, '_items' ) !== false || strpos( $field_name, '_steps' ) !== false || strpos( $field_name, '_bullets' ) !== false ) ) {

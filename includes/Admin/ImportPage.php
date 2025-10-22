@@ -43,6 +43,14 @@ class ImportPage {
 			return;
 		}
 
+		// Enqueue admin import CSS with cache busting.
+		wp_enqueue_style(
+			'seo-admin-import',
+			plugin_dir_url( dirname( __DIR__ ) ) . 'assets/css/admin-import.css',
+			array(),
+			filemtime( plugin_dir_path( dirname( __DIR__ ) ) . 'assets/css/admin-import.css' )
+		);
+
 		// Enqueue block preview CSS.
 		wp_enqueue_style(
 			'seo-admin-block-preview',

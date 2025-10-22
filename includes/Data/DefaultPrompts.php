@@ -130,44 +130,35 @@ Context:
 - Company: Bravo Jewelers (family-run, handcrafted jewelry in Carlsbad, CA)
 
 Requirements:
-- Generate exactly 4 guarantees/trust factors that are RELEVANT to this specific page topic
+- Generate exactly 4 UNIQUE guarantees/trust factors that are RELEVANT to this specific page topic
+- CRITICAL: Use DIVERSE icon combinations - avoid repetitive patterns across different pages
 - Each feature must have:
-  - Icon type: Choose the MOST relevant from these options based on the page topic:
-    * "shipping" - for delivery/shipping related guarantees
-    * "returns" - for return policy, exchanges, satisfaction guarantees
-    * "warranty" - for product protection, lifetime warranties, quality guarantees
-    * "finance" - for payment options, financing, pricing guarantees
-    * "quality" - for handcrafted, quality assurance, expert craftsmanship
-    * "secure" - for secure shopping, data protection, authentication
-    * "support" - for customer service, expert guidance, consultations
-    * "eco" - for sustainable practices, ethical sourcing, recycled materials
-    * "diamond" - for certification, authenticity, GIA certified, conflict-free
-    * "resize" - for sizing services, custom fitting, adjustments
-    * "gift" - for gift wrapping, special occasions, personalization
-    * "repair" - for repair services, maintenance, cleaning
+  - Icon type: Choose from 12 available options. Mix up your selections creatively.
+  - Available icons (interpret broadly): shipping, returns, warranty, finance, quality, secure, support, eco, diamond, resize, gift, repair
   - Feature title: 2-3 words maximum (prefer 2 words)
   - Feature description: 3-6 words explaining the benefit
-- Think about what guarantees would be most important for someone reading THIS specific page
-- Vary the guarantees based on page context - DO NOT always use the same 4
-- Focus on customer benefits and trust factors
-- Professional and trustworthy tone
-- No overly promotional language
 
-Example logic:
-- For "Ring Sizing Guide": Use icons like "resize", "support", "quality", "returns"
-- For "Diamond Guide": Use icons like "diamond", "quality", "warranty", "secure"
-- For "Care Instructions": Use icons like "warranty", "repair", "quality", "support"
-- For "Engagement Rings": Use icons like "quality", "diamond", "finance", "resize"
-- For "Sustainable Jewelry": Use icons like "eco", "quality", "diamond", "warranty"
+Icon Selection Strategy:
+1. Think beyond literal meanings:
+   - "diamond" = certification, premium quality, verified authenticity (ANY product)
+   - "resize" = customization, adjustments, personalization (ANY service)
+   - "repair" = maintenance, ongoing care, support (ANY long-term commitment)
+   - "eco" = sustainability, ethics, responsibility (ANY category)
+   - "gift" = special occasions, presentation, experiences (ANY celebratory context)
 
-Good examples:
-- Title: "Free Shipping" | Description: "On all orders over $500" | Icon: "shipping"
-- Title: "GIA Certified" | Description: "Authentic diamond certification" | Icon: "diamond"
-- Title: "Expert Sizing" | Description: "Complimentary ring sizing service" | Icon: "resize"
-- Title: "Lifetime Warranty" | Description: "Your investment protected forever" | Icon: "warranty"
-- Title: "Ethically Sourced" | Description: "Conflict-free and sustainable" | Icon: "eco"
-- Title: "Secure Shopping" | Description: "Safe and encrypted checkout" | Icon: "secure"
-- Title: "Free Repairs" | Description: "Lifetime maintenance and cleaning" | Icon: "repair"
+2. VARY your combinations - don't default to the same 4 icons every time:
+   - Care Guide: Try "repair, support, warranty, quality"
+   - Buying Guide: Try "diamond, finance, secure, gift"
+   - Product Collection: Try "quality, gift, resize, eco"
+   - Size Guide: Try "resize, support, returns, secure"
+   - Sustainability: Try "eco, diamond, quality, support"
+
+3. Consider the page's unique angle:
+   - What makes THIS page different from others?
+   - What trust factors are MOST relevant here?
+   - Which icons haven't been overused?
+
+Your Mission: Create a FRESH, UNIQUE set of 4 guarantees that feel specifically tailored to this page's topic. Challenge yourself to use different icon combinations than you might typically choose.
 
 Output as JSON (features array only):
 {

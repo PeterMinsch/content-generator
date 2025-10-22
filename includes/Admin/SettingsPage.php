@@ -473,14 +473,14 @@ class SettingsPage {
 	 * @return void
 	 */
 	public function renderAutoAssignmentField(): void {
-		$settings = get_option( self::OPTION_NAME, array() );
+		$settings = get_option( self::IMAGE_OPTION_NAME, array() );
 		$enabled  = $settings['enable_auto_assignment'] ?? true; // Default enabled.
 
 		?>
 		<label>
 			<input
 				type="checkbox"
-				name="<?php echo esc_attr( self::OPTION_NAME ); ?>[enable_auto_assignment]"
+				name="<?php echo esc_attr( self::IMAGE_OPTION_NAME ); ?>[enable_auto_assignment]"
 				value="1"
 				<?php checked( $enabled, true ); ?>
 			/>
@@ -1168,6 +1168,9 @@ class SettingsPage {
 			// No image selected or cleared.
 			$sanitized['default_image_id'] = null;
 		}
+
+		// Auto-assignment checkbox.
+		$sanitized['enable_auto_assignment'] = isset( $input['enable_auto_assignment'] ) && '1' === $input['enable_auto_assignment'];
 
 		// Preserve folder structure checkbox.
 		$sanitized['preserve_folder_structure'] = isset( $input['preserve_folder_structure'] ) && '1' === $input['preserve_folder_structure'];

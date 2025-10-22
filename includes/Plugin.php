@@ -78,12 +78,16 @@ class Plugin {
 		$queue_status_page = new Admin\QueueStatusPage();
 		$this->container->set( 'admin.queue_status', $queue_status_page );
 
+		// Register geographic title generator page.
+		$geo_titles_page = new Admin\GeographicTitleGeneratorPage();
+		$this->container->set( 'admin.geo_titles', $geo_titles_page );
+
 		// Register internal linking test page.
 		$test_links_page = new Admin\InternalLinkingTestPage();
 		$this->container->set( 'admin.test_links', $test_links_page );
 
-		// Register admin menu (depends on settings, image library, import, and queue status pages).
-		$admin_menu = new Admin\AdminMenu( $settings_page, $image_library_page, $import_page, $queue_status_page );
+		// Register admin menu (depends on settings, image library, import, queue status, and geo titles pages).
+		$admin_menu = new Admin\AdminMenu( $settings_page, $image_library_page, $import_page, $queue_status_page, $geo_titles_page );
 		$this->container->set( 'admin.menu', $admin_menu );
 
 		// Register page editor.
@@ -211,11 +215,17 @@ class Plugin {
 		// Register queue status page AJAX handlers.
 		$this->container->get( 'admin.queue_status' )->register();
 
+		// Register geographic title generator page AJAX handlers.
+		$this->container->get( 'admin.geo_titles' )->register();
+
 		// Register internal linking test page.
 		$this->container->get( 'admin.test_links' )->register();
 
 		// Register template loader.
 		$this->container->get( 'template.loader' )->register();
+
+		// Enqueue global performance monitor on all admin pages.
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueueGlobalPerformanceMonitor' ) );
 
 		// Register generation queue cron hook.
 		add_action( 'seo_generate_queued_page', array( $this, 'processQueuedPage' ) );
@@ -316,6 +326,21 @@ class Plugin {
 	 * Prevent cloning of the instance.
 	 */
 	private function __clone() {}
+
+	/**
+	 * Enqueue global performance monitor on all admin pages.
+	 *
+	 * @return void
+	 */
+	public function enqueueGlobalPerformanceMonitor(): void {
+		wp_enqueue_script(
+			'seo-global-perf-monitor',
+			plugin_dir_url( __DIR__ ) . 'assets/js/src/global-perf-monitor.js',
+			array(),
+			'1.0.0',
+			true
+		);
+	}
 
 	/**
 	 * Prevent unserializing of the instance.

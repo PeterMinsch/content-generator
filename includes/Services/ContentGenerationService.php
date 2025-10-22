@@ -26,6 +26,7 @@ class ContentGenerationService {
 	private const BLOCK_ORDER = array(
 		'seo_metadata',
 		'hero',
+		'about_section',
 		'serp_answer',
 		'product_criteria',
 		'materials',
@@ -306,18 +307,28 @@ class ContentGenerationService {
 	 * @return array Array of assigned image field names and IDs.
 	 */
 	private function autoAssignImages( int $post_id, string $block_type, array $context, array $parsed_content ): array {
+		// DEBUG: Log auto-assignment check
+		error_log( "[Auto-Assignment] Called for block: {$block_type} on post {$post_id}" );
+
 		// Check if auto-assignment is enabled.
-		if ( ! $this->isAutoAssignmentEnabled() ) {
+		$is_enabled = $this->isAutoAssignmentEnabled();
+		error_log( "[Auto-Assignment] Enabled: " . ( $is_enabled ? 'YES' : 'NO' ) );
+
+		if ( ! $is_enabled ) {
+			error_log( "[Auto-Assignment] SKIPPED - disabled in settings" );
 			return array();
 		}
 
 		// Only auto-assign for blocks with image fields.
 		if ( 'hero' === $block_type ) {
+			error_log( "[Auto-Assignment] Processing hero block image assignment" );
 			return $this->assignHeroImage( $post_id, $context );
 		} elseif ( 'process' === $block_type ) {
+			error_log( "[Auto-Assignment] Processing process block image assignment" );
 			return $this->assignProcessImages( $post_id, $context, $parsed_content );
 		}
 
+		error_log( "[Auto-Assignment] No image assignment for block type: {$block_type}" );
 		return array();
 	}
 
@@ -500,6 +511,13 @@ class ContentGenerationService {
 	 * @return bool True if enabled, false otherwise.
 	 */
 	private function isAutoAssignmentEnabled(): bool {
+		// Check new location first (seo_generator_image_settings)
+		$image_settings = get_option( 'seo_generator_image_settings', array() );
+		if ( isset( $image_settings['enable_auto_assignment'] ) ) {
+			return (bool) $image_settings['enable_auto_assignment'];
+		}
+
+		// Fallback to old location for backward compatibility
 		$settings = get_option( 'seo_generator_settings', array() );
 		return $settings['enable_auto_assignment'] ?? true; // Default enabled.
 	}
