@@ -91,6 +91,14 @@ class ImportService {
 	private $image_service = null;
 
 	/**
+	 * Cache of existing post titles for batch duplicate checking.
+	 * Initialized once per batch to avoid repeated database queries.
+	 *
+	 * @var array|null
+	 */
+	private $existing_titles_cache = null;
+
+	/**
 	 * Import log data for current import session.
 	 *
 	 * @var array
@@ -248,6 +256,11 @@ class ImportService {
 
 		if ( is_wp_error( $post_id ) ) {
 			return $post_id;
+		}
+
+		// Add newly created title to cache for subsequent duplicate checks in this batch.
+		if ( $this->existing_titles_cache !== null ) {
+			$this->existing_titles_cache[ $title ] = 0;
 		}
 
 		// Save metadata (ACF fields, taxonomy).
@@ -459,23 +472,57 @@ class ImportService {
 	}
 
 	/**
-	 * Check if post with given title already exists.
+	 * Initialize the title cache for batch duplicate checking.
+	 *
+	 * Fetches all existing SEO page titles in a single query and stores them
+	 * in a hash table for O(1) lookup performance. This dramatically improves
+	 * performance when checking duplicates for large imports.
+	 *
+	 * Performance: 1 query instead of N queries (where N = number of rows)
+	 *
+	 * @return void
+	 */
+	private function initTitleCache(): void {
+		if ( $this->existing_titles_cache !== null ) {
+			return; // Already initialized.
+		}
+
+		global $wpdb;
+
+		// Get ALL titles for seo-page post type in ONE query.
+		$titles = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT post_title
+				 FROM {$wpdb->posts}
+				 WHERE post_type = %s
+				 AND post_status != 'trash'",
+				'seo-page'
+			)
+		);
+
+		// Create hash table for O(1) lookups.
+		// array_flip converts ['title1', 'title2'] into ['title1' => 0, 'title2' => 1].
+		// PHP array keys are implemented as hash tables, making isset() instant.
+		$this->existing_titles_cache = array_flip( $titles );
+	}
+
+	/**
+	 * Check if post with given title already exists (batch-optimized).
+	 *
+	 * Uses a cached hash table of existing titles to avoid repeated database
+	 * queries. The cache is initialized once per batch for maximum efficiency.
 	 *
 	 * @param string $title Post title.
 	 * @return bool True if post exists, false otherwise.
 	 */
 	private function postExists( string $title ): bool {
-		$query = new \WP_Query(
-			array(
-				'post_type'      => 'seo-page',
-				'post_status'    => 'any',
-				'title'          => $title,
-				'posts_per_page' => 1,
-				'fields'         => 'ids',
-			)
-		);
+		// Initialize cache if not done yet.
+		if ( $this->existing_titles_cache === null ) {
+			$this->initTitleCache();
+		}
 
-		return $query->have_posts();
+		// O(1) hash table lookup - instant!
+		return isset( $this->existing_titles_cache[ $title ] );
 	}
 
 	/**

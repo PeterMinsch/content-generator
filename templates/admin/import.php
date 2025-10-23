@@ -18,6 +18,25 @@ $max_upload_size = wp_max_upload_size();
 	<!-- Page Header -->
 	<h1 class="heading-1"><?php esc_html_e( 'CSV Import', 'seo-generator' ); ?></h1>
 
+	<!-- Testing Tools Section -->
+	<div class="seo-card mt-4" style="border-left: 4px solid #dc3232;">
+		<h3 class="seo-card__title" style="color: #dc3232;">
+			🧪 <?php esc_html_e( 'Testing Tools', 'seo-generator' ); ?>
+		</h3>
+		<div class="seo-card__content">
+			<p style="color: #646970; margin-bottom: 12px;">
+				<?php esc_html_e( 'Use these tools to clear test data and prepare for fresh imports.', 'seo-generator' ); ?>
+			</p>
+			<button type="button" id="delete-all-seo-pages" class="button button-secondary" style="background: #dc3232; border-color: #dc3232; color: white;">
+				<span class="dashicons dashicons-trash" style="vertical-align: middle;"></span>
+				<?php esc_html_e( 'Delete All SEO Pages', 'seo-generator' ); ?>
+			</button>
+			<p style="color: #d63638; font-size: 12px; margin-top: 8px; font-weight: 600;">
+				⚠️ <?php esc_html_e( 'WARNING: This will permanently delete ALL SEO pages. This action cannot be undone!', 'seo-generator' ); ?>
+			</p>
+		</div>
+	</div>
+
 	<!-- Geographic Titles Success Banner (hidden by default, shown by JavaScript) -->
 	<div id="geo-titles-success-banner" style="display: none; margin-top: 20px;">
 		<div class="notice notice-success" style="padding: 20px; border-left: 4px solid #00a32a; background: #f0f6fc;">
@@ -50,7 +69,7 @@ $max_upload_size = wp_max_upload_size();
 					);
 					?>
 				</li>
-				<li><?php esc_html_e( 'Maximum rows: 1000 per import', 'seo-generator' ); ?></li>
+				<li><?php esc_html_e( 'Maximum rows: 10,000 per import', 'seo-generator' ); ?></li>
 			</ul>
 
 			<h4 class="mt-4"><?php esc_html_e( 'Required Columns:', 'seo-generator' ); ?></h4>
@@ -138,7 +157,7 @@ men's tungsten rings,commercial,800,</pre>
 			</div>
 
 			<p class="text-sm text-gray mt-4">
-				<?php esc_html_e( 'Content will be auto-generated in the background. Background generation processes one page every 3 minutes to respect API rate limits.', 'seo-generator' ); ?>
+				<?php esc_html_e( 'Content will be auto-generated in the background. Background generation processes one page every 30 seconds to respect API rate limits.', 'seo-generator' ); ?>
 			</p>
 		</div>
 	</div>
@@ -370,5 +389,88 @@ men's tungsten rings,commercial,800,</pre>
 		document.querySelectorAll('input[name="blocks_to_generate[]"]').forEach(cb => cb.checked = false);
 	});
 
+	// Delete All SEO Pages button
+	const deleteAllBtn = document.getElementById('delete-all-seo-pages');
+	if (deleteAllBtn) {
+		deleteAllBtn.addEventListener('click', async function() {
+			// Strong confirmation
+			const confirmation = confirm(
+				'⚠️ WARNING: This will PERMANENTLY DELETE ALL SEO PAGES!\n\n' +
+				'This action cannot be undone.\n\n' +
+				'Are you absolutely sure you want to continue?'
+			);
+
+			if (!confirmation) {
+				return;
+			}
+
+			// Second confirmation
+			const secondConfirmation = confirm(
+				'This is your FINAL WARNING!\n\n' +
+				'Click OK to permanently delete all SEO pages, or Cancel to abort.'
+			);
+
+			if (!secondConfirmation) {
+				return;
+			}
+
+			// Disable button and show loading state
+			deleteAllBtn.disabled = true;
+			deleteAllBtn.innerHTML = '<span class="dashicons dashicons-update-alt" style="vertical-align: middle; animation: rotation 1s infinite linear;"></span> Deleting...';
+
+			try {
+				const response = await fetch(seoImportData.ajaxUrl, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+					},
+					body: new URLSearchParams({
+						action: 'seo_delete_all_pages',
+						nonce: seoImportData.nonce,
+					}),
+				});
+
+				const data = await response.json();
+
+				if (data.success) {
+					alert(
+						'✅ Success!\n\n' +
+						data.data.message + '\n\n' +
+						'Total: ' + data.data.total + '\n' +
+						'Deleted: ' + data.data.deleted + '\n' +
+						(data.data.errors > 0 ? 'Errors: ' + data.data.errors : '')
+					);
+
+					// Reload page to refresh
+					window.location.reload();
+				} else {
+					alert('Error: ' + (data.data.message || 'Failed to delete pages'));
+
+					// Re-enable button
+					deleteAllBtn.disabled = false;
+					deleteAllBtn.innerHTML = '<span class="dashicons dashicons-trash" style="vertical-align: middle;"></span> Delete All SEO Pages';
+				}
+			} catch (error) {
+				console.error('Delete error:', error);
+				alert('Error: ' + error.message);
+
+				// Re-enable button
+				deleteAllBtn.disabled = false;
+				deleteAllBtn.innerHTML = '<span class="dashicons dashicons-trash" style="vertical-align: middle;"></span> Delete All SEO Pages';
+			}
+		});
+	}
+
 })();
 </script>
+
+<style>
+@keyframes rotation {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+</style>

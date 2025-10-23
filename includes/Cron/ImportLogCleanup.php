@@ -9,7 +9,7 @@
 
 namespace SEOGenerator\Cron;
 
-use SEOGenerator\Repositories\ImportLogRepository;
+use SEOGenerator\Services\ImportHistoryService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,17 +36,17 @@ class ImportLogCleanup {
 	private const DEFAULT_RETENTION_DAYS = 90;
 
 	/**
-	 * ImportLogRepository instance.
+	 * ImportHistoryService instance.
 	 *
-	 * @var ImportLogRepository
+	 * @var ImportHistoryService
 	 */
-	private $repository;
+	private $history_service;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->repository = new ImportLogRepository();
+		$this->history_service = new ImportHistoryService();
 	}
 
 	/**
@@ -73,14 +73,14 @@ class ImportLogCleanup {
 		// Ensure reasonable minimum (at least 7 days).
 		$retention_days = max( 7, intval( $retention_days ) );
 
-		// Delete old logs.
-		$deleted = $this->repository->deleteOlderThan( $retention_days );
+		// Cleanup old import history.
+		$deleted = $this->history_service->cleanupOldImports();
 
 		// Log cleanup activity.
 		if ( $deleted > 0 ) {
 			error_log(
 				sprintf(
-					'[SEO Generator] Import log cleanup: Deleted %d import log records older than %d days.',
+					'[SEO Generator] Import history cleanup: Deleted %d import records older than %d days.',
 					$deleted,
 					$retention_days
 				)

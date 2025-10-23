@@ -92,7 +92,10 @@ wp_localize_script(
 	</p>
 
 	<!-- Queue Control Buttons -->
-	<div class="queue-actions" style="display: flex; gap: var(--space-3); margin: var(--space-6) 0;">
+	<div class="queue-actions" style="display: flex; gap: var(--space-3); margin: var(--space-6) 0; flex-wrap: wrap;">
+		<button id="process-queue-now" class="seo-btn-primary" style="background: #00a32a; border-color: #00a32a;">
+			⚡ <?php esc_html_e( 'Process Queue Now', 'seo-generator' ); ?>
+		</button>
 		<?php if ( $is_paused ) : ?>
 			<button id="resume-queue" class="seo-btn-primary">
 				▶️ <?php esc_html_e( 'Resume Queue', 'seo-generator' ); ?>
@@ -105,6 +108,14 @@ wp_localize_script(
 		<button id="clear-queue" class="seo-btn-secondary">
 			🗑️ <?php esc_html_e( 'Clear Queue', 'seo-generator' ); ?>
 		</button>
+	</div>
+
+	<!-- Processing Status -->
+	<div id="processing-status" style="display: none; margin-top: 16px; padding: 16px; background: #e7f7ff; border-left: 4px solid #0073aa; border-radius: 4px;">
+		<p style="margin: 0; font-weight: 600;">
+			<span class="dashicons dashicons-update-alt" style="animation: rotation 1s infinite linear;"></span>
+			<span id="processing-message">Processing queue...</span>
+		</p>
 	</div>
 
 	<!-- WordPress Cron Information -->
@@ -126,7 +137,7 @@ wp_localize_script(
 					<code>wp seo-generator queue process</code>
 				</li>
 				<li>
-					<?php esc_html_e( 'Jobs are scheduled 3 minutes apart to respect API rate limits.', 'seo-generator' ); ?>
+					<?php esc_html_e( 'Jobs are scheduled 30 seconds apart to respect API rate limits.', 'seo-generator' ); ?>
 				</li>
 			</ul>
 		</div>

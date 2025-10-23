@@ -36,9 +36,10 @@ class GenerationQueue {
 	const PAUSED_OPTION = 'seo_queue_paused';
 
 	/**
-	 * Rate limit in seconds (3 minutes).
+	 * Rate limit in seconds (30 seconds).
+	 * Optimized from 180s to 30s for faster bulk generation while staying well within OpenAI rate limits.
 	 */
-	const RATE_LIMIT_SECONDS = 180;
+	const RATE_LIMIT_SECONDS = 30;
 
 	/**
 	 * Queue a post for background generation.
@@ -59,7 +60,7 @@ class GenerationQueue {
 			}
 		}
 
-		// Calculate scheduled time (3 minutes apart).
+		// Calculate scheduled time (30 seconds apart).
 		$base_time      = time();
 		$scheduled_time = $base_time + ( $index * self::RATE_LIMIT_SECONDS );
 

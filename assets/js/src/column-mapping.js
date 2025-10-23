@@ -22,6 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
 	let currentMappings = {};
 	let currentHeaders = [];
 	let parsedMetadata = null; // Store parsed CSV metadata
+	let importInProgress = false; // Track if import is currently running
+
+	/**
+	 * Warn user if they try to leave during import.
+	 */
+	window.addEventListener('beforeunload', (event) => {
+		if (importInProgress) {
+			const message = 'Import in progress! Leaving this page will cancel the import. Are you sure?';
+			event.preventDefault();
+			event.returnValue = message; // Standard for most browsers
+			return message; // For some older browsers
+		}
+	});
 
 	/**
 	 * Check for preloaded file on page load (from geographic title generator).
@@ -416,9 +429,21 @@ document.addEventListener('DOMContentLoaded', () => {
 		const progressSection = document.getElementById('import-progress');
 		const progressText = document.getElementById('progress-text');
 
+		// Mark import as in progress
+		importInProgress = true;
+
 		// Show progress section
 		if (progressSection) {
 			progressSection.style.display = 'block';
+		}
+
+		// Add warning banner
+		if (progressSection) {
+			const warningBanner = document.createElement('div');
+			warningBanner.id = 'import-warning-banner';
+			warningBanner.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; border-radius: 6px; padding: 16px; margin-bottom: 16px; color: #856404; font-weight: 600; text-align: center;';
+			warningBanner.innerHTML = '⚠️ Import in progress - Please do not leave this page until complete!';
+			progressSection.insertBefore(warningBanner, progressSection.firstChild);
 		}
 
 		try {
@@ -463,6 +488,15 @@ document.addEventListener('DOMContentLoaded', () => {
 			console.error('Import error:', error);
 			alert('Import failed: ' + error.message);
 
+			// Mark import as complete
+			importInProgress = false;
+
+			// Remove warning banner
+			const warningBanner = document.getElementById('import-warning-banner');
+			if (warningBanner) {
+				warningBanner.remove();
+			}
+
 			// Re-enable button
 			if (blockOrderProceedBtn) {
 				blockOrderProceedBtn.disabled = false;
@@ -481,6 +515,15 @@ document.addEventListener('DOMContentLoaded', () => {
 	 * @param {Object} results Cumulative import results.
 	 */
 	function showCompletionSummary(results) {
+		// Mark import as complete
+		importInProgress = false;
+
+		// Remove warning banner
+		const warningBanner = document.getElementById('import-warning-banner');
+		if (warningBanner) {
+			warningBanner.remove();
+		}
+
 		let message = `Import Complete!\n\n`;
 		message += `Created: ${results.created.length} posts\n`;
 		message += `Skipped: ${results.skipped.length} duplicates\n`;

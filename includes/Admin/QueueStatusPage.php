@@ -40,6 +40,7 @@ class QueueStatusPage {
 		add_action( 'wp_ajax_seo_queue_resume', array( $this, 'handleQueueResume' ) );
 		add_action( 'wp_ajax_seo_queue_clear', array( $this, 'handleQueueClear' ) );
 		add_action( 'wp_ajax_seo_queue_cancel_job', array( $this, 'handleCancelJob' ) );
+		add_action( 'wp_ajax_seo_process_queue_cron', array( $this, 'handleProcessQueueCron' ) );
 	}
 
 	/**
@@ -218,5 +219,81 @@ class QueueStatusPage {
 				array( 'message' => __( 'Failed to cancel job.', 'seo-generator' ) )
 			);
 		}
+	}
+
+	/**
+	 * Handle AJAX request to manually process queue cron jobs.
+	 *
+	 * This spawns WordPress Cron to process ready jobs asynchronously in the background.
+	 * Useful in local development environments where WP-Cron doesn't run automatically.
+	 *
+	 * @return void
+	 */
+	public function handleProcessQueueCron(): void {
+		// Verify nonce.
+		check_ajax_referer( 'seo_queue_nonce', 'nonce' );
+
+		// Check user capabilities.
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'You do not have sufficient permissions.', 'seo-generator' ) )
+			);
+		}
+
+		// Check if queue is paused.
+		if ( $this->queue->isPaused() ) {
+			wp_send_json_error(
+				array( 'message' => __( 'Queue is paused. Please resume the queue first.', 'seo-generator' ) )
+			);
+		}
+
+		// Get all pending jobs.
+		$pending_jobs = $this->queue->getQueuedPosts( 'pending' );
+
+		if ( empty( $pending_jobs ) ) {
+			wp_send_json_success(
+				array( 'message' => __( 'No pending jobs to process.', 'seo-generator' ) )
+			);
+		}
+
+		// Filter jobs that are ready to process (scheduled time has passed).
+		$ready_jobs   = array();
+		$current_time = time();
+
+		foreach ( $pending_jobs as $job ) {
+			if ( isset( $job['scheduled_time'] ) && $job['scheduled_time'] <= $current_time ) {
+				$ready_jobs[] = $job;
+			}
+		}
+
+		if ( empty( $ready_jobs ) ) {
+			wp_send_json_success(
+				array(
+					'message' => sprintf(
+						/* translators: %d: number of pending jobs */
+						__( 'No jobs ready to process yet. %d job(s) scheduled for later.', 'seo-generator' ),
+						count( $pending_jobs )
+					),
+				)
+			);
+		}
+
+		// Spawn WordPress Cron asynchronously to process jobs in background.
+		// This makes a non-blocking HTTP request to wp-cron.php which will
+		// process all due jobs according to their scheduled times.
+		spawn_cron();
+
+		// Wait a moment for the cron spawn to register.
+		sleep( 1 );
+
+		wp_send_json_success(
+			array(
+				'message' => sprintf(
+					/* translators: %d: number of ready jobs */
+					__( 'WordPress Cron triggered. %d job(s) will be processed in the background. Refresh this page in 30 seconds to see progress.', 'seo-generator' ),
+					count( $ready_jobs )
+				),
+			)
+		);
 	}
 }

@@ -26,6 +26,7 @@ class ImportPage {
 		add_action( 'wp_ajax_seo_save_block_order', array( $this, 'handleSaveBlockOrder' ) );
 		add_action( 'wp_ajax_seo_import_batch', array( $this, 'handleBatchImport' ) );
 		add_action( 'wp_ajax_seo_import_progress', array( $this, 'handleImportProgress' ) );
+		add_action( 'wp_ajax_seo_delete_all_pages', array( $this, 'handleDeleteAllPages' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueueAssets' ) );
 	}
 
@@ -605,7 +606,8 @@ class ImportPage {
 		}
 
 		// Parse CSV using CSVParser service.
-		$parser = new \SEOGenerator\Services\CSVParser( array( 'max_rows' => 1000 ) );
+		// Increased limit to 10,000 for large geographic title imports.
+		$parser = new \SEOGenerator\Services\CSVParser( array( 'max_rows' => 10000 ) );
 		$result = $parser->parse( $file_path, $column_mapping );
 
 		// Check if parsing failed.
@@ -814,6 +816,11 @@ class ImportPage {
 		// Check if complete.
 		$completed = ( $batch_index + 1 ) >= count( $batches );
 
+		// Log to import history when completed.
+		if ( $completed ) {
+			$this->logImportToHistory( $user_id, $cumulative_results, count( $parsed_data['rows'] ) );
+		}
+
 		// Send success response.
 		wp_send_json_success(
 			array(
@@ -883,5 +890,142 @@ class ImportPage {
 		set_transient( 'import_results_' . $user_id, $cumulative, HOUR_IN_SECONDS );
 
 		return $cumulative;
+	}
+
+	/**
+	 * Log completed import to history.
+	 *
+	 * @param int   $user_id           User ID.
+	 * @param array $cumulative_results Cumulative import results.
+	 * @param int   $total_rows        Total rows processed.
+	 * @return void
+	 */
+	private function logImportToHistory( int $user_id, array $cumulative_results, int $total_rows ): void {
+		// Get filename from transient.
+		$file_path = get_transient( 'import_file_' . $user_id );
+		$filename  = $file_path ? basename( $file_path ) : 'unknown.csv';
+
+		// Detect import type from filename pattern.
+		$import_type = 'csv_upload';
+		if ( strpos( $filename, 'geo_titles_import_' ) === 0 ) {
+			$import_type = 'geographic_titles';
+		}
+
+		// Count results.
+		$success_count = isset( $cumulative_results['created'] ) ? count( $cumulative_results['created'] ) : 0;
+		$skipped_count = isset( $cumulative_results['skipped'] ) ? count( $cumulative_results['skipped'] ) : 0;
+		$error_count   = isset( $cumulative_results['errors'] ) ? count( $cumulative_results['errors'] ) : 0;
+
+		// Prepare error messages.
+		$error_messages = array();
+		if ( isset( $cumulative_results['errors'] ) && is_array( $cumulative_results['errors'] ) ) {
+			foreach ( $cumulative_results['errors'] as $error ) {
+				if ( is_array( $error ) && isset( $error['message'] ) ) {
+					$error_messages[] = $error['message'];
+				} elseif ( is_string( $error ) ) {
+					$error_messages[] = $error;
+				}
+			}
+		}
+
+		// Create import history entry.
+		$history_service = new \SEOGenerator\Services\ImportHistoryService();
+		$import_id = $history_service->addImport(
+			array(
+				'user_id'       => $user_id,
+				'filename'      => $filename,
+				'total_rows'    => $total_rows,
+				'success_count' => $success_count,
+				'error_count'   => $error_count,
+				'skipped_count' => $skipped_count,
+				'import_type'   => $import_type,
+				'errors'        => $error_messages,
+				'logs'          => array(
+					sprintf( 'Import completed at %s', current_time( 'mysql' ) ),
+					sprintf( '%d rows processed', $total_rows ),
+					sprintf( '%d posts created, %d skipped, %d errors', $success_count, $skipped_count, $error_count ),
+				),
+			)
+		);
+
+		error_log( '[ImportPage] Import logged to history with ID: ' . $import_id . ' (type: ' . $import_type . ')' );
+
+		// Clean up old transients.
+		delete_transient( 'import_results_' . $user_id );
+	}
+
+	/**
+	 * Handle AJAX request to delete all SEO pages.
+	 *
+	 * @return void
+	 */
+	public function handleDeleteAllPages(): void {
+		// Verify nonce.
+		check_ajax_referer( 'seo_csv_upload', 'nonce' );
+
+		// Check user capabilities.
+		if ( ! current_user_can( 'delete_posts' ) ) {
+			wp_send_json_error(
+				array( 'message' => __( 'You do not have sufficient permissions.', 'seo-generator' ) )
+			);
+		}
+
+		// Get all SEO pages.
+		$args = array(
+			'post_type'      => 'seo-page',
+			'post_status'    => 'any',
+			'posts_per_page' => -1,
+			'fields'         => 'ids',
+		);
+
+		$posts = get_posts( $args );
+		$total_count = count( $posts );
+
+		if ( $total_count === 0 ) {
+			wp_send_json_success(
+				array(
+					'message' => __( 'No SEO pages found to delete.', 'seo-generator' ),
+					'deleted' => 0,
+				)
+			);
+		}
+
+		// Delete all posts.
+		$deleted_count = 0;
+		$error_count   = 0;
+
+		foreach ( $posts as $post_id ) {
+			// Force delete (bypass trash).
+			$result = wp_delete_post( $post_id, true );
+
+			if ( $result ) {
+				$deleted_count++;
+			} else {
+				$error_count++;
+			}
+		}
+
+		// Log the deletion.
+		error_log(
+			sprintf(
+				'[ImportPage] Bulk delete: %d SEO pages deleted, %d errors (total: %d)',
+				$deleted_count,
+				$error_count,
+				$total_count
+			)
+		);
+
+		wp_send_json_success(
+			array(
+				'message' => sprintf(
+					/* translators: %d: number of deleted pages */
+					__( 'Successfully deleted %d SEO pages.', 'seo-generator' ),
+					$deleted_count
+				),
+				'deleted' => $deleted_count,
+				'errors'  => $error_count,
+				'total'   => $total_count,
+			)
+		);
 	}
 }

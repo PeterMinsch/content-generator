@@ -1325,149 +1325,195 @@ class GeographicTitleGeneratorPage {
 
 		?>
 		<style>
-			/* Modern Gradient Design for Geographic Title Generator */
+			/* Glass/Neumorphism Design for Geographic Title Generator */
 			.wrap.seo-generator-page {
-				background: linear-gradient(135deg, #FEF9F4 0%, #FFFFFF 100%);
+				background: linear-gradient(135deg, #FEF9F4 0%, #f5ede3 50%, #FEF9F4 100%);
 				margin-left: -20px;
 				margin-right: 0;
 				padding: 40px;
 				min-height: 100vh;
+				position: relative;
+			}
+
+			.wrap.seo-generator-page::before {
+				content: '';
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background:
+					radial-gradient(circle at 20% 30%, rgba(202, 150, 82, 0.05) 0%, transparent 50%),
+					radial-gradient(circle at 80% 70%, rgba(188, 140, 77, 0.05) 0%, transparent 50%);
+				pointer-events: none;
 			}
 
 			.wrap.seo-generator-page .heading-1 {
-				background: linear-gradient(135deg, #CA9652 0%, #BC8C4D 50%, #8C6839 100%);
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: transparent;
-				background-clip: text;
-				font-size: 48px;
+				color: #272521;
+				font-size: 42px;
 				font-weight: 300;
-				letter-spacing: -1px;
+				letter-spacing: -0.5px;
 				margin-bottom: 30px;
 				text-transform: uppercase;
 				font-family: 'Cormorant', serif;
+				position: relative;
+				z-index: 1;
+				text-align: center;
+			}
+
+			.wrap.seo-generator-page .heading-1::after {
+				content: '';
+				display: block;
+				width: 60px;
+				height: 3px;
+				background: linear-gradient(90deg, #CA9652, transparent);
+				margin: 12px auto 0;
+				border-radius: 2px;
 			}
 
 			.seo-geo-titles-container {
 				max-width: 1200px;
+				margin: 0 auto;
+				position: relative;
+				z-index: 1;
 			}
 
 			.seo-card {
-				background: rgba(255, 255, 255, 0.95);
-				border-radius: 20px;
-				box-shadow: 0 20px 60px rgba(202, 150, 82, 0.15),
-				            0 8px 16px rgba(39, 37, 33, 0.08);
-				border: 1px solid rgba(202, 150, 82, 0.2);
+				background: rgba(255, 255, 255, 0.6);
+				backdrop-filter: blur(20px);
+				-webkit-backdrop-filter: blur(20px);
+				border-radius: 24px;
+				box-shadow:
+					0 8px 32px rgba(202, 150, 82, 0.08),
+					inset 0 1px 0 rgba(255, 255, 255, 0.9),
+					inset 0 -1px 0 rgba(202, 150, 82, 0.1);
+				border: 1px solid rgba(255, 255, 255, 0.4);
 				overflow: hidden;
-				transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+				transition: all 0.3s ease;
 				margin-top: 24px;
 			}
 
 			.seo-card:hover {
-				transform: translateY(-4px);
-				box-shadow: 0 30px 80px rgba(202, 150, 82, 0.25),
-				            0 12px 24px rgba(39, 37, 33, 0.12);
-			}
-
-			.seo-card__title {
-				background: linear-gradient(135deg, #CA9652 0%, #BC8C4D 100%);
-				color: #FFFFFF;
-				padding: 24px 32px;
-				margin: 0;
-				font-size: 24px;
-				font-weight: 500;
-				letter-spacing: -0.5px;
-				position: relative;
-				overflow: hidden;
-			}
-
-			.seo-card__title::before {
-				content: '';
-				position: absolute;
-				top: 0;
-				left: -100%;
-				width: 100%;
-				height: 100%;
-				background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-				transition: left 0.5s;
-			}
-
-			.seo-card:hover .seo-card__title::before {
-				left: 100%;
-			}
-
-			.seo-card__content {
-				padding: 32px;
-			}
-
-			/* Modern Buttons */
-			.button, .button-primary {
-				border-radius: 12px !important;
-				padding: 12px 28px !important;
-				font-size: 15px !important;
-				font-weight: 500 !important;
-				transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-				border: none !important;
-				box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-			}
-
-			.button-primary {
-				background: linear-gradient(135deg, #CA9652 0%, #BC8C4D 100%) !important;
-				color: #FFFFFF !important;
-			}
-
-			.button-primary:hover {
-				background: linear-gradient(135deg, #BC8C4D 0%, #8C6839 100%) !important;
-				transform: translateY(-2px) !important;
-				box-shadow: 0 8px 20px rgba(202, 150, 82, 0.3) !important;
-			}
-
-			.button:not(.button-primary) {
-				background: rgba(202, 150, 82, 0.1) !important;
-				border: 1px solid rgba(202, 150, 82, 0.3) !important;
-				color: #CA9652 !important;
-			}
-
-			.button:not(.button-primary):hover {
-				background: rgba(202, 150, 82, 0.2) !important;
-				border-color: #CA9652 !important;
-				transform: translateY(-2px) !important;
-			}
-
-			/* Search Input */
-			.regular-text, #search-titles {
-				border-radius: 12px !important;
-				border: 2px solid rgba(202, 150, 82, 0.2) !important;
-				padding: 12px 20px !important;
-				font-size: 15px !important;
-				transition: all 0.3s !important;
-				background: #FFFFFF !important;
-			}
-
-			.regular-text:focus, #search-titles:focus {
-				border-color: #CA9652 !important;
-				box-shadow: 0 0 0 4px rgba(202, 150, 82, 0.1) !important;
-				outline: none !important;
-			}
-
-			/* Filter Checkboxes */
-			label[id$="-container"] {
-				background: rgba(254, 249, 244, 0.8);
-				border: 2px solid rgba(202, 150, 82, 0.2);
-				border-radius: 12px;
-				padding: 10px 20px !important;
-				transition: all 0.3s;
-				cursor: pointer;
-			}
-
-			label[id$="-container"]:hover {
-				background: rgba(202, 150, 82, 0.1);
-				border-color: #CA9652;
+				box-shadow:
+					0 12px 48px rgba(202, 150, 82, 0.12),
+					inset 0 1px 0 rgba(255, 255, 255, 1),
+					inset 0 -1px 0 rgba(202, 150, 82, 0.15);
 				transform: translateY(-2px);
 			}
 
+			.seo-card__title {
+				background: rgba(202, 150, 82, 0.08);
+				backdrop-filter: blur(10px);
+				-webkit-backdrop-filter: blur(10px);
+				color: #272521;
+				padding: 20px 28px;
+				margin: 0;
+				font-size: 20px;
+				font-weight: 500;
+				letter-spacing: -0.3px;
+				border-bottom: 1px solid rgba(202, 150, 82, 0.15);
+			}
+
+			.seo-card__content {
+				padding: 28px;
+			}
+
+			/* Glass Buttons */
+			.button, .button-primary {
+				border-radius: 14px !important;
+				padding: 11px 24px !important;
+				font-size: 14px !important;
+				font-weight: 500 !important;
+				transition: all 0.25s ease !important;
+				backdrop-filter: blur(10px) !important;
+				-webkit-backdrop-filter: blur(10px) !important;
+				border: 1px solid rgba(202, 150, 82, 0.2) !important;
+			}
+
+			.button-primary {
+				background: rgba(202, 150, 82, 0.15) !important;
+				color: #8C6839 !important;
+				box-shadow:
+					0 4px 16px rgba(202, 150, 82, 0.15),
+					inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+			}
+
+			.button-primary:hover {
+				background: rgba(202, 150, 82, 0.25) !important;
+				box-shadow:
+					0 6px 24px rgba(202, 150, 82, 0.2),
+					inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+				transform: translateY(-1px) !important;
+				color: #644A29 !important;
+			}
+
+			.button:not(.button-primary) {
+				background: rgba(255, 255, 255, 0.5) !important;
+				color: #8C6839 !important;
+				box-shadow:
+					0 4px 12px rgba(0, 0, 0, 0.05),
+					inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+			}
+
+			.button:not(.button-primary):hover {
+				background: rgba(255, 255, 255, 0.7) !important;
+				box-shadow:
+					0 6px 16px rgba(0, 0, 0, 0.08),
+					inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
+				transform: translateY(-1px) !important;
+			}
+
+			/* Glass Input Fields */
+			.regular-text, #search-titles {
+				border-radius: 14px !important;
+				border: 1px solid rgba(202, 150, 82, 0.2) !important;
+				padding: 11px 18px !important;
+				font-size: 14px !important;
+				transition: all 0.25s !important;
+				background: rgba(255, 255, 255, 0.6) !important;
+				backdrop-filter: blur(10px) !important;
+				-webkit-backdrop-filter: blur(10px) !important;
+				box-shadow:
+					inset 0 1px 3px rgba(0, 0, 0, 0.05),
+					0 1px 0 rgba(255, 255, 255, 0.5) !important;
+			}
+
+			.regular-text:focus, #search-titles:focus {
+				border-color: rgba(202, 150, 82, 0.4) !important;
+				background: rgba(255, 255, 255, 0.8) !important;
+				box-shadow:
+					0 0 0 3px rgba(202, 150, 82, 0.08),
+					inset 0 1px 3px rgba(0, 0, 0, 0.05),
+					0 1px 0 rgba(255, 255, 255, 0.6) !important;
+				outline: none !important;
+			}
+
+			/* Glass Filter Checkboxes */
+			label[id$="-container"] {
+				background: rgba(255, 255, 255, 0.5);
+				backdrop-filter: blur(10px);
+				-webkit-backdrop-filter: blur(10px);
+				border: 1px solid rgba(202, 150, 82, 0.2);
+				border-radius: 14px;
+				padding: 10px 18px !important;
+				transition: all 0.25s;
+				cursor: pointer;
+				box-shadow:
+					0 4px 12px rgba(0, 0, 0, 0.04),
+					inset 0 1px 0 rgba(255, 255, 255, 0.6);
+			}
+
+			label[id$="-container"]:hover {
+				background: rgba(202, 150, 82, 0.08);
+				border-color: rgba(202, 150, 82, 0.3);
+				box-shadow:
+					0 6px 16px rgba(202, 150, 82, 0.1),
+					inset 0 1px 0 rgba(255, 255, 255, 0.7);
+			}
+
 			label[id$="-container"] input[type="checkbox"] {
-				width: 20px;
-				height: 20px;
+				width: 18px;
+				height: 18px;
 				accent-color: #CA9652;
 				cursor: pointer;
 			}
@@ -1475,14 +1521,20 @@ class GeographicTitleGeneratorPage {
 			label[id$="-container"] span {
 				color: #272521;
 				font-weight: 500;
+				font-size: 14px;
 			}
 
-			/* Results Table */
+			/* Glass Results Table */
 			#titles-list {
-				border: 2px solid rgba(202, 150, 82, 0.15) !important;
-				border-radius: 16px !important;
-				padding: 24px !important;
-				background: linear-gradient(135deg, #FFFFFF 0%, rgba(254, 249, 244, 0.5) 100%) !important;
+				border: 1px solid rgba(202, 150, 82, 0.15) !important;
+				border-radius: 20px !important;
+				padding: 20px !important;
+				background: rgba(255, 255, 255, 0.4) !important;
+				backdrop-filter: blur(20px) !important;
+				-webkit-backdrop-filter: blur(20px) !important;
+				box-shadow:
+					0 8px 32px rgba(202, 150, 82, 0.06),
+					inset 0 1px 0 rgba(255, 255, 255, 0.8) !important;
 			}
 
 			#titles-list table {
@@ -1492,58 +1544,78 @@ class GeographicTitleGeneratorPage {
 			}
 
 			#titles-list thead {
-				background: linear-gradient(135deg, #CA9652 0%, #BC8C4D 100%);
+				background: rgba(202, 150, 82, 0.1);
+				backdrop-filter: blur(10px);
+				-webkit-backdrop-filter: blur(10px);
 			}
 
 			#titles-list thead th {
-				color: #FFFFFF !important;
-				padding: 16px 12px !important;
+				color: #644A29 !important;
+				padding: 14px 10px !important;
 				font-weight: 600 !important;
 				text-transform: uppercase;
-				font-size: 13px;
+				font-size: 12px;
 				letter-spacing: 0.5px;
-				border-bottom: none !important;
+				border-bottom: 1px solid rgba(202, 150, 82, 0.15) !important;
 			}
 
 			#titles-list tbody tr {
 				transition: all 0.2s;
-				border-bottom: 1px solid rgba(202, 150, 82, 0.1);
+				background: rgba(255, 255, 255, 0.3);
 			}
 
 			#titles-list tbody tr:hover {
+				background: rgba(202, 150, 82, 0.05);
+			}
+
+			#titles-list tbody tr:nth-child(even) {
+				background: rgba(254, 249, 244, 0.3);
+			}
+
+			#titles-list tbody tr:nth-child(even):hover {
 				background: rgba(202, 150, 82, 0.08);
-				transform: translateX(4px);
 			}
 
 			#titles-list tbody td {
-				padding: 14px 12px !important;
+				padding: 12px 10px !important;
 				color: #272521;
-				font-size: 14px;
+				font-size: 13px;
+				border-bottom: 1px solid rgba(202, 150, 82, 0.08);
 			}
 
-			/* Pagination */
+			/* Glass Pagination */
 			.pagination-btn {
-				background: rgba(202, 150, 82, 0.1) !important;
-				border: 2px solid rgba(202, 150, 82, 0.3) !important;
-				color: #CA9652 !important;
-				border-radius: 10px !important;
-				padding: 8px 16px !important;
-				margin: 0 4px !important;
-				transition: all 0.3s !important;
+				background: rgba(255, 255, 255, 0.5) !important;
+				backdrop-filter: blur(10px) !important;
+				-webkit-backdrop-filter: blur(10px) !important;
+				border: 1px solid rgba(202, 150, 82, 0.2) !important;
+				color: #8C6839 !important;
+				border-radius: 12px !important;
+				padding: 8px 14px !important;
+				margin: 0 3px !important;
+				transition: all 0.25s !important;
 				font-weight: 500 !important;
+				font-size: 13px !important;
+				box-shadow:
+					0 2px 8px rgba(0, 0, 0, 0.04),
+					inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
 			}
 
 			.pagination-btn:hover:not(:disabled) {
-				background: linear-gradient(135deg, #CA9652 0%, #BC8C4D 100%) !important;
-				color: #FFFFFF !important;
-				border-color: #CA9652 !important;
-				transform: translateY(-2px) !important;
+				background: rgba(202, 150, 82, 0.12) !important;
+				border-color: rgba(202, 150, 82, 0.3) !important;
+				box-shadow:
+					0 4px 12px rgba(202, 150, 82, 0.1),
+					inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
 			}
 
 			.pagination-btn.active {
-				background: linear-gradient(135deg, #CA9652 0%, #BC8C4D 100%) !important;
-				color: #FFFFFF !important;
-				border-color: #CA9652 !important;
+				background: rgba(202, 150, 82, 0.15) !important;
+				color: #644A29 !important;
+				border-color: rgba(202, 150, 82, 0.3) !important;
+				box-shadow:
+					0 4px 16px rgba(202, 150, 82, 0.15),
+					inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
 			}
 
 			.pagination-btn:disabled {
@@ -1551,34 +1623,60 @@ class GeographicTitleGeneratorPage {
 				cursor: not-allowed;
 			}
 
-			/* Status Messages */
+			/* Glass Status Messages */
 			#generation-status, #upload-status {
-				border-radius: 12px;
-				padding: 16px 24px;
-				margin-top: 16px;
+				border-radius: 14px;
+				padding: 14px 20px;
+				margin-top: 14px;
+				backdrop-filter: blur(10px);
+				-webkit-backdrop-filter: blur(10px);
 			}
 
 			#generation-status.success, #upload-status.success {
-				background: rgba(202, 150, 82, 0.1);
-				border-left: 4px solid #CA9652;
-				color: #272521;
+				background: rgba(202, 150, 82, 0.08);
+				border: 1px solid rgba(202, 150, 82, 0.2);
+				color: #644A29;
+				box-shadow:
+					0 4px 12px rgba(202, 150, 82, 0.08),
+					inset 0 1px 0 rgba(255, 255, 255, 0.6);
 			}
 
 			/* Code blocks */
 			code, pre {
-				background: rgba(39, 37, 33, 0.05) !important;
-				border: 1px solid rgba(202, 150, 82, 0.2) !important;
+				background: rgba(255, 255, 255, 0.6) !important;
+				backdrop-filter: blur(10px) !important;
+				-webkit-backdrop-filter: blur(10px) !important;
+				border: 1px solid rgba(202, 150, 82, 0.15) !important;
 				border-radius: 8px !important;
 				padding: 4px 8px !important;
 				font-family: 'Monaco', 'Menlo', monospace !important;
 				color: #8C6839 !important;
+				box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 			}
 
 			/* Total Count Display */
 			#total-count {
 				color: #CA9652;
 				font-weight: 700;
-				font-size: 18px;
+				font-size: 17px;
+			}
+
+			/* Subtle animations */
+			@keyframes float {
+				0%, 100% { transform: translateY(0px); }
+				50% { transform: translateY(-3px); }
+			}
+
+			.seo-card {
+				animation: float 6s ease-in-out infinite;
+			}
+
+			.seo-card:nth-child(2) {
+				animation-delay: 1s;
+			}
+
+			.seo-card:nth-child(3) {
+				animation-delay: 2s;
 			}
 		</style>
 		<div class="wrap seo-generator-page">

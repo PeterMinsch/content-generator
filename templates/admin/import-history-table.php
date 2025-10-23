@@ -2,137 +2,187 @@
 /**
  * Import History Table Template
  *
- * Displays paginated table of import history logs.
- *
  * @package SEOGenerator
  */
 
 defined( 'ABSPATH' ) || exit;
 
-// Get repository.
-$import_log_repo = new \SEOGenerator\Repositories\ImportLogRepository();
+// Get history service.
+$history_service = new \SEOGenerator\Services\ImportHistoryService();
 
-// Get pagination parameters.
-$paged    = isset( $_GET['log_paged'] ) ? absint( $_GET['log_paged'] ) : 1;
-$per_page = 5; // Reduced from 10 to 5 for faster loading
-$offset   = ( $paged - 1 ) * $per_page;
+// Get current page from URL parameter.
+$current_page = isset( $_GET['history_page'] ) ? max( 1, intval( $_GET['history_page'] ) ) : 1;
+$per_page     = 10;
 
-// Get import logs and total count.
-// Add error handling to prevent page hangs.
-try {
-	$logs        = $import_log_repo->findAll( $per_page, $offset );
-	$total_count = $import_log_repo->count();
-	$total_pages = ceil( $total_count / $per_page );
-} catch ( \Exception $e ) {
-	error_log( '[SEO Generator] Import history query failed: ' . $e->getMessage() );
-	$logs        = array();
-	$total_count = 0;
-	$total_pages = 0;
-}
+// Get history and total count.
+$history     = $history_service->getHistory( $current_page, $per_page );
+$total_count = $history_service->getHistoryCount();
+$total_pages = ceil( $total_count / $per_page );
 
+// Get current user.
+$current_user = wp_get_current_user();
 ?>
 
-<div class="wrap seo-import-history">
-	<h2><?php esc_html_e( 'Import History', 'seo-generator' ); ?></h2>
+<div class="seo-card" id="import-history-section">
+	<h3 class="seo-card__title">
+		📊 <?php esc_html_e( 'Import History', 'seo-generator' ); ?>
+		<?php if ( $total_count > 0 ) : ?>
+			<span style="font-weight: normal; font-size: 14px; color: var(--gray-600);">
+				(<?php echo esc_html( $total_count ); ?> total)
+			</span>
+		<?php endif; ?>
+	</h3>
+	<div class="seo-card__content">
+		<?php if ( empty( $history ) ) : ?>
+			<p style="color: var(--gray-600); text-align: center; padding: 40px 20px;">
+				<?php esc_html_e( 'No import history yet. Complete an import to see it here.', 'seo-generator' ); ?>
+			</p>
+		<?php else : ?>
+			<div style="overflow-x: auto;">
+				<table class="wp-list-table widefat fixed striped" style="width: 100%; border-collapse: collapse;">
+					<thead>
+						<tr>
+							<th style="width: 15%; padding: 12px; text-align: left; background: var(--gray-50); border-bottom: 2px solid var(--gray-200);">
+								<?php esc_html_e( 'Date & Time', 'seo-generator' ); ?>
+							</th>
+							<th style="width: 25%; padding: 12px; text-align: left; background: var(--gray-50); border-bottom: 2px solid var(--gray-200);">
+								<?php esc_html_e( 'Filename', 'seo-generator' ); ?>
+							</th>
+							<th style="width: 12%; padding: 12px; text-align: left; background: var(--gray-50); border-bottom: 2px solid var(--gray-200);">
+								<?php esc_html_e( 'Type', 'seo-generator' ); ?>
+							</th>
+							<th style="width: 10%; padding: 12px; text-align: center; background: var(--gray-50); border-bottom: 2px solid var(--gray-200);">
+								<?php esc_html_e( 'Total Rows', 'seo-generator' ); ?>
+							</th>
+							<th style="width: 28%; padding: 12px; text-align: left; background: var(--gray-50); border-bottom: 2px solid var(--gray-200);">
+								<?php esc_html_e( 'Results', 'seo-generator' ); ?>
+							</th>
+							<th style="width: 10%; padding: 12px; text-align: center; background: var(--gray-50); border-bottom: 2px solid var(--gray-200);">
+								<?php esc_html_e( 'Actions', 'seo-generator' ); ?>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<?php foreach ( $history as $import ) : ?>
+							<?php
+							$import_id     = isset( $import['id'] ) ? $import['id'] : '';
+							$timestamp     = isset( $import['timestamp'] ) ? $import['timestamp'] : 0;
+							$filename      = isset( $import['filename'] ) ? $import['filename'] : 'N/A';
+							$import_type   = isset( $import['import_type'] ) ? $import['import_type'] : 'csv_upload';
+							$total_rows    = isset( $import['total_rows'] ) ? $import['total_rows'] : 0;
+							$success_count = isset( $import['success_count'] ) ? $import['success_count'] : 0;
+							$error_count   = isset( $import['error_count'] ) ? $import['error_count'] : 0;
+							$skipped_count = isset( $import['skipped_count'] ) ? $import['skipped_count'] : 0;
+							$user_id       = isset( $import['user_id'] ) ? $import['user_id'] : 0;
 
-	<?php if ( empty( $logs ) ) : ?>
-		<p><?php esc_html_e( 'No import history found.', 'seo-generator' ); ?></p>
-	<?php else : ?>
-		<table class="wp-list-table widefat fixed striped">
-			<thead>
-				<tr>
-					<th scope="col" class="column-date"><?php esc_html_e( 'Date/Time', 'seo-generator' ); ?></th>
-					<th scope="col" class="column-filename"><?php esc_html_e( 'Filename', 'seo-generator' ); ?></th>
-					<th scope="col" class="column-total"><?php esc_html_e( 'Total Rows', 'seo-generator' ); ?></th>
-					<th scope="col" class="column-success"><?php esc_html_e( 'Success', 'seo-generator' ); ?></th>
-					<th scope="col" class="column-errors"><?php esc_html_e( 'Errors', 'seo-generator' ); ?></th>
-					<th scope="col" class="column-user"><?php esc_html_e( 'User', 'seo-generator' ); ?></th>
-					<th scope="col" class="column-actions"><?php esc_html_e( 'Actions', 'seo-generator' ); ?></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php foreach ( $logs as $log ) : ?>
+							// Get user display name.
+							$user = get_userdata( $user_id );
+							$username = $user ? $user->display_name : 'Unknown';
+
+							// Format timestamp.
+							$date_formatted = $timestamp ? wp_date( 'M j, Y', $timestamp ) : 'N/A';
+							$time_formatted = $timestamp ? wp_date( 'g:i A', $timestamp ) : 'N/A';
+
+							// Format import type.
+							$type_label = $import_type === 'geographic_titles' ? 'Geographic Titles' : 'CSV Upload';
+							$type_color = $import_type === 'geographic_titles' ? '#0073aa' : '#46b450';
+
+							// Calculate success rate.
+							$success_rate = $total_rows > 0 ? round( ( $success_count / $total_rows ) * 100 ) : 0;
+							$status_color = $success_rate >= 80 ? '#46b450' : ( $success_rate >= 50 ? '#f0b849' : '#dc3232' );
+							?>
+							<tr>
+								<td style="padding: 12px; border-bottom: 1px solid var(--gray-200);">
+									<div style="font-weight: 500; color: var(--gray-900);"><?php echo esc_html( $date_formatted ); ?></div>
+									<div style="font-size: 12px; color: var(--gray-600);"><?php echo esc_html( $time_formatted ); ?></div>
+								</td>
+								<td style="padding: 12px; border-bottom: 1px solid var(--gray-200);">
+									<div style="font-family: var(--font-mono); font-size: 13px; color: var(--gray-900); word-break: break-all;">
+										<?php echo esc_html( $filename ); ?>
+									</div>
+									<div style="font-size: 12px; color: var(--gray-600); margin-top: 4px;">
+										By <?php echo esc_html( $username ); ?>
+									</div>
+								</td>
+								<td style="padding: 12px; border-bottom: 1px solid var(--gray-200);">
+									<span style="display: inline-block; padding: 4px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; border-radius: 4px; background: <?php echo esc_attr( $type_color ); ?>20; color: <?php echo esc_attr( $type_color ); ?>;">
+										<?php echo esc_html( $type_label ); ?>
+									</span>
+								</td>
+								<td style="padding: 12px; border-bottom: 1px solid var(--gray-200); text-align: center;">
+									<div style="font-weight: 600; color: var(--gray-900);"><?php echo esc_html( number_format( $total_rows ) ); ?></div>
+								</td>
+								<td style="padding: 12px; border-bottom: 1px solid var(--gray-200);">
+									<div style="display: flex; gap: 12px; align-items: center;">
+										<?php if ( $success_count > 0 ) : ?>
+											<div style="display: flex; align-items: center; gap: 4px;">
+												<span style="width: 8px; height: 8px; border-radius: 50%; background: #46b450; display: inline-block;"></span>
+												<span style="font-size: 13px; color: var(--gray-700);">
+													<strong><?php echo esc_html( $success_count ); ?></strong> created
+												</span>
+											</div>
+										<?php endif; ?>
+
+										<?php if ( $skipped_count > 0 ) : ?>
+											<div style="display: flex; align-items: center; gap: 4px;">
+												<span style="width: 8px; height: 8px; border-radius: 50%; background: #f0b849; display: inline-block;"></span>
+												<span style="font-size: 13px; color: var(--gray-700);">
+													<strong><?php echo esc_html( $skipped_count ); ?></strong> skipped
+												</span>
+											</div>
+										<?php endif; ?>
+
+										<?php if ( $error_count > 0 ) : ?>
+											<div style="display: flex; align-items: center; gap: 4px;">
+												<span style="width: 8px; height: 8px; border-radius: 50%; background: #dc3232; display: inline-block;"></span>
+												<span style="font-size: 13px; color: var(--gray-700);">
+													<strong><?php echo esc_html( $error_count ); ?></strong> errors
+												</span>
+											</div>
+										<?php endif; ?>
+									</div>
+									<div style="margin-top: 6px; width: 100%; height: 4px; background: var(--gray-200); border-radius: 2px; overflow: hidden;">
+										<div style="width: <?php echo esc_attr( $success_rate ); ?>%; height: 100%; background: <?php echo esc_attr( $status_color ); ?>; transition: width 0.3s ease;"></div>
+									</div>
+								</td>
+								<td style="padding: 12px; border-bottom: 1px solid var(--gray-200); text-align: center;">
+									<a href="<?php echo esc_url( admin_url( 'admin.php?page=seo-import-keywords&action=view_log&import_id=' . urlencode( $import_id ) ) ); ?>"
+									   class="button button-small"
+									   style="font-size: 12px;">
+										<?php esc_html_e( 'View Details', 'seo-generator' ); ?>
+									</a>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					</tbody>
+				</table>
+			</div>
+
+			<?php if ( $total_pages > 1 ) : ?>
+				<div style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 8px;">
 					<?php
-					$user      = get_userdata( $log['user_id'] );
-					$username  = $user ? $user->display_name : __( 'Unknown', 'seo-generator' );
-					$timestamp = mysql2date( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $log['timestamp'] );
+					// Previous button.
+					if ( $current_page > 1 ) {
+						$prev_url = add_query_arg( 'history_page', $current_page - 1 );
+						echo '<a href="' . esc_url( $prev_url ) . '" class="button">&laquo; ' . esc_html__( 'Previous', 'seo-generator' ) . '</a>';
+					}
 
-					// Build details URL.
-					$details_url = add_query_arg(
-						array(
-							'page'   => 'seo-generator-import',
-							'action' => 'view_log',
-							'log_id' => $log['id'],
-						),
-						admin_url( 'admin.php' )
-					);
-					?>
-					<tr>
-						<td class="column-date">
-							<?php echo esc_html( $timestamp ); ?>
-						</td>
-						<td class="column-filename">
-							<strong><?php echo esc_html( $log['filename'] ); ?></strong>
-						</td>
-						<td class="column-total">
-							<?php echo absint( $log['total_rows'] ); ?>
-						</td>
-						<td class="column-success">
-							<span class="seo-success-count">
-								<?php echo absint( $log['success_count'] ); ?>
-							</span>
-						</td>
-						<td class="column-errors">
-							<?php if ( $log['error_count'] > 0 ) : ?>
-								<span class="seo-error-count" style="color: #dc3232; font-weight: 600;">
-									<?php echo absint( $log['error_count'] ); ?>
-								</span>
-							<?php else : ?>
-								<span style="color: #46b450;">
-									<?php esc_html_e( '0', 'seo-generator' ); ?>
-								</span>
-							<?php endif; ?>
-						</td>
-						<td class="column-user">
-							<?php echo esc_html( $username ); ?>
-						</td>
-						<td class="column-actions">
-							<a href="<?php echo esc_url( $details_url ); ?>" class="button button-small">
-								<?php esc_html_e( 'View Details', 'seo-generator' ); ?>
-							</a>
-						</td>
-					</tr>
-				<?php endforeach; ?>
-			</tbody>
-		</table>
+					// Page numbers.
+					for ( $i = 1; $i <= $total_pages; $i++ ) {
+						$page_url = add_query_arg( 'history_page', $i );
+						$is_current = $i === $current_page;
+						$button_class = $is_current ? 'button button-primary' : 'button';
+						echo '<a href="' . esc_url( $page_url ) . '" class="' . esc_attr( $button_class ) . '">' . esc_html( $i ) . '</a>';
+					}
 
-		<?php if ( $total_pages > 1 ) : ?>
-			<div class="tablenav bottom">
-				<div class="tablenav-pages">
-					<?php
-					echo paginate_links(
-						array(
-							'base'      => add_query_arg( 'log_paged', '%#%' ),
-							'format'    => '',
-							'current'   => $paged,
-							'total'     => $total_pages,
-							'prev_text' => '&laquo;',
-							'next_text' => '&raquo;',
-						)
-					);
+					// Next button.
+					if ( $current_page < $total_pages ) {
+						$next_url = add_query_arg( 'history_page', $current_page + 1 );
+						echo '<a href="' . esc_url( $next_url ) . '" class="button">' . esc_html__( 'Next', 'seo-generator' ) . ' &raquo;</a>';
+					}
 					?>
 				</div>
-			</div>
+			<?php endif; ?>
 		<?php endif; ?>
-	<?php endif; ?>
+	</div>
 </div>
-
-<style>
-.seo-import-history .column-date { width: 15%; }
-.seo-import-history .column-filename { width: 25%; }
-.seo-import-history .column-total { width: 10%; text-align: center; }
-.seo-import-history .column-success { width: 10%; text-align: center; }
-.seo-import-history .column-errors { width: 10%; text-align: center; }
-.seo-import-history .column-user { width: 15%; }
-.seo-import-history .column-actions { width: 15%; }
-</style>

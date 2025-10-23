@@ -318,6 +318,64 @@
 	}
 
 	/**
+	 * Handle process queue now button click.
+	 * Manually triggers WordPress Cron to process ready jobs.
+	 */
+	async function handleProcessQueueNow() {
+		const btn = document.getElementById( 'process-queue-now' );
+		const status = document.getElementById( 'processing-status' );
+		const message = document.getElementById( 'processing-message' );
+
+		// Disable button and show processing status
+		btn.disabled = true;
+		btn.innerHTML = '⏳ Processing...';
+		if ( status ) {
+			status.style.display = 'block';
+		}
+
+		try {
+			const formData = new FormData();
+			formData.append( 'action', 'seo_process_queue_cron' );
+			formData.append( 'nonce', seoQueueData.nonce );
+
+			const response = await fetch( seoQueueData.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: formData,
+			} );
+
+			const result = await response.json();
+
+			if ( result.success ) {
+				if ( message ) {
+					message.textContent = result.data.message + ' Refreshing...';
+				}
+				showNotice( result.data.message, 'success' );
+
+				// Wait 2 seconds then reload to show updated queue
+				setTimeout( () => {
+					location.reload();
+				}, 2000 );
+			} else {
+				showNotice( result.data.message || 'Failed to process queue', 'error' );
+				btn.disabled = false;
+				btn.innerHTML = '⚡ Process Queue Now';
+				if ( status ) {
+					status.style.display = 'none';
+				}
+			}
+		} catch ( error ) {
+			console.error( 'Process queue failed:', error );
+			showNotice( 'Failed to process queue', 'error' );
+			btn.disabled = false;
+			btn.innerHTML = '⚡ Process Queue Now';
+			if ( status ) {
+				status.style.display = 'none';
+			}
+		}
+	}
+
+	/**
 	 * Handle cancel individual job button click.
 	 *
 	 * @param {number} postId Post ID to cancel.
@@ -384,6 +442,12 @@
 	 * Initialize event listeners.
 	 */
 	function initializeEventListeners() {
+		// Process queue now button.
+		const processBtn = document.getElementById( 'process-queue-now' );
+		if ( processBtn ) {
+			processBtn.addEventListener( 'click', handleProcessQueueNow );
+		}
+
 		// Pause queue button.
 		const pauseBtn = document.getElementById( 'pause-queue' );
 		if ( pauseBtn ) {

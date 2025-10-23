@@ -146,19 +146,19 @@ Icon Selection Strategy:
    - "eco" = sustainability, ethics, responsibility (ANY category)
    - "gift" = special occasions, presentation, experiences (ANY celebratory context)
 
-2. VARY your combinations - don't default to the same 4 icons every time:
+2. VARY your combinations - don\'t default to the same 4 icons every time:
    - Care Guide: Try "repair, support, warranty, quality"
    - Buying Guide: Try "diamond, finance, secure, gift"
    - Product Collection: Try "quality, gift, resize, eco"
    - Size Guide: Try "resize, support, returns, secure"
    - Sustainability: Try "eco, diamond, quality, support"
 
-3. Consider the page's unique angle:
+3. Consider the page\'s unique angle:
    - What makes THIS page different from others?
    - What trust factors are MOST relevant here?
-   - Which icons haven't been overused?
+   - Which icons haven\'t been overused?
 
-Your Mission: Create a FRESH, UNIQUE set of 4 guarantees that feel specifically tailored to this page's topic. Challenge yourself to use different icon combinations than you might typically choose.
+Your Mission: Create a FRESH, UNIQUE set of 4 guarantees that feel specifically tailored to this page\'s topic. Challenge yourself to use different icon combinations than you might typically choose.
 
 Output as JSON (features array only):
 {
