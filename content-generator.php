@@ -211,14 +211,20 @@ function seo_generator_enqueue_admin_scripts( $hook ) {
 		)
 	);
 
+	// Check for pre-loaded file from geographic title generator.
+	$user_id       = get_current_user_id();
+	$transient_key = 'import_file_' . $user_id;
+	$preloaded_file = get_transient( $transient_key );
+
 	// Localize column-mapping script with import-specific data.
 	wp_localize_script(
 		'seo-generator-column-mapping',
 		'seoImportData',
 		array(
-			'nonce'         => wp_create_nonce( 'seo_csv_upload' ),
-			'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
-			'maxUploadSize' => wp_max_upload_size(),
+			'nonce'          => wp_create_nonce( 'seo_csv_upload' ),
+			'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+			'maxUploadSize'  => wp_max_upload_size(),
+			'preloadedFile'  => $preloaded_file ? $preloaded_file : null,
 		)
 	);
 }

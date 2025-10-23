@@ -13,6 +13,13 @@
 	let searchTerm = '';
 	let totalPages = 0;
 	let performanceMonitor = null;
+	let duplicateCount = 0;
+	let duplicateSlugs = [];
+	let hideDuplicates = false;
+	let landmarksOnly = false;
+	let landmarksCount = 0;
+	let urgentOnly = false;
+	let urgentCount = 0;
 
 	/**
 	 * Performance monitoring class.
@@ -193,11 +200,35 @@
 		// Handle export to CSV
 		$('#export-csv-btn').on('click', exportToCSV);
 
-		// Handle copy all slugs
-		$('#copy-all-btn').on('click', copyAllSlugs);
+		// Handle send to import page
+		$('#send-to-import-btn').on('click', sendToImportPage);
+
+		// Handle clear cache
+		$('#clear-cache-btn').on('click', clearLocationCache);
 
 		// Handle search/filter
 		$('#search-titles').on('input', filterTitles);
+
+		// Handle hide duplicates checkbox
+		$('#hide-duplicates-checkbox').on('change', function() {
+			hideDuplicates = $(this).is(':checked');
+			currentPage = 1; // Reset to first page
+			loadTitlesPage();
+		});
+
+		// Handle landmarks only checkbox
+		$('#landmarks-only-checkbox').on('change', function() {
+			landmarksOnly = $(this).is(':checked');
+			currentPage = 1; // Reset to first page
+			loadTitlesPage();
+		});
+
+		// Handle urgent only checkbox
+		$('#urgent-only-checkbox').on('change', function() {
+			urgentOnly = $(this).is(':checked');
+			currentPage = 1; // Reset to first page
+			loadTitlesPage();
+		});
 
 		// Handle pagination
 		$(document).on('click', '.pagination-btn', handlePagination);
@@ -234,10 +265,15 @@
 			success: function (response) {
 				if (response.success) {
 					const count = response.data.count;
-					showUploadStatus(
-						`✓ Successfully uploaded ${count} keyword${count !== 1 ? 's' : ''}. You can now generate title variations.`,
-						'success'
-					);
+					let message = `✓ Successfully uploaded ${count} keyword${count !== 1 ? 's' : ''}. You can now generate title variations.`;
+
+					// Show debug info if available
+					if (response.data.debug) {
+						console.log('[DEBUG]', response.data.debug);
+						message += '<br><small style="color: #666;">' + response.data.debug + '</small>';
+					}
+
+					showUploadStatus(message, 'success');
 					$('#generate-titles-btn').prop('disabled', false);
 				} else {
 					showUploadStatus('Error: ' + (response.data.message || 'Upload failed'), 'error');
@@ -293,6 +329,8 @@
 				page: currentPage,
 				limit: itemsPerPage,
 				search: searchTerm,
+				landmarksOnly: landmarksOnly,
+				urgentOnly: urgentOnly,
 			},
 			success: function (response) {
 				console.log('[PERF] AJAX response received');
@@ -303,6 +341,30 @@
 					console.log('[PERF] Response successful, processing data...');
 					totalCount = response.data.totalCount;
 					totalPages = response.data.totalPages;
+
+					// Store duplicate information (only sent on first page)
+					if (response.data.duplicateCount !== undefined) {
+						duplicateCount = response.data.duplicateCount;
+						duplicateSlugs = response.data.duplicateSlugs || [];
+
+						// Hide the duplicate filter checkbox (not needed since duplicates are excluded)
+						$('#hide-duplicates-container').hide();
+					}
+
+					// Count landmarks in the titles
+					// We need to estimate total landmarks count based on current page data
+					if (response.data.titles && response.data.titles.length > 0) {
+						const currentPageLandmarks = response.data.titles.filter(t => t.locationType === 'landmark').length;
+						const landmarksRatio = currentPageLandmarks / response.data.titles.length;
+						landmarksCount = Math.round(totalCount * landmarksRatio);
+						$('#landmarks-count-label').text(landmarksCount);
+
+						// Count urgent words in the titles
+						const currentPageUrgent = response.data.titles.filter(t => t.urgent && t.urgent !== '').length;
+						const urgentRatio = currentPageUrgent / response.data.titles.length;
+						urgentCount = Math.round(totalCount * urgentRatio);
+						$('#urgent-count-label').text(urgentCount);
+					}
 
 					// Display performance metrics
 					if (response.data.metrics) {
@@ -325,10 +387,14 @@
 
 					if (currentPage === 1 && !searchTerm) {
 						const serverTime = response.data.metrics ? response.data.metrics.total_time : '?';
-						showGenerationStatus(
-							`✓ Generated ${totalCount.toLocaleString()} titles in ${serverTime}ms (AJAX: ${ajaxDuration}ms)`,
-							'success'
-						);
+						let statusMessage = `✓ Generated ${totalCount.toLocaleString()} titles in ${serverTime}ms (AJAX: ${ajaxDuration}ms)`;
+
+						// Add info message if duplicates were excluded
+						if (duplicateCount > 0) {
+							statusMessage += `<br><span style="color: #2271b1;">ℹ️ ${duplicateCount} duplicate${duplicateCount !== 1 ? 's' : ''} excluded</span>`;
+						}
+
+						showGenerationStatus(statusMessage, 'success');
 					}
 
 					console.log('[PERF] Starting render...');
@@ -398,9 +464,17 @@
 		// Table header
 		const $thead = $('<thead>').append(
 			$('<tr>').append(
-				$('<th>', { style: 'width: 50px;' }).text('#'),
-				$('<th>', { style: 'width: 40%;' }).text('Title'),
-				$('<th>', { style: 'width: 60%;' }).text('Slug')
+				$('<th>', { style: 'width: 40px;' }).text('#'),
+				$('<th>', { style: 'width: 16%;' }).text('Title'),
+				$('<th>', { style: 'width: 10%;' }).text('Slug'),
+				$('<th>', { style: 'width: 7%;' }).text('Stone'),
+				$('<th>', { style: 'width: 7%;' }).text('Product'),
+				$('<th>', { style: 'width: 7%;' }).text('Style'),
+				$('<th>', { style: 'width: 7%;' }).text('Metal'),
+				$('<th>', { style: 'width: 10%;' }).text('Location'),
+				$('<th>', { style: 'width: 10%;' }).text('Landmarks'),
+				$('<th>', { style: 'width: 7%;' }).text('Zip Code'),
+				$('<th>', { style: 'width: 10%;' }).text('Urgent')
 			)
 		);
 
@@ -408,15 +482,31 @@
 		const $tbody = $('<tbody>');
 		titles.forEach((item, index) => {
 			const actualIndex = startIndex + index + 1;
+			const isLandmark = item.locationType === 'landmark';
+
+			// Skip non-landmarks if landmarks-only filter is enabled
+			if (landmarksOnly && !isLandmark) {
+				return;
+			}
+
 			const $row = $('<tr>').append(
 				$('<td>').text(actualIndex),
 				$('<td>').text(item.title),
 				$('<td>').html(
-					'<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 12px;">' +
+					'<code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-size: 11px;">' +
 						$('<div>').text(item.slug).html() +
 						'</code>'
-				)
+				),
+				$('<td>').text(item.stone || '-'),
+				$('<td>').text(item.product || '-'),
+				$('<td>').text(item.style || '-'),
+				$('<td>').text(item.metal || '-'),
+				$('<td>').text(isLandmark ? '-' : (item.location || '-')),
+				$('<td>').text(isLandmark ? (item.location || '-') : '-'),
+				$('<td>').text(item.zip || '-'),
+				$('<td>').text(item.urgent || '-')
 			);
+
 			$tbody.append($row);
 		});
 
@@ -615,17 +705,90 @@
 	}
 
 	/**
-	 * Copy all slugs to clipboard.
+	 * Send titles directly to Import page.
 	 */
-	function copyAllSlugs() {
+	function sendToImportPage() {
 		if (totalCount === 0) {
-			alert('No titles to copy.');
+			alert('No titles to send.');
 			return;
 		}
 
-		alert(
-			`Note: Copy all ${totalCount.toLocaleString()} slugs will be implemented in the next update. For now, you can copy visible titles manually.`
-		);
+		const $btn = $('#send-to-import-btn');
+		const originalText = $btn.text();
+
+		if (
+			totalCount > 5000 &&
+			!confirm(
+				`You are about to send ${totalCount.toLocaleString()} titles to the Import page. This may take a moment. Continue?`
+			)
+		) {
+			return;
+		}
+
+		$btn.prop('disabled', true).text('Sending...');
+
+		$.ajax({
+			url: seoGeoTitles.ajaxUrl,
+			type: 'POST',
+			data: {
+				action: 'seo_send_geo_to_import',
+				nonce: seoGeoTitles.nonce,
+				search: searchTerm,
+			},
+			success: function (response) {
+				if (response.success) {
+					alert(
+						`✓ Successfully sent ${response.data.count.toLocaleString()} titles to Import page.\n\nRedirecting now...`
+					);
+
+					// Redirect to import page
+					window.location.href = response.data.import_url;
+				} else {
+					alert('Error: ' + (response.data.message || 'Failed to send titles'));
+					$btn.prop('disabled', false).text(originalText);
+				}
+			},
+			error: function (xhr, status, error) {
+				alert('Error sending titles: ' + error);
+				$btn.prop('disabled', false).text(originalText);
+			},
+		});
+	}
+
+	/**
+	 * Clear location data cache.
+	 */
+	function clearLocationCache() {
+		if (!confirm('This will clear the cached location data and reload it with the latest structure. Continue?')) {
+			return;
+		}
+
+		const $btn = $('#clear-cache-btn');
+		const originalText = $btn.text();
+
+		$btn.prop('disabled', true).text('Clearing...');
+
+		$.ajax({
+			url: seoGeoTitles.ajaxUrl,
+			type: 'POST',
+			data: {
+				action: 'seo_clear_geo_cache',
+				nonce: seoGeoTitles.nonce,
+			},
+			success: function (response) {
+				if (response.success) {
+					alert('✓ Cache cleared successfully! The location data will be reloaded on the next generation.');
+					$btn.prop('disabled', false).text(originalText);
+				} else {
+					alert('Error: ' + (response.data.message || 'Failed to clear cache'));
+					$btn.prop('disabled', false).text(originalText);
+				}
+			},
+			error: function (xhr, status, error) {
+				alert('Error clearing cache: ' + error);
+				$btn.prop('disabled', false).text(originalText);
+			},
+		});
 	}
 
 	/**

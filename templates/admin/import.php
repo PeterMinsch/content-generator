@@ -18,6 +18,19 @@ $max_upload_size = wp_max_upload_size();
 	<!-- Page Header -->
 	<h1 class="heading-1"><?php esc_html_e( 'CSV Import', 'seo-generator' ); ?></h1>
 
+	<!-- Geographic Titles Success Banner (hidden by default, shown by JavaScript) -->
+	<div id="geo-titles-success-banner" style="display: none; margin-top: 20px;">
+		<div class="notice notice-success" style="padding: 20px; border-left: 4px solid #00a32a; background: #f0f6fc;">
+			<h2 style="margin: 0 0 10px 0; color: #00a32a; font-size: 18px;">
+				✓ Geographic Titles Successfully Loaded!
+			</h2>
+			<p style="margin: 0; font-size: 14px;">
+				<strong id="geo-titles-count">0</strong> titles from the Geographic Title Generator are ready to import.
+				The file has been automatically loaded and is ready for column mapping below.
+			</p>
+		</div>
+	</div>
+
 	<!-- Instructions Card -->
 	<div class="seo-card mt-6">
 		<h3 class="seo-card__title">
@@ -211,14 +224,14 @@ men's tungsten rings,commercial,800,</pre>
 									</svg>
 									<span class="device-label"><?php esc_html_e( 'Mobile', 'seo-generator' ); ?></span>
 								</button>
-								<button type="button" class="device-toggle-btn" data-device="tablet" role="tab" aria-selected="false" aria-label="<?php esc_attr_e( 'Tablet preview', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Preview on tablet device', 'seo-generator' ); ?>">
+								<button type="button" class="device-toggle-btn active" data-device="tablet" role="tab" aria-selected="true" aria-label="<?php esc_attr_e( 'Tablet preview', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Preview on tablet device', 'seo-generator' ); ?>">
 									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 										<rect x="3" y="2" width="14" height="16" rx="1" stroke="currentColor" stroke-width="1.5"/>
 										<circle cx="10" cy="15.5" r="0.75" fill="currentColor"/>
 									</svg>
 									<span class="device-label"><?php esc_html_e( 'Tablet', 'seo-generator' ); ?></span>
 								</button>
-								<button type="button" class="device-toggle-btn active" data-device="desktop" role="tab" aria-selected="true" aria-label="<?php esc_attr_e( 'Desktop preview', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Preview on desktop device', 'seo-generator' ); ?>">
+								<button type="button" class="device-toggle-btn" data-device="desktop" role="tab" aria-selected="false" aria-label="<?php esc_attr_e( 'Desktop preview', 'seo-generator' ); ?>" title="<?php esc_attr_e( 'Preview on desktop device', 'seo-generator' ); ?>">
 									<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 										<rect x="2" y="3" width="16" height="11" rx="1" stroke="currentColor" stroke-width="1.5"/>
 										<path d="M6 17H14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -229,9 +242,9 @@ men's tungsten rings,commercial,800,</pre>
 							</div>
 						</div>
 					</div>
-					<div id="block-preview-container" class="preview-device-wrapper" data-device="desktop">
+					<div id="block-preview-container" class="preview-device-wrapper" data-device="tablet">
 						<!-- Device Frame Container -->
-						<div class="device-frame desktop-frame">
+						<div class="device-frame tablet-frame">
 							<div class="device-screen">
 								<iframe
 									id="block-preview-iframe"

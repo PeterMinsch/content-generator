@@ -1,351 +1,351 @@
-city,area_name,category,notes
-Carlsbad,Calavera Hills,neighborhood,
-Carlsbad,Carlsbad Ranch,neighborhood,
-Carlsbad,Carlsbad Village,neighborhood,
-Carlsbad,Kelly Ranch,neighborhood,
-Carlsbad,La Costa,neighborhood,
-Carlsbad,North Beach,neighborhood,
-Carlsbad,Olde Carlsbad,neighborhood,
-Carlsbad,Poinsettia,neighborhood,
-Carlsbad,South Beach,neighborhood,
-Carlsbad,Tamarack Point,neighborhood,
-Carlsbad,The Barrio,neighborhood,
-Carlsbad,Aviara,subdivision/master-planned,
-Carlsbad,Bressi Ranch,subdivision/master-planned,
-Carlsbad,La Costa Greens,subdivision/master-planned,
-Carlsbad,La Costa Oaks,subdivision/master-planned,
-Carlsbad,La Costa Ridge,subdivision/master-planned,
-Carlsbad,Rancho Carrillo,subdivision/master-planned,
-Carlsbad,Rancho La Costa,subdivision/master-planned,
-Carlsbad,Robertson Ranch,subdivision/master-planned,
-Chula Vista,Castle Park,neighborhood,
-Chula Vista,Greg Rogers,neighborhood,
-Chula Vista,Harborside,neighborhood,
-Chula Vista,Hilltop,neighborhood,
-Chula Vista,North Chula Vista,neighborhood,
-Chula Vista,Otay Ranch Village,neighborhood,
-Chula Vista,Otay Town,neighborhood,
-Chula Vista,Salt Creek,neighborhood,
-Chula Vista,Terra Nova,neighborhood,
-Chula Vista,Village Center,neighborhood,
-Chula Vista,West Chula Vista (Urban Core),neighborhood,
-Chula Vista,Eastlake,subdivision/master-planned,
-Chula Vista,Eastlake Greens,subdivision/master-planned,Village within Eastlake
-Chula Vista,Eastlake Trails,subdivision/master-planned,Village within Eastlake
-Chula Vista,Eastlake Vistas,subdivision/master-planned,Village within Eastlake
-Chula Vista,Eastlake Woods,subdivision/master-planned,Village within Eastlake
-Chula Vista,Hillsborough (Otay Ranch),subdivision/master-planned,Village within Otay Ranch
-Chula Vista,Montecito (Otay Ranch),subdivision/master-planned,Village within Otay Ranch
-Chula Vista,Otay Ranch,subdivision/master-planned,
-Chula Vista,Rancho del Rey,subdivision/master-planned,
-Chula Vista,Rolling Hills Ranch,subdivision/master-planned,
-Chula Vista,San Miguel Ranch,subdivision/master-planned,
-Chula Vista,Sunbow,subdivision/master-planned,
-Chula Vista,Suwerte (Otay Ranch),subdivision/master-planned,Village within Otay Ranch
-Chula Vista,Windingwalk (Otay Ranch),subdivision/master-planned,Village within Otay Ranch
-Coronado,Coronado Cays,neighborhood,
-Coronado,Coronado Shores,neighborhood,
-Coronado,Coronado Village,neighborhood,
-Coronado,Country Club area,neighborhood,
-Coronado,Ferry Landing area,neighborhood,
-Coronado,Coronado Cays – Bahama Village,subdivision/master-planned,
-Coronado,Coronado Cays – Bermuda Village,subdivision/master-planned,
-Coronado,Coronado Cays – Blue Anchor,subdivision/master-planned,
-Coronado,Coronado Cays – Green Turtle,subdivision/master-planned,
-Coronado,Coronado Cays – Jamaica Village,subdivision/master-planned,
-Coronado,Coronado Cays – Kingston Court,subdivision/master-planned,
-Coronado,Coronado Cays – Mardi Gras,subdivision/master-planned,
-Coronado,Coronado Cays – Port Royale,subdivision/master-planned,
-Coronado,Coronado Cays – The Point,subdivision/master-planned,
-Coronado,Coronado Cays – Trinidad Village,subdivision/master-planned,
-Del Mar,Beach Colony,neighborhood,
-Del Mar,Del Mar Village,neighborhood,
-Del Mar,Olde Del Mar,neighborhood,
-El Cajon,Bostonia (portion),neighborhood,
-El Cajon,Cajon Heights,neighborhood,
-El Cajon,Downtown El Cajon,neighborhood,
-El Cajon,Fletcher Hills (portion),neighborhood,
-El Cajon,Granite Hills (portion),neighborhood,
-El Cajon,Wells Park,neighborhood,
-Encinitas,Cardiff-by-the-Sea,community,
-Encinitas,Leucadia,community,
-Encinitas,New Encinitas,community,
-Encinitas,Old Encinitas,community,
-Encinitas,Olivenhain,community,
-Encinitas,Cardiff Composer District,neighborhood,
-Encinitas,Cardiff Walking District,neighborhood,
-Encinitas,Encinitas Highlands,neighborhood,
-Encinitas,Northview,neighborhood,
-Encinitas,Pacific Serena,neighborhood,
-Encinitas,San Dieguito (Old Encinitas core),neighborhood,
-Encinitas,Cantebria,subdivision/master-planned,
-Encinitas,Copper Crest,subdivision/master-planned,
-Encinitas,Country Rose,subdivision/master-planned,
-Encinitas,Encinitas Ranch,subdivision/master-planned,
-Encinitas,Knightsbridge,subdivision/master-planned,
-Encinitas,Lake Val Sereno,subdivision/master-planned,
-Encinitas,New Villanitas,subdivision/master-planned,
-Encinitas,Summerfield/Summerhill,subdivision/master-planned,
-Encinitas,Village Park,subdivision/master-planned,
-Encinitas,Villanitas,subdivision/master-planned,
-Encinitas,Wildflower Estates,subdivision/master-planned,
-Escondido,Downtown Escondido,neighborhood,
-Escondido,East Grove,neighborhood,
-Escondido,Felicita Park area,neighborhood,
-Escondido,Midway,neighborhood,
-Escondido,North Escondido,neighborhood,
-Escondido,Old Escondido Historic District,neighborhood,
-Escondido,South Escondido,neighborhood,
-Escondido,City Square (Downtown condos),subdivision/master-planned,
-Escondido,Eureka Springs,subdivision/master-planned,
-Escondido,Rancho Vistamonte,subdivision/master-planned,
-Imperial Beach,City Center / Palm Ave corridor,neighborhood,
-Imperial Beach,Seacoast (Beachfront),neighborhood,
-Imperial Beach,Seaside Point,neighborhood,
-Imperial Beach,Imperial Palms Condos,subdivision/master-planned,
-Imperial Beach,The Tapestry,subdivision/master-planned,
-Imperial Beach,Tradewinds,subdivision/master-planned,
-La Mesa,Downtown Village,neighborhood,
-La Mesa,Eastridge,neighborhood,
-La Mesa,Fletcher Hills (portion),neighborhood,
-La Mesa,Grossmont,neighborhood,
-La Mesa,Lake Murray (La Mesa side),neighborhood,
-La Mesa,Serramar,neighborhood,
-La Mesa,Severin-Grossmont,neighborhood,
-La Mesa,Windsor Hills / Mt. Nebo,neighborhood,
-Lemon Grove,Central Lemon Grove,neighborhood,
-Lemon Grove,Civic Center/Downtown,neighborhood,
-Lemon Grove,Lemon Grove Park,neighborhood,
-Lemon Grove,North Lemon Grove,neighborhood,
-Lemon Grove,South Lemon Grove,neighborhood,
-National City,El Toyon,neighborhood,
-National City,Kimball,neighborhood,
-National City,Old Town National City,neighborhood,
-National City,Paradise Village area,neighborhood,
-National City,Rancho de la Nacion (historic),neighborhood,
-Oceanside,Downtown Oceanside,neighborhood,
-Oceanside,Fire Mountain,neighborhood,
-Oceanside,Guajome,neighborhood,
-Oceanside,Henie Hills,neighborhood,
-Oceanside,Ivey Ranch,neighborhood,
-Oceanside,Loma Alta,neighborhood,
-Oceanside,Morro Hills,neighborhood,
-Oceanside,North Valley,neighborhood,
-Oceanside,Ocean Hills,neighborhood,
-Oceanside,Peacock Hills,neighborhood,
-Oceanside,Rancho Del Oro,neighborhood,
-Oceanside,San Luis Rey,neighborhood,
-Oceanside,South Oceanside,neighborhood,
-Oceanside,Tri-City,neighborhood,
-Oceanside,Whelan Ranch,neighborhood,
-Oceanside,Ocean Hills Country Club (55+),subdivision/master-planned,
-Oceanside,Rancho Del Oro Villages,subdivision/master-planned,
-Oceanside,Village of Montego (Harbor),subdivision/master-planned,
-Poway,Bridlewood,neighborhood,
-Poway,Garden Road,neighborhood,
-Poway,Green Valley,neighborhood,
-Poway,High Valley,neighborhood,
-Poway,Huntington Gate,neighborhood,
-Poway,Old Poway,neighborhood,
-Poway,Poway Oaks,neighborhood,
-Poway,Rancho Arbolitos,neighborhood,
-Poway,Rolling Hills,neighborhood,
-Poway,The Palisades,neighborhood,
-Poway,Valle Verde,neighborhood,
-Poway,Bridlewood Lakeside,subdivision/master-planned,
-Poway,Sereno,subdivision/master-planned,
-Poway,Silver Saddle Ranch,subdivision/master-planned,
-Poway,Stone Canyon,subdivision/master-planned,
-Poway,Stoneridge,subdivision/master-planned,
-Poway,The Heritage,subdivision/master-planned,
-Poway,Vineland Hills,subdivision/master-planned,
-San Diego,Balboa Park,community,Community Planning Area
-San Diego,Barrio Logan,community,Community Planning Area
-San Diego,Black Mountain Ranch (Del Sur),community,Community Planning Area
-San Diego,Carmel Mountain Ranch,community,Community Planning Area
-San Diego,Carmel Valley,community,Community Planning Area
-San Diego,City Heights,community,Community Planning Area
-San Diego,Clairemont Mesa,community,Community Planning Area
-San Diego,College Area,community,Community Planning Area
-San Diego,Del Mar Mesa,community,Community Planning Area
-San Diego,Downtown,community,Community Planning Area
-San Diego,Eastern Area,community,Community Planning Area
-San Diego,Encanto Neighborhoods,community,Community Planning Area
-San Diego,Fairbanks Country Club,community,Community Planning Area
-San Diego,Golden Hill,community,Community Planning Area
-San Diego,Kearny Mesa,community,Community Planning Area
-San Diego,Kensington-Talmadge,community,Community Planning Area
-San Diego,La Jolla,community,Community Planning Area
-San Diego,Linda Vista,community,Community Planning Area
-San Diego,Mid-City: Kensington-Talmadge,community,Community Planning Area
-San Diego,Mid-City: Normal Heights,community,Community Planning Area
-San Diego,Midway-Pacific Highway,community,Community Planning Area
-San Diego,Mira Mesa,community,Community Planning Area
-San Diego,Miramar Ranch North,community,Community Planning Area
-San Diego,Mission Bay Park,community,Community Planning Area
-San Diego,Mission Beach,community,Community Planning Area
-San Diego,Mission Valley,community,Community Planning Area
-San Diego,Navajo,community,Community Planning Area
-San Diego,North Park,community,Community Planning Area
-San Diego,Ocean Beach,community,Community Planning Area
-San Diego,Old Town,community,Community Planning Area
-San Diego,Otay Mesa,community,Community Planning Area
-San Diego,Otay Mesa-Nestor,community,Community Planning Area
-San Diego,Pacific Beach,community,Community Planning Area
-San Diego,Peninsula,community,Community Planning Area
-San Diego,Rancho Bernardo,community,Community Planning Area
-San Diego,Rancho Encantada (Stonebridge),community,Community Planning Area
-San Diego,Rancho Peñasquitos,community,Community Planning Area
-San Diego,Sabre Springs,community,Community Planning Area
-San Diego,San Pasqual,community,Community Planning Area
-San Diego,San Ysidro,community,Community Planning Area
-San Diego,Scripps Miramar Ranch,community,Community Planning Area
-San Diego,Scripps Ranch,community,Community Planning Area
-San Diego,Serra Mesa,community,Community Planning Area
-San Diego,Skyline-Paradise Hills,community,Community Planning Area
-San Diego,Southeastern San Diego,community,Community Planning Area
-San Diego,Tierrasanta,community,Community Planning Area
-San Diego,Torrey Highlands,community,Community Planning Area
-San Diego,Torrey Hills,community,Community Planning Area
-San Diego,Torrey Pines,community,Community Planning Area
-San Diego,University (UTC),community,Community Planning Area
-San Diego,Uptown (Hillcrest/Bankers Hill/Mission Hills),community,Community Planning Area
-San Diego,Allied Gardens,neighborhood,
-San Diego,Alta Vista,neighborhood,
-San Diego,Bankers Hill/Park West,neighborhood,
-San Diego,Barrio Logan,neighborhood,
-San Diego,Bay Ho,neighborhood,
-San Diego,Bay Park,neighborhood,
-San Diego,Bernardo Heights,neighborhood,
-San Diego,Bird Rock,neighborhood,
-San Diego,Broadway Heights,neighborhood,
-San Diego,Carmel Mountain Ranch,neighborhood,
-San Diego,Carmel Valley,neighborhood,
-San Diego,Chollas Creek,neighborhood,
-San Diego,Chollas View,neighborhood,
-San Diego,Clairemont Mesa East,neighborhood,
-San Diego,Clairemont Mesa West,neighborhood,
-San Diego,College Area,neighborhood,
-San Diego,Core-Columbia,neighborhood,
-San Diego,Cortez Hill,neighborhood,
-San Diego,Del Cerro,neighborhood,
-San Diego,Del Mar Mesa,neighborhood,
-San Diego,Del Sur (Black Mountain Ranch),neighborhood,
-San Diego,East Village,neighborhood,
-San Diego,Egger Highlands,neighborhood,
-San Diego,El Cerrito,neighborhood,
-San Diego,Emerald Hills,neighborhood,
-San Diego,Encanto,neighborhood,
-San Diego,Golden Hill,neighborhood,
-San Diego,Grantville,neighborhood,
-San Diego,Hillcrest,neighborhood,
-San Diego,Jamacha,neighborhood,
-San Diego,Kearny Mesa,neighborhood,
-San Diego,Kensington,neighborhood,
-San Diego,La Jolla,neighborhood,
-San Diego,Lincoln Park,neighborhood,
-San Diego,Linda Vista,neighborhood,
-San Diego,Little Italy,neighborhood,
-San Diego,Logan Heights,neighborhood,
-San Diego,Lomita Village,neighborhood,
-San Diego,Marina District,neighborhood,
-San Diego,Meadowbrook,neighborhood,
-San Diego,Midway District,neighborhood,
-San Diego,Mira Mesa,neighborhood,
-San Diego,Mission Beach,neighborhood,
-San Diego,Mission Hills,neighborhood,
-San Diego,Mission Valley East,neighborhood,
-San Diego,Mission Valley West,neighborhood,
-San Diego,Morena,neighborhood,
-San Diego,Mountain View,neighborhood,
-San Diego,Mt. Hope,neighborhood,
-San Diego,Nestor,neighborhood,
-San Diego,Normal Heights,neighborhood,
-San Diego,North Park,neighborhood,
-San Diego,O'Farrell,neighborhood,
-San Diego,Oak Park,neighborhood,
-San Diego,Ocean Beach,neighborhood,
-San Diego,Old Town,neighborhood,
-San Diego,Otay Mesa,neighborhood,
-San Diego,Otay Mesa West,neighborhood,
-San Diego,Pacific Beach,neighborhood,
-San Diego,Palm City,neighborhood,
-San Diego,Paradise Hills,neighborhood,
-San Diego,Point Loma,neighborhood,
-San Diego,Rancho Bernardo,neighborhood,
-San Diego,Rancho Peñasquitos,neighborhood,
-San Diego,Redwood Village,neighborhood,
-San Diego,Rolando,neighborhood,
-San Diego,Sabre Springs,neighborhood,
-San Diego,San Carlos,neighborhood,
-San Diego,San Ysidro,neighborhood,
-San Diego,Scripps Ranch,neighborhood,
-San Diego,Serra Mesa,neighborhood,
-San Diego,Shelltown,neighborhood,
-San Diego,Sherman Heights,neighborhood,
-San Diego,Skyline,neighborhood,
-San Diego,Sorrento Mesa,neighborhood,
-San Diego,Sorrento Valley,neighborhood,
-San Diego,South Park,neighborhood,
-San Diego,Southcrest,neighborhood,
-San Diego,Stockton,neighborhood,
-San Diego,Stonebridge (Rancho Encantada),neighborhood,
-San Diego,Sunset Cliffs,neighborhood,
-San Diego,Talmadge,neighborhood,
-San Diego,Tijuana River Valley,neighborhood,
-San Diego,Torrey Highlands,neighborhood,
-San Diego,Torrey Hills,neighborhood,
-San Diego,Torrey Pines,neighborhood,
-San Diego,University City (UTC),neighborhood,
-San Diego,University Heights,neighborhood,
-San Diego,Valencia Park,neighborhood,
-San Diego,Webster,neighborhood,
-San Diego,Bernardo Heights,subdivision/master-planned,
-San Diego,Camino Bernardo,subdivision/master-planned,
-San Diego,Carmel Country Highlands,subdivision/master-planned,
-San Diego,Del Sur,subdivision/master-planned,
-San Diego,Oaks North (55+),subdivision/master-planned,
-San Diego,Pacific Highlands Ranch,subdivision/master-planned,
-San Diego,Scripps Ranch Villages,subdivision/master-planned,
-San Diego,Seven Oaks (55+),subdivision/master-planned,
-San Diego,Stonebridge Estates (Rancho Encantada),subdivision/master-planned,
-San Diego,Torrey Highlands (various villages),subdivision/master-planned,
-San Diego,Torrey Hills (master-planned),subdivision/master-planned,
-San Diego,Westwood (Rancho Bernardo),subdivision/master-planned,
-San Marcos,Discovery Hills,neighborhood,
-San Marcos,Richmar (Downtown),neighborhood,
-San Marcos,University District/North City,neighborhood,
-San Marcos,Old Creek Ranch,subdivision/master-planned,
-San Marcos,Rancho Dorado,subdivision/master-planned,
-San Marcos,Rancho Santalina,subdivision/master-planned,
-San Marcos,San Elijo Hills,subdivision/master-planned,
-San Marcos,Santa Fe Hills,subdivision/master-planned,
-San Marcos,Twin Oaks Valley,subdivision/master-planned,
-San Marcos,Twin Oaks Valley Ranch,subdivision/master-planned,
-Santee,Carlton Hills,neighborhood,
-Santee,Carlton Oaks,neighborhood,
-Santee,Town Center,neighborhood,
-Santee,Fanita Ranch (planned),subdivision/master-planned,Approved/entitled phases; long-term buildout
-Santee,Riverwalk,subdivision/master-planned,
-Santee,Sky Ranch,subdivision/master-planned,
-Solana Beach,Del Mar Beach Club area,neighborhood,
-Solana Beach,Eden Gardens (La Colonia),neighborhood,
-Solana Beach,Lomas Santa Fe,neighborhood,
-Solana Beach,Solana Hills,neighborhood,
-Solana Beach,West Solana Beach,neighborhood,
-Solana Beach,Loma Del Cielo,subdivision/master-planned,
-Solana Beach,Lomas Santa Fe Estates,subdivision/master-planned,
-Solana Beach,Saint Francis Court,subdivision/master-planned,
-Solana Beach,Saratoga West,subdivision/master-planned,
-Solana Beach,Sea Turf,subdivision/master-planned,
-Solana Beach,Seascape (various condo complexes),subdivision/master-planned,
-Vista,Alta Vista,neighborhood,
-Vista,Breeze Hill,neighborhood,
-Vista,Downtown Vista (Vista Village),neighborhood,
-Vista,East Vista,neighborhood,
-Vista,North Vista,neighborhood,
-Vista,Shadowridge,neighborhood,
-Vista,Warmlands,neighborhood,
-Vista,Moncado Springs,subdivision/master-planned,
-Vista,Shadowridge (master-planned area),subdivision/master-planned,
-Vista,Stonegate,subdivision/master-planned,
+city,area_name,category,notes,zip_code
+Carlsbad,Calavera Hills,neighborhood,,92008
+Carlsbad,Carlsbad Ranch,neighborhood,,92008
+Carlsbad,Carlsbad Village,neighborhood,,92008
+Carlsbad,Kelly Ranch,neighborhood,,92008
+Carlsbad,La Costa,neighborhood,,92009
+Carlsbad,North Beach,neighborhood,,92008
+Carlsbad,Olde Carlsbad,neighborhood,,92008
+Carlsbad,Poinsettia,neighborhood,,92011
+Carlsbad,South Beach,neighborhood,,92008
+Carlsbad,Tamarack Point,neighborhood,,92008
+Carlsbad,The Barrio,neighborhood,,92008
+Carlsbad,Aviara,subdivision/master-planned,,92011
+Carlsbad,Bressi Ranch,subdivision/master-planned,,92009
+Carlsbad,La Costa Greens,subdivision/master-planned,,92009
+Carlsbad,La Costa Oaks,subdivision/master-planned,,92009
+Carlsbad,La Costa Ridge,subdivision/master-planned,,92009
+Carlsbad,Rancho Carrillo,subdivision/master-planned,,92008
+Carlsbad,Rancho La Costa,subdivision/master-planned,,92009
+Carlsbad,Robertson Ranch,subdivision/master-planned,,92010
+Chula Vista,Castle Park,neighborhood,,91910
+Chula Vista,Greg Rogers,neighborhood,,91910
+Chula Vista,Harborside,neighborhood,,91910
+Chula Vista,Hilltop,neighborhood,,91911
+Chula Vista,North Chula Vista,neighborhood,,91910
+Chula Vista,Otay Ranch Village,neighborhood,,91913
+Chula Vista,Otay Town,neighborhood,,91911
+Chula Vista,Salt Creek,neighborhood,,91914
+Chula Vista,Terra Nova,neighborhood,,91910
+Chula Vista,Village Center,neighborhood,,91910
+Chula Vista,West Chula Vista (Urban Core),neighborhood,,91910
+Chula Vista,Eastlake,subdivision/master-planned,,91915
+Chula Vista,Eastlake Greens,subdivision/master-planned,Village within Eastlake,91915
+Chula Vista,Eastlake Trails,subdivision/master-planned,Village within Eastlake,91915
+Chula Vista,Eastlake Vistas,subdivision/master-planned,Village within Eastlake,91915
+Chula Vista,Eastlake Woods,subdivision/master-planned,Village within Eastlake,91915
+Chula Vista,Hillsborough (Otay Ranch),subdivision/master-planned,Village within Otay Ranch,91913
+Chula Vista,Montecito (Otay Ranch),subdivision/master-planned,Village within Otay Ranch,91913
+Chula Vista,Otay Ranch,subdivision/master-planned,,91913
+Chula Vista,Rancho del Rey,subdivision/master-planned,,91914
+Chula Vista,Rolling Hills Ranch,subdivision/master-planned,,91914
+Chula Vista,San Miguel Ranch,subdivision/master-planned,,91914
+Chula Vista,Sunbow,subdivision/master-planned,,91911
+Chula Vista,Suwerte (Otay Ranch),subdivision/master-planned,Village within Otay Ranch,91913
+Chula Vista,Windingwalk (Otay Ranch),subdivision/master-planned,Village within Otay Ranch,91913
+Coronado,Coronado Cays,neighborhood,,92118
+Coronado,Coronado Shores,neighborhood,,92118
+Coronado,Coronado Village,neighborhood,,92118
+Coronado,Country Club area,neighborhood,,92118
+Coronado,Ferry Landing area,neighborhood,,92118
+Coronado,Coronado Cays – Bahama Village,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Bermuda Village,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Blue Anchor,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Green Turtle,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Jamaica Village,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Kingston Court,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Mardi Gras,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Port Royale,subdivision/master-planned,,92118
+Coronado,Coronado Cays – The Point,subdivision/master-planned,,92118
+Coronado,Coronado Cays – Trinidad Village,subdivision/master-planned,,92118
+Del Mar,Beach Colony,neighborhood,,92014
+Del Mar,Del Mar Village,neighborhood,,92014
+Del Mar,Olde Del Mar,neighborhood,,92014
+El Cajon,Bostonia (portion),neighborhood,,92020
+El Cajon,Cajon Heights,neighborhood,,92020
+El Cajon,Downtown El Cajon,neighborhood,,92020
+El Cajon,Fletcher Hills (portion),neighborhood,,92020
+El Cajon,Granite Hills (portion),neighborhood,,92019
+El Cajon,Wells Park,neighborhood,,92020
+Encinitas,Cardiff-by-the-Sea,community,,92007
+Encinitas,Leucadia,community,,92024
+Encinitas,New Encinitas,community,,92024
+Encinitas,Old Encinitas,community,,92024
+Encinitas,Olivenhain,community,,92024
+Encinitas,Cardiff Composer District,neighborhood,,92007
+Encinitas,Cardiff Walking District,neighborhood,,92007
+Encinitas,Encinitas Highlands,neighborhood,,92024
+Encinitas,Northview,neighborhood,,92024
+Encinitas,Pacific Serena,neighborhood,,92024
+Encinitas,San Dieguito (Old Encinitas core),neighborhood,,92024
+Encinitas,Cantebria,subdivision/master-planned,,92024
+Encinitas,Copper Crest,subdivision/master-planned,,92024
+Encinitas,Country Rose,subdivision/master-planned,,92024
+Encinitas,Encinitas Ranch,subdivision/master-planned,,92024
+Encinitas,Knightsbridge,subdivision/master-planned,,92024
+Encinitas,Lake Val Sereno,subdivision/master-planned,,92024
+Encinitas,New Villanitas,subdivision/master-planned,,92024
+Encinitas,Summerfield/Summerhill,subdivision/master-planned,,92024
+Encinitas,Village Park,subdivision/master-planned,,92024
+Encinitas,Villanitas,subdivision/master-planned,,92024
+Encinitas,Wildflower Estates,subdivision/master-planned,,92024
+Escondido,Downtown Escondido,neighborhood,,92025
+Escondido,East Grove,neighborhood,,92027
+Escondido,Felicita Park area,neighborhood,,92025
+Escondido,Midway,neighborhood,,92027
+Escondido,North Escondido,neighborhood,,92026
+Escondido,Old Escondido Historic District,neighborhood,,92025
+Escondido,South Escondido,neighborhood,,92025
+Escondido,City Square (Downtown condos),subdivision/master-planned,,92025
+Escondido,Eureka Springs,subdivision/master-planned,,92026
+Escondido,Rancho Vistamonte,subdivision/master-planned,,92029
+Imperial Beach,City Center / Palm Ave corridor,neighborhood,,91932
+Imperial Beach,Seacoast (Beachfront),neighborhood,,91932
+Imperial Beach,Seaside Point,neighborhood,,91932
+Imperial Beach,Imperial Palms Condos,subdivision/master-planned,,91932
+Imperial Beach,The Tapestry,subdivision/master-planned,,91932
+Imperial Beach,Tradewinds,subdivision/master-planned,,91932
+La Mesa,Downtown Village,neighborhood,,91942
+La Mesa,Eastridge,neighborhood,,91942
+La Mesa,Fletcher Hills (portion),neighborhood,,91942
+La Mesa,Grossmont,neighborhood,,91942
+La Mesa,Lake Murray (La Mesa side),neighborhood,,91942
+La Mesa,Serramar,neighborhood,,91941
+La Mesa,Severin-Grossmont,neighborhood,,91942
+La Mesa,Windsor Hills / Mt. Nebo,neighborhood,,91941
+Lemon Grove,Central Lemon Grove,neighborhood,,91945
+Lemon Grove,Civic Center/Downtown,neighborhood,,91945
+Lemon Grove,Lemon Grove Park,neighborhood,,91945
+Lemon Grove,North Lemon Grove,neighborhood,,91945
+Lemon Grove,South Lemon Grove,neighborhood,,91945
+National City,El Toyon,neighborhood,,91950
+National City,Kimball,neighborhood,,91950
+National City,Old Town National City,neighborhood,,91950
+National City,Paradise Village area,neighborhood,,91950
+National City,Rancho de la Nacion (historic),neighborhood,,91950
+Oceanside,Downtown Oceanside,neighborhood,,92054
+Oceanside,Fire Mountain,neighborhood,,92057
+Oceanside,Guajome,neighborhood,,92057
+Oceanside,Henie Hills,neighborhood,,92056
+Oceanside,Ivey Ranch,neighborhood,,92057
+Oceanside,Loma Alta,neighborhood,,92058
+Oceanside,Morro Hills,neighborhood,,92056
+Oceanside,North Valley,neighborhood,,92057
+Oceanside,Ocean Hills,neighborhood,,92056
+Oceanside,Peacock Hills,neighborhood,,92057
+Oceanside,Rancho Del Oro,neighborhood,,92057
+Oceanside,San Luis Rey,neighborhood,,92057
+Oceanside,South Oceanside,neighborhood,,92054
+Oceanside,Tri-City,neighborhood,,92054
+Oceanside,Whelan Ranch,neighborhood,,92058
+Oceanside,Ocean Hills Country Club (55+),subdivision/master-planned,,92056
+Oceanside,Rancho Del Oro Villages,subdivision/master-planned,,92057
+Oceanside,Village of Montego (Harbor),subdivision/master-planned,,92054
+Poway,Bridlewood,neighborhood,,92064
+Poway,Garden Road,neighborhood,,92064
+Poway,Green Valley,neighborhood,,92064
+Poway,High Valley,neighborhood,,92064
+Poway,Huntington Gate,neighborhood,,92064
+Poway,Old Poway,neighborhood,,92064
+Poway,Poway Oaks,neighborhood,,92064
+Poway,Rancho Arbolitos,neighborhood,,92064
+Poway,Rolling Hills,neighborhood,,92064
+Poway,The Palisades,neighborhood,,92064
+Poway,Valle Verde,neighborhood,,92064
+Poway,Bridlewood Lakeside,subdivision/master-planned,,92064
+Poway,Sereno,subdivision/master-planned,,92064
+Poway,Silver Saddle Ranch,subdivision/master-planned,,92064
+Poway,Stone Canyon,subdivision/master-planned,,92064
+Poway,Stoneridge,subdivision/master-planned,,92064
+Poway,The Heritage,subdivision/master-planned,,92064
+Poway,Vineland Hills,subdivision/master-planned,,92064
+San Diego,Balboa Park,community,Community Planning Area,92101
+San Diego,Barrio Logan,community,Community Planning Area,92113
+San Diego,Black Mountain Ranch (Del Sur),community,Community Planning Area,92127
+San Diego,Carmel Mountain Ranch,community,Community Planning Area,92128
+San Diego,Carmel Valley,community,Community Planning Area,92130
+San Diego,City Heights,community,Community Planning Area,92105
+San Diego,Clairemont Mesa,community,Community Planning Area,92117
+San Diego,College Area,community,Community Planning Area,92115
+San Diego,Del Mar Mesa,community,Community Planning Area,92130
+San Diego,Downtown,community,Community Planning Area,92101
+San Diego,Eastern Area,community,Community Planning Area,92105
+San Diego,Encanto Neighborhoods,community,Community Planning Area,92114
+San Diego,Fairbanks Country Club,community,Community Planning Area,92067
+San Diego,Golden Hill,community,Community Planning Area,92102
+San Diego,Kearny Mesa,community,Community Planning Area,92123
+San Diego,Kensington-Talmadge,community,Community Planning Area,92105
+San Diego,La Jolla,community,Community Planning Area,92037
+San Diego,Linda Vista,community,Community Planning Area,92111
+San Diego,Mid-City: Kensington-Talmadge,community,Community Planning Area,92105
+San Diego,Mid-City: Normal Heights,community,Community Planning Area,92116
+San Diego,Midway-Pacific Highway,community,Community Planning Area,92110
+San Diego,Mira Mesa,community,Community Planning Area,92126
+San Diego,Miramar Ranch North,community,Community Planning Area,92127
+San Diego,Mission Bay Park,community,Community Planning Area,92109
+San Diego,Mission Beach,community,Community Planning Area,92109
+San Diego,Mission Valley,community,Community Planning Area,92108
+San Diego,Navajo,community,Community Planning Area,92119
+San Diego,North Park,community,Community Planning Area,92104
+San Diego,Ocean Beach,community,Community Planning Area,92107
+San Diego,Old Town,community,Community Planning Area,92110
+San Diego,Otay Mesa,community,Community Planning Area,92154
+San Diego,Otay Mesa-Nestor,community,Community Planning Area,92154
+San Diego,Pacific Beach,community,Community Planning Area,92109
+San Diego,Peninsula,community,Community Planning Area,92106
+San Diego,Rancho Bernardo,community,Community Planning Area,92127
+San Diego,Rancho Encantada (Stonebridge),community,Community Planning Area,92127
+San Diego,Rancho Peñasquitos,community,Community Planning Area,92129
+San Diego,Sabre Springs,community,Community Planning Area,92131
+San Diego,San Pasqual,community,Community Planning Area,92025
+San Diego,San Ysidro,community,Community Planning Area,92173
+San Diego,Scripps Miramar Ranch,community,Community Planning Area,92131
+San Diego,Scripps Ranch,community,Community Planning Area,92131
+San Diego,Serra Mesa,community,Community Planning Area,92111
+San Diego,Skyline-Paradise Hills,community,Community Planning Area,92139
+San Diego,Southeastern San Diego,community,Community Planning Area,92114
+San Diego,Tierrasanta,community,Community Planning Area,92124
+San Diego,Torrey Highlands,community,Community Planning Area,92130
+San Diego,Torrey Hills,community,Community Planning Area,92130
+San Diego,Torrey Pines,community,Community Planning Area,92037
+San Diego,University (UTC),community,Community Planning Area,92122
+San Diego,Uptown (Hillcrest/Bankers Hill/Mission Hills),community,Community Planning Area,92103
+San Diego,Allied Gardens,neighborhood,,92119
+San Diego,Alta Vista,neighborhood,,92126
+San Diego,Bankers Hill/Park West,neighborhood,,92103
+San Diego,Barrio Logan,neighborhood,,92113
+San Diego,Bay Ho,neighborhood,,92117
+San Diego,Bay Park,neighborhood,,92117
+San Diego,Bernardo Heights,neighborhood,,92128
+San Diego,Bird Rock,neighborhood,,92037
+San Diego,Broadway Heights,neighborhood,,92102
+San Diego,Carmel Mountain Ranch,neighborhood,,92128
+San Diego,Carmel Valley,neighborhood,,92130
+San Diego,Chollas Creek,neighborhood,,92105
+San Diego,Chollas View,neighborhood,,92105
+San Diego,Clairemont Mesa East,neighborhood,,92117
+San Diego,Clairemont Mesa West,neighborhood,,92117
+San Diego,College Area,neighborhood,,92115
+San Diego,Core-Columbia,neighborhood,,92101
+San Diego,Cortez Hill,neighborhood,,92101
+San Diego,Del Cerro,neighborhood,,92115
+San Diego,Del Mar Mesa,neighborhood,,92130
+San Diego,Del Sur (Black Mountain Ranch),neighborhood,,92127
+San Diego,East Village,neighborhood,,92101
+San Diego,Egger Highlands,neighborhood,,92139
+San Diego,El Cerrito,neighborhood,,92105
+San Diego,Emerald Hills,neighborhood,,92114
+San Diego,Encanto,neighborhood,,92114
+San Diego,Golden Hill,neighborhood,,92102
+San Diego,Grantville,neighborhood,,92120
+San Diego,Hillcrest,neighborhood,,92103
+San Diego,Jamacha,neighborhood,,92114
+San Diego,Kearny Mesa,neighborhood,,92123
+San Diego,Kensington,neighborhood,,92105
+San Diego,La Jolla,neighborhood,,92037
+San Diego,Lincoln Park,neighborhood,,92114
+San Diego,Linda Vista,neighborhood,,92111
+San Diego,Little Italy,neighborhood,,92101
+San Diego,Logan Heights,neighborhood,,92113
+San Diego,Lomita Village,neighborhood,,92154
+San Diego,Marina District,neighborhood,,92101
+San Diego,Meadowbrook,neighborhood,,92114
+San Diego,Midway District,neighborhood,,92110
+San Diego,Mira Mesa,neighborhood,,92126
+San Diego,Mission Beach,neighborhood,,92109
+San Diego,Mission Hills,neighborhood,,92103
+San Diego,Mission Valley East,neighborhood,,92108
+San Diego,Mission Valley West,neighborhood,,92108
+San Diego,Morena,neighborhood,,92110
+San Diego,Mountain View,neighborhood,,92114
+San Diego,Mt. Hope,neighborhood,,92102
+San Diego,Nestor,neighborhood,,92154
+San Diego,Normal Heights,neighborhood,,92116
+San Diego,North Park,neighborhood,,92104
+San Diego,O'Farrell,neighborhood,,92139
+San Diego,Oak Park,neighborhood,,92113
+San Diego,Ocean Beach,neighborhood,,92107
+San Diego,Old Town,neighborhood,,92110
+San Diego,Otay Mesa,neighborhood,,92154
+San Diego,Otay Mesa West,neighborhood,,92154
+San Diego,Pacific Beach,neighborhood,,92109
+San Diego,Palm City,neighborhood,,92154
+San Diego,Paradise Hills,neighborhood,,92139
+San Diego,Point Loma,neighborhood,,92106
+San Diego,Rancho Bernardo,neighborhood,,92127
+San Diego,Rancho Peñasquitos,neighborhood,,92129
+San Diego,Redwood Village,neighborhood,,92105
+San Diego,Rolando,neighborhood,,92115
+San Diego,Sabre Springs,neighborhood,,92131
+San Diego,San Carlos,neighborhood,,92119
+San Diego,San Ysidro,neighborhood,,92173
+San Diego,Scripps Ranch,neighborhood,,92131
+San Diego,Serra Mesa,neighborhood,,92111
+San Diego,Shelltown,neighborhood,,92113
+San Diego,Sherman Heights,neighborhood,,92102
+San Diego,Skyline,neighborhood,,92114
+San Diego,Sorrento Mesa,neighborhood,,92121
+San Diego,Sorrento Valley,neighborhood,,92121
+San Diego,South Park,neighborhood,,92116
+San Diego,Southcrest,neighborhood,,92114
+San Diego,Stockton,neighborhood,,92113
+San Diego,Stonebridge (Rancho Encantada),neighborhood,,92127
+San Diego,Sunset Cliffs,neighborhood,,92107
+San Diego,Talmadge,neighborhood,,92116
+San Diego,Tijuana River Valley,neighborhood,,92154
+San Diego,Torrey Highlands,neighborhood,,92130
+San Diego,Torrey Hills,neighborhood,,92130
+San Diego,Torrey Pines,neighborhood,,92037
+San Diego,University City (UTC),neighborhood,,92122
+San Diego,University Heights,neighborhood,,92116
+San Diego,Valencia Park,neighborhood,,92114
+San Diego,Webster,neighborhood,,92154
+San Diego,Bernardo Heights,subdivision/master-planned,,92128
+San Diego,Camino Bernardo,subdivision/master-planned,,92127
+San Diego,Carmel Country Highlands,subdivision/master-planned,,92130
+San Diego,Del Sur,subdivision/master-planned,,92127
+San Diego,Oaks North (55+),subdivision/master-planned,,92127
+San Diego,Pacific Highlands Ranch,subdivision/master-planned,,92130
+San Diego,Scripps Ranch Villages,subdivision/master-planned,,92131
+San Diego,Seven Oaks (55+),subdivision/master-planned,,92127
+San Diego,Stonebridge Estates (Rancho Encantada),subdivision/master-planned,,92127
+San Diego,Torrey Highlands (various villages),subdivision/master-planned,,92130
+San Diego,Torrey Hills (master-planned),subdivision/master-planned,,92130
+San Diego,Westwood (Rancho Bernardo),subdivision/master-planned,,92127
+San Marcos,Discovery Hills,neighborhood,,92078
+San Marcos,Richmar (Downtown),neighborhood,,92078
+San Marcos,University District/North City,neighborhood,,92078
+San Marcos,Old Creek Ranch,subdivision/master-planned,,92069
+San Marcos,Rancho Dorado,subdivision/master-planned,,92069
+San Marcos,Rancho Santalina,subdivision/master-planned,,92069
+San Marcos,San Elijo Hills,subdivision/master-planned,,92078
+San Marcos,Santa Fe Hills,subdivision/master-planned,,92078
+San Marcos,Twin Oaks Valley,subdivision/master-planned,,92078
+San Marcos,Twin Oaks Valley Ranch,subdivision/master-planned,,92078
+Santee,Carlton Hills,neighborhood,,92071
+Santee,Carlton Oaks,neighborhood,,92071
+Santee,Town Center,neighborhood,,92071
+Santee,Fanita Ranch (planned),subdivision/master-planned,Approved/entitled phases; long-term buildout,92071
+Santee,Riverwalk,subdivision/master-planned,,92071
+Santee,Sky Ranch,subdivision/master-planned,,92071
+Solana Beach,Del Mar Beach Club area,neighborhood,,92075
+Solana Beach,Eden Gardens (La Colonia),neighborhood,,92075
+Solana Beach,Lomas Santa Fe,neighborhood,,92075
+Solana Beach,Solana Hills,neighborhood,,92075
+Solana Beach,West Solana Beach,neighborhood,,92075
+Solana Beach,Loma Del Cielo,subdivision/master-planned,,92075
+Solana Beach,Lomas Santa Fe Estates,subdivision/master-planned,,92075
+Solana Beach,Saint Francis Court,subdivision/master-planned,,92075
+Solana Beach,Saratoga West,subdivision/master-planned,,92075
+Solana Beach,Sea Turf,subdivision/master-planned,,92075
+Solana Beach,Seascape (various condo complexes),subdivision/master-planned,,92075
+Vista,Alta Vista,neighborhood,,92084
+Vista,Breeze Hill,neighborhood,,92083
+Vista,Downtown Vista (Vista Village),neighborhood,,92084
+Vista,East Vista,neighborhood,,92084
+Vista,North Vista,neighborhood,,92083
+Vista,Shadowridge,neighborhood,,92081
+Vista,Warmlands,neighborhood,,92084
+Vista,Moncado Springs,subdivision/master-planned,,92084
+Vista,Shadowridge (master-planned area),subdivision/master-planned,,92081
+Vista,Stonegate,subdivision/master-planned,,92083

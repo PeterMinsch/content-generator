@@ -347,8 +347,9 @@ class ImportPage {
 		// Sanitize header values.
 		$headers = array_map( 'sanitize_text_field', $headers );
 
-		// Read preview rows (up to 3).
+		// Read preview rows (up to 3) and count total rows.
 		$preview_rows = array();
+		$row_count    = 0;
 		for ( $i = 0; $i < 3; $i++ ) {
 			$row = fgetcsv( $file );
 			if ( $row === false ) {
@@ -356,6 +357,12 @@ class ImportPage {
 			}
 			// Sanitize row data.
 			$preview_rows[] = array_map( 'sanitize_text_field', $row );
+			$row_count++;
+		}
+
+		// Count remaining rows (for total count).
+		while ( fgetcsv( $file ) !== false ) {
+			$row_count++;
 		}
 
 		// Close file handle.
@@ -364,6 +371,7 @@ class ImportPage {
 		return array(
 			'headers'      => $headers,
 			'preview_rows' => $preview_rows,
+			'total_rows'   => $row_count,
 		);
 	}
 
@@ -457,6 +465,7 @@ class ImportPage {
 				'headers'      => $headers,
 				'mappings'     => $mappings,
 				'preview_rows' => $parse_result['preview_rows'],
+				'total_rows'   => $parse_result['total_rows'] ?? 0,
 			)
 		);
 	}

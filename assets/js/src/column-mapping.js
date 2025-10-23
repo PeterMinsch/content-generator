@@ -24,6 +24,35 @@ document.addEventListener('DOMContentLoaded', () => {
 	let parsedMetadata = null; // Store parsed CSV metadata
 
 	/**
+	 * Check for preloaded file on page load (from geographic title generator).
+	 */
+	if (seoImportData.preloadedFile) {
+		// Hide the upload section since file is already loaded
+		const uploadSection = document.getElementById('upload-section');
+		const instructionsCard = document.querySelector('.seo-card.mt-6'); // Instructions card
+
+		if (uploadSection) {
+			uploadSection.style.display = 'none';
+		}
+
+		// Also hide instructions card for cleaner UX
+		if (instructionsCard) {
+			instructionsCard.style.display = 'none';
+		}
+
+		// Show the success banner
+		const successBanner = document.getElementById('geo-titles-success-banner');
+		if (successBanner) {
+			successBanner.style.display = 'block';
+		}
+
+		// Automatically load column mapping
+		setTimeout(() => {
+			loadColumnMapping();
+		}, 500);
+	}
+
+	/**
 	 * Handle form submission.
 	 */
 	uploadForm.addEventListener('submit', async (e) => {
@@ -75,6 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
 			if (data.success) {
 				currentHeaders = data.data.headers;
 				currentMappings = data.data.mappings;
+
+				// Update count in success banner if it exists (for preloaded geo titles)
+				if (seoImportData.preloadedFile && data.data.total_rows) {
+					const countElement = document.getElementById('geo-titles-count');
+					if (countElement) {
+						countElement.textContent = data.data.total_rows.toLocaleString();
+					}
+				}
 
 				// Render UI.
 				renderColumnMapping(data.data.headers, data.data.mappings);
