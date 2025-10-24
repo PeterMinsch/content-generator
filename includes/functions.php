@@ -135,6 +135,7 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 		'ethics'            => array( 'ethics_heading', 'ethics_text', 'certifications' ),
 		'faqs'              => array( 'faqs_heading', 'faq_items' ),
 		'cta'               => array( 'cta_heading', 'cta_text', 'cta_primary_label', 'cta_primary_url', 'cta_secondary_label', 'cta_secondary_url' ),
+		'related_links'     => array( 'section_heading', 'links' ),
 	);
 
 	// Check if block type exists.
@@ -168,7 +169,7 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 
 			if ( ! empty( $direct_value ) ) {
 				// For repeater fields, decode JSON if needed
-				if ( is_string( $direct_value ) && ( $field_name === 'about_features' || strpos( $field_name, '_items' ) !== false || strpos( $field_name, '_steps' ) !== false || strpos( $field_name, '_bullets' ) !== false ) ) {
+				if ( is_string( $direct_value ) && ( $field_name === 'about_features' || $field_name === 'links' || strpos( $field_name, '_items' ) !== false || strpos( $field_name, '_steps' ) !== false || strpos( $field_name, '_bullets' ) !== false ) ) {
 					$decoded = json_decode( $direct_value, true );
 					$field_value = is_array( $decoded ) ? $decoded : $direct_value;
 				} else {

@@ -43,6 +43,11 @@ class GenerationQueue {
 	const RATE_LIMIT_SECONDS = 10;
 
 	/**
+	 * Maximum number of retry attempts for failed jobs.
+	 */
+	const MAX_RETRIES = 3;
+
+	/**
 	 * Queue a post for background generation.
 	 *
 	 * @param int        $post_id Post ID to queue.
@@ -71,6 +76,7 @@ class GenerationQueue {
 			'scheduled_time' => $scheduled_time,
 			'status'         => 'pending',
 			'queued_at'      => current_time( 'mysql' ),
+			'retry_count'    => 0,
 		);
 
 		// Store blocks configuration if provided.
@@ -141,6 +147,73 @@ class GenerationQueue {
 		}
 
 		return $updated;
+	}
+
+	/**
+	 * Retry a failed job with exponential backoff.
+	 *
+	 * @param int         $post_id Post ID.
+	 * @param string|null $error   Error message from previous attempt.
+	 * @return bool True if job was retried, false if max retries reached or job not found.
+	 */
+	public function retryFailedJob( int $post_id, ?string $error = null ): bool {
+		$queue = get_option( self::QUEUE_OPTION, array() );
+		$retried = false;
+
+		foreach ( $queue as &$item ) {
+			if ( $item['post_id'] === $post_id ) {
+				// Initialize retry_count if it doesn't exist (backward compatibility).
+				if ( ! isset( $item['retry_count'] ) ) {
+					$item['retry_count'] = 0;
+				}
+
+				// Check if we've exceeded max retries.
+				if ( $item['retry_count'] >= self::MAX_RETRIES ) {
+					// Mark as permanently failed.
+					$item['status'] = 'failed';
+					$item['error'] = sprintf(
+						'Max retries (%d) exceeded. Last error: %s',
+						self::MAX_RETRIES,
+						$error ?? 'Unknown error'
+					);
+					$item['updated_at'] = current_time( 'mysql' );
+					error_log( "[Queue] Post {$post_id} failed permanently after " . self::MAX_RETRIES . ' retries' );
+					break;
+				}
+
+				// Increment retry count.
+				$item['retry_count']++;
+
+				// Calculate exponential backoff delay: 30s, 60s, 120s.
+				$backoff_multiplier = pow( 2, $item['retry_count'] - 1 );
+				$delay = self::RATE_LIMIT_SECONDS * $backoff_multiplier;
+
+				// Reschedule the job.
+				$scheduled_time = time() + $delay;
+				$item['scheduled_time'] = $scheduled_time;
+				$item['status'] = 'pending';
+				$item['updated_at'] = current_time( 'mysql' );
+
+				// Store the previous error for reference.
+				if ( $error ) {
+					$item['last_error'] = $error;
+				}
+
+				// Schedule WordPress Cron event.
+				wp_schedule_single_event( $scheduled_time, 'seo_generate_queued_page', array( $post_id ) );
+
+				error_log( "[Queue] Retrying post {$post_id} (attempt {$item['retry_count']}/{" . self::MAX_RETRIES . '}) in ' . $delay . 's' );
+
+				$retried = true;
+				break;
+			}
+		}
+
+		if ( $retried || isset( $item ) ) {
+			update_option( self::QUEUE_OPTION, $queue );
+		}
+
+		return $retried;
 	}
 
 	/**

@@ -149,8 +149,8 @@ class ContentGenerationService {
 			// Calculate generation time.
 			$generation_time = round( microtime( true ) - $start_time, 2 );
 
-			// Parse generated content.
-			$parsed_content = $this->content_parser->parse( $block_type, $result->getContent() );
+			// Parse generated content (pass post_id for context-aware parsing).
+			$parsed_content = $this->content_parser->parse( $block_type, $result->getContent(), $post_id );
 
 			// Update ACF fields.
 			$this->updateACFFields( $post_id, $block_type, $parsed_content );

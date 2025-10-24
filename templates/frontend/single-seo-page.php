@@ -155,7 +155,7 @@ if ( empty( $hero_image_url ) ) {
         } );
     } else {
         // Fallback to default order (hero first, then other blocks)
-        $blocks_to_render = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta' );
+        $blocks_to_render = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta', 'related_links' );
     }
 
     foreach ( $blocks_to_render as $block_type ) {

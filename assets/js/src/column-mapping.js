@@ -427,7 +427,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		// Get the proceed button from block ordering section (different from column mapping button)
 		const blockOrderProceedBtn = document.getElementById('proceed-import-btn');
 		const progressSection = document.getElementById('import-progress');
-		const progressText = document.getElementById('progress-text');
+		const progressFooter = document.getElementById('progress-footer');
+		const progressBar = document.querySelector('.seo-progress-bar__fill');
+		const progressBarContainer = document.querySelector('.seo-progress-bar');
 
 		// Mark import as in progress
 		importInProgress = true;
@@ -435,6 +437,14 @@ document.addEventListener('DOMContentLoaded', () => {
 		// Show progress section
 		if (progressSection) {
 			progressSection.style.display = 'block';
+		}
+
+		// Initialize progress bar
+		if (progressBar) {
+			progressBar.style.width = '0%';
+		}
+		if (progressBarContainer) {
+			progressBarContainer.setAttribute('aria-valuenow', '0');
 		}
 
 		// Add warning banner
@@ -448,10 +458,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		try {
 			for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-				// Update progress text
-				if (progressText) {
-					progressText.textContent = `Importing batch ${batchIndex + 1} of ${totalBatches}...`;
+				// Calculate progress percentage
+				const progressPercent = Math.round(((batchIndex) / totalBatches) * 100);
+
+				// Update progress bar
+				if (progressBar) {
+					progressBar.style.width = progressPercent + '%';
 				}
+				if (progressBarContainer) {
+					progressBarContainer.setAttribute('aria-valuenow', progressPercent);
+				}
+
+				// Update progress footer with batch counter
+				if (progressFooter) {
+					progressFooter.innerHTML = `
+						<strong>Batch ${batchIndex + 1} of ${totalBatches}</strong>
+						<span style="color: #666; margin-left: 10px;">(${progressPercent}% complete)</span>
+					`;
+				}
+
+				// Update button text
 				if (blockOrderProceedBtn) {
 					blockOrderProceedBtn.textContent = `Importing batch ${batchIndex + 1} of ${totalBatches}...`;
 				}
@@ -518,30 +544,39 @@ document.addEventListener('DOMContentLoaded', () => {
 		// Mark import as complete
 		importInProgress = false;
 
+		// Set progress bar to 100%
+		const progressBar = document.querySelector('.seo-progress-bar__fill');
+		const progressBarContainer = document.querySelector('.seo-progress-bar');
+		const progressFooter = document.getElementById('progress-footer');
+
+		if (progressBar) {
+			progressBar.style.width = '100%';
+		}
+		if (progressBarContainer) {
+			progressBarContainer.setAttribute('aria-valuenow', '100');
+		}
+		if (progressFooter) {
+			progressFooter.innerHTML = '<strong style="color: #00a32a;">✓ Import Complete!</strong>';
+		}
+
 		// Remove warning banner
 		const warningBanner = document.getElementById('import-warning-banner');
 		if (warningBanner) {
 			warningBanner.remove();
 		}
 
-		let message = `Import Complete!\n\n`;
-		message += `Created: ${results.created.length} posts\n`;
-		message += `Skipped: ${results.skipped.length} duplicates\n`;
-		message += `Errors: ${results.errors.length} rows\n\n`;
+		// Log completion details to console for debugging
+		console.log('Import Complete!');
+		console.log(`Created: ${results.created.length} posts`);
+		console.log(`Skipped: ${results.skipped.length} duplicates`);
+		console.log(`Errors: ${results.errors.length} rows`);
 
 		if (results.errors.length > 0) {
-			message += `Errors:\n`;
-			results.errors.slice(0, 5).forEach(error => {
-				message += `- Row ${error.row}: ${error.error}\n`;
-			});
+			console.log('Errors:', results.errors.slice(0, 5));
 			if (results.errors.length > 5) {
-				message += `...and ${results.errors.length - 5} more\n`;
+				console.log(`...and ${results.errors.length - 5} more errors`);
 			}
 		}
-
-		message += `\nView created posts in the SEO Pages admin screen.`;
-
-		alert(message);
 
 		// Re-enable and reset buttons (if they exist)
 		const blockOrderProceedBtn = document.getElementById('proceed-import-btn');
@@ -554,10 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			proceedImportBtn.innerHTML = '<span class="dashicons dashicons-yes" style="vertical-align: middle;"></span> Proceed to Import';
 		}
 
-		// Optionally redirect to posts list
-		if (confirm('Would you like to view the created posts?')) {
-			window.location.href = 'edit.php?post_type=seo-page';
-		}
+		// No popups - completion is shown in progress UI above
 	}
 
 	// Cancel button click.

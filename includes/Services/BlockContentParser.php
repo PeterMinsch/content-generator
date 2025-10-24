@@ -18,10 +18,11 @@ class BlockContentParser {
 	 *
 	 * @param string $block_type Block type identifier.
 	 * @param string $raw_content Raw content from AI.
+	 * @param int    $post_id Optional post ID for context (used by some parsers).
 	 * @return array Parsed content ready for ACF field update.
 	 * @throws \Exception If parsing fails.
 	 */
-	public function parse( string $block_type, string $raw_content ): array {
+	public function parse( string $block_type, string $raw_content, int $post_id = 0 ): array {
 		// Try to parse as JSON first (most blocks use JSON format).
 		$json_data = $this->tryParseJson( $raw_content );
 
@@ -41,6 +42,7 @@ class BlockContentParser {
 			'ethics' => $this->parseEthics( $json_data, $raw_content ),
 			'faqs' => $this->parseFaqs( $json_data, $raw_content ),
 			'cta' => $this->parseCta( $json_data, $raw_content ),
+			'related_links' => $this->parseRelatedLinks( $json_data, $raw_content, $post_id ),
 			default => throw new \Exception( "Unknown block type: {$block_type}" ),
 		};
 	}
@@ -158,11 +160,11 @@ class BlockContentParser {
 		// Parse AI-generated features
 		$features = array();
 		foreach ( $json['features'] as $item ) {
-			if ( isset( $item['icon_type'], $item['title'], $item['description'] ) ) {
+			if ( isset( $item['icon_type'], $item['feature_title'], $item['feature_description'] ) ) {
 				$features[] = array(
-					'icon_type'   => sanitize_text_field( $item['icon_type'] ),
-					'title'       => sanitize_text_field( $item['title'] ),
-					'description' => sanitize_text_field( $item['description'] ),
+					'icon_type'           => sanitize_text_field( $item['icon_type'] ),
+					'feature_title'       => sanitize_text_field( $item['feature_title'] ),
+					'feature_description' => sanitize_text_field( $item['feature_description'] ),
 				);
 			}
 		}
@@ -530,6 +532,50 @@ class BlockContentParser {
 			'cta_primary_url'     => isset( $json['primary_url'] ) ? esc_url_raw( $json['primary_url'] ) : '',
 			'cta_secondary_label' => isset( $json['secondary_label'] ) ? sanitize_text_field( $json['secondary_label'] ) : '',
 			'cta_secondary_url'   => isset( $json['secondary_url'] ) ? esc_url_raw( $json['secondary_url'] ) : '',
+		);
+	}
+
+	/**
+	 * Parse related links content.
+	 *
+	 * @param array|null $json JSON data.
+	 * @param string     $raw_content Raw content.
+	 * @param int        $post_id Post ID for context.
+	 * @return array Parsed content.
+	 * @throws \Exception If parsing fails.
+	 */
+	private function parseRelatedLinks( ?array $json, string $raw_content, int $post_id = 0 ): array {
+		if ( null === $json || ! isset( $json['section_heading'], $json['links'] ) ) {
+			error_log( '[SEO Generator] Related links parse failed. Raw content: ' . substr( $raw_content, 0, 500 ) );
+			error_log( '[SEO Generator] Related links parse failed. JSON data: ' . print_r( $json, true ) );
+			throw new \Exception( 'Invalid related links format. Expected JSON with section_heading and links array.' );
+		}
+
+		// Parse links array (without images initially - images will be generated in background)
+		$links = array();
+		foreach ( $json['links'] as $item ) {
+			if ( isset( $item['link_title'], $item['link_url'] ) ) {
+				$link_title       = sanitize_text_field( $item['link_title'] );
+				$link_description = isset( $item['link_description'] ) ? sanitize_textarea_field( $item['link_description'] ) : '';
+				$link_category    = isset( $item['link_category'] ) ? sanitize_text_field( $item['link_category'] ) : '';
+
+				// Store image as empty initially - will be generated in background
+				$image_attachment_id = '';
+
+				$links[] = array(
+					'link_title'       => $link_title,
+					'link_url'         => esc_url_raw( $item['link_url'] ),
+					'link_description' => $link_description,
+					'link_category'    => $link_category,
+					'link_item_count'  => isset( $item['link_item_count'] ) ? sanitize_text_field( $item['link_item_count'] ) : '',
+					'link_image'       => $image_attachment_id, // Empty for now
+				);
+			}
+		}
+
+		return array(
+			'section_heading' => sanitize_text_field( $json['section_heading'] ),
+			'links'           => $links,
 		);
 	}
 }

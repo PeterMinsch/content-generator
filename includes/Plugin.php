@@ -230,6 +230,9 @@ class Plugin {
 		// Register generation queue cron hook.
 		add_action( 'seo_generate_queued_page', array( $this, 'processQueuedPage' ) );
 
+		// Register background image generation cron hook.
+		add_action( 'seo_generate_related_link_images', array( $this, 'generateRelatedLinkImages' ) );
+
 		// Register queue cleanup cron hook.
 		add_action( 'seo_cleanup_old_queue_jobs', array( $this, 'cleanupOldQueueJobs' ) );
 
@@ -328,6 +331,19 @@ class Plugin {
 	public function processQueuedPage( int $post_id ): void {
 		$generation_service = new Services\GenerationService();
 		$generation_service->processQueuedPage( $post_id );
+	}
+
+	/**
+	 * Generate images for related_links block (WordPress Cron handler).
+	 *
+	 * Runs in background AFTER page generation completes to avoid timeouts.
+	 *
+	 * @param int $post_id Post ID to generate images for.
+	 * @return void
+	 */
+	public function generateRelatedLinkImages( int $post_id ): void {
+		$image_service = new Services\RelatedLinksImageService();
+		$image_service->generateImagesForPost( $post_id );
 	}
 
 	/**

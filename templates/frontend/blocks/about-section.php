@@ -155,15 +155,15 @@ function seo_get_feature_icon( $icon_type ) {
 
 						<!-- Text Content -->
 						<div class="flex flex-col items-center gap-2">
-							<?php if ( ! empty( $feature['title'] ) ) : ?>
+							<?php if ( ! empty( $feature['feature_title'] ) ) : ?>
 								<h3 class="font-cormorant text-[28px] leading-none uppercase text-[#272521] m-0 font-normal">
-									<?php echo esc_html( $feature['title'] ); ?>
+									<?php echo esc_html( $feature['feature_title'] ); ?>
 								</h3>
 							<?php endif; ?>
 
-							<?php if ( ! empty( $feature['description'] ) ) : ?>
+							<?php if ( ! empty( $feature['feature_description'] ) ) : ?>
 								<p class="font-avenir text-[16px] leading-[1.4] font-medium text-[#8F8F8F] m-0">
-									<?php echo esc_html( $feature['description'] ); ?>
+									<?php echo esc_html( $feature['feature_description'] ); ?>
 								</p>
 							<?php endif; ?>
 						</div>

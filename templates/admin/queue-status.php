@@ -54,24 +54,36 @@ wp_localize_script(
 			<div class="seo-card__content">
 				<span style="display: block; font-size: var(--text-3xl); font-weight: 600; color: var(--warning);" id="pending-count"><?php echo esc_html( $stats['pending'] ); ?></span>
 				<span style="display: block; font-size: var(--text-sm); color: var(--gray-700); margin-top: var(--space-2);"><?php esc_html_e( 'Pending', 'seo-generator' ); ?></span>
+				<div style="width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+					<div id="pending-progress" style="height: 100%; background: #f0b232; transition: width 0.3s ease;"></div>
+				</div>
 			</div>
 		</div>
 		<div class="seo-card" style="text-align: center;">
 			<div class="seo-card__content">
 				<span style="display: block; font-size: var(--text-3xl); font-weight: 600; color: var(--info);" id="processing-count"><?php echo esc_html( $stats['processing'] ); ?></span>
 				<span style="display: block; font-size: var(--text-sm); color: var(--gray-700); margin-top: var(--space-2);"><?php esc_html_e( 'Processing', 'seo-generator' ); ?></span>
+				<div style="width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+					<div id="processing-progress" style="height: 100%; background: #2271b1; transition: width 0.3s ease;"></div>
+				</div>
 			</div>
 		</div>
 		<div class="seo-card" style="text-align: center;">
 			<div class="seo-card__content">
 				<span style="display: block; font-size: var(--text-3xl); font-weight: 600; color: var(--success);" id="completed-count"><?php echo esc_html( $stats['completed'] ); ?></span>
 				<span style="display: block; font-size: var(--text-sm); color: var(--gray-700); margin-top: var(--space-2);"><?php esc_html_e( 'Completed', 'seo-generator' ); ?></span>
+				<div style="width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+					<div id="completed-progress" style="height: 100%; background: #00a32a; transition: width 0.3s ease;"></div>
+				</div>
 			</div>
 		</div>
 		<div class="seo-card" style="text-align: center;">
 			<div class="seo-card__content">
 				<span style="display: block; font-size: var(--text-3xl); font-weight: 600; color: var(--error);" id="failed-count"><?php echo esc_html( $stats['failed'] ); ?></span>
 				<span style="display: block; font-size: var(--text-sm); color: var(--gray-700); margin-top: var(--space-2);"><?php esc_html_e( 'Failed', 'seo-generator' ); ?></span>
+				<div style="width: 100%; height: 6px; background: #e0e0e0; border-radius: 3px; margin-top: 8px; overflow: hidden;">
+					<div id="failed-progress" style="height: 100%; background: #d63638; transition: width 0.3s ease;"></div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -144,7 +156,19 @@ wp_localize_script(
 	</div>
 
 	<!-- Queued Jobs Table -->
-	<h2><?php esc_html_e( 'Queued Jobs', 'seo-generator' ); ?></h2>
+	<div style="display: flex; justify-content: space-between; align-items: center; margin: var(--space-6) 0 var(--space-4) 0;">
+		<h2 style="margin: 0;"><?php esc_html_e( 'Queued Jobs', 'seo-generator' ); ?></h2>
+		<div style="display: flex; gap: var(--space-3); align-items: center;">
+			<label for="status-filter" style="font-weight: 600;"><?php esc_html_e( 'Filter:', 'seo-generator' ); ?></label>
+			<select id="status-filter" class="regular-text" style="width: auto;">
+				<option value="all"><?php esc_html_e( 'All Jobs', 'seo-generator' ); ?></option>
+				<option value="pending"><?php esc_html_e( 'Pending Only', 'seo-generator' ); ?></option>
+				<option value="processing"><?php esc_html_e( 'Processing Only', 'seo-generator' ); ?></option>
+				<option value="completed"><?php esc_html_e( 'Completed Only', 'seo-generator' ); ?></option>
+				<option value="failed"><?php esc_html_e( 'Failed Only', 'seo-generator' ); ?></option>
+			</select>
+		</div>
+	</div>
 
 	<?php if ( empty( $queue ) ) : ?>
 		<p><?php esc_html_e( 'No jobs in queue.', 'seo-generator' ); ?></p>

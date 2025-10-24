@@ -18,6 +18,40 @@ $max_upload_size = wp_max_upload_size();
 	<!-- Page Header -->
 	<h1 class="heading-1"><?php esc_html_e( 'CSV Import', 'seo-generator' ); ?></h1>
 
+	<!-- Import Source Selection -->
+	<div class="seo-card mt-4">
+		<h3 class="seo-card__title">
+			📁 <?php esc_html_e( 'Choose Import Source', 'seo-generator' ); ?>
+		</h3>
+		<div class="seo-card__content">
+			<p class="mb-4"><?php esc_html_e( 'Select where your page titles will come from:', 'seo-generator' ); ?></p>
+
+			<div class="import-source-toggle">
+				<label class="import-source-option">
+					<input type="radio" name="import_source" value="geographic" id="source-geographic" checked>
+					<div class="import-source-card">
+						<div class="import-source-icon">🗺️</div>
+						<div class="import-source-info">
+							<strong><?php esc_html_e( 'Geographic Title Generator', 'seo-generator' ); ?></strong>
+							<p><?php esc_html_e( 'Use pre-generated titles from the Geographic Title Generator tool', 'seo-generator' ); ?></p>
+						</div>
+					</div>
+				</label>
+
+				<label class="import-source-option">
+					<input type="radio" name="import_source" value="custom" id="source-custom">
+					<div class="import-source-card">
+						<div class="import-source-icon">📄</div>
+						<div class="import-source-info">
+							<strong><?php esc_html_e( 'Upload Custom CSV', 'seo-generator' ); ?></strong>
+							<p><?php esc_html_e( 'Upload your own CSV file with custom page titles', 'seo-generator' ); ?></p>
+						</div>
+					</div>
+				</label>
+			</div>
+		</div>
+	</div>
+
 	<!-- Testing Tools Section -->
 	<div class="seo-card mt-4" style="border-left: 4px solid #dc3232;">
 		<h3 class="seo-card__title" style="color: #dc3232;">
@@ -50,8 +84,8 @@ $max_upload_size = wp_max_upload_size();
 		</div>
 	</div>
 
-	<!-- Instructions Card -->
-	<div class="seo-card mt-6">
+	<!-- Instructions Card (Hidden by default, shown when "Upload Custom CSV" is selected) -->
+	<div class="seo-card mt-6" style="display: none;">
 		<h3 class="seo-card__title">
 			📋 <?php esc_html_e( 'Import Instructions', 'seo-generator' ); ?>
 		</h3>
@@ -82,8 +116,8 @@ men's tungsten rings,commercial,800,</pre>
 		</div>
 	</div>
 
-	<!-- Step 1: File Upload -->
-	<div class="seo-card mt-4" id="upload-section">
+	<!-- Step 1: File Upload (Hidden by default, shown when "Upload Custom CSV" is selected) -->
+	<div class="seo-card mt-4" id="upload-section" style="display: none;">
 		<h3 class="seo-card__title">
 			1️⃣ <?php esc_html_e( 'Upload CSV File', 'seo-generator' ); ?>
 		</h3>
@@ -183,7 +217,7 @@ men's tungsten rings,commercial,800,</pre>
 				$blocks       = $block_config['blocks'] ?? array();
 
 				// Define default order (excluding seo_metadata which is internal)
-				$default_order = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta' );
+				$default_order = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta', 'related_links' );
 
 				foreach ( $default_order as $block_key ) :
 					if ( isset( $blocks[ $block_key ] ) ) :
@@ -347,6 +381,33 @@ men's tungsten rings,commercial,800,</pre>
 (function() {
 	'use strict';
 
+	// Import Source Toggle
+	const sourceRadios = document.querySelectorAll('input[name="import_source"]');
+	const uploadSection = document.getElementById('upload-section');
+	const instructionsCard = document.querySelector('.seo-card.mt-6'); // Instructions card
+
+	function updateImportSource() {
+		const selectedSource = document.querySelector('input[name="import_source"]:checked')?.value;
+
+		if (selectedSource === 'custom') {
+			// Show CSV upload section and instructions
+			uploadSection.style.display = 'block';
+			if (instructionsCard) instructionsCard.style.display = 'block';
+		} else {
+			// Hide CSV upload section and instructions (geographic titles selected)
+			uploadSection.style.display = 'none';
+			if (instructionsCard) instructionsCard.style.display = 'none';
+		}
+	}
+
+	// Listen for source changes
+	sourceRadios.forEach(radio => {
+		radio.addEventListener('change', updateImportSource);
+	});
+
+	// Initialize on page load
+	updateImportSource();
+
 	// Auto-submit form when file is selected
 	const fileInput = document.getElementById('csv_file');
 	const uploadForm = document.getElementById('csv-upload-form');
@@ -471,6 +532,86 @@ men's tungsten rings,commercial,800,</pre>
 	}
 	to {
 		transform: rotate(360deg);
+	}
+}
+
+/* Import Source Toggle Styles */
+.import-source-toggle {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 1rem;
+	margin-top: 1rem;
+}
+
+.import-source-option {
+	cursor: pointer;
+	display: block;
+	position: relative;
+}
+
+.import-source-option input[type="radio"] {
+	position: absolute;
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.import-source-card {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 1.25rem;
+	border: 2px solid var(--gray-200, #ddd);
+	border-radius: 8px;
+	background: white;
+	transition: all 0.2s ease;
+	height: 100%;
+}
+
+.import-source-card:hover {
+	border-color: var(--primary, #2271b1);
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.import-source-option input[type="radio"]:checked + .import-source-card {
+	border-color: var(--primary, #2271b1);
+	background: rgba(34, 113, 177, 0.05);
+	box-shadow: 0 0 0 1px var(--primary, #2271b1);
+}
+
+.import-source-option input[type="radio"]:focus + .import-source-card {
+	outline: 2px solid var(--primary, #2271b1);
+	outline-offset: 2px;
+}
+
+.import-source-icon {
+	font-size: 2rem;
+	flex-shrink: 0;
+	line-height: 1;
+}
+
+.import-source-info {
+	flex: 1;
+}
+
+.import-source-info strong {
+	display: block;
+	font-size: 16px;
+	margin-bottom: 0.5rem;
+	color: var(--gray-900, #1e1e1e);
+}
+
+.import-source-info p {
+	margin: 0;
+	font-size: 14px;
+	color: var(--gray-600, #666);
+	line-height: 1.5;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+	.import-source-toggle {
+		grid-template-columns: 1fr;
 	}
 }
 </style>

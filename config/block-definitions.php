@@ -555,7 +555,7 @@ return [
 					'max'        => 4,
 					'min'        => 4,
 					'sub_fields' => [
-						'icon_type'   => [
+						'icon_type'           => [
 							'label'   => __( 'Icon Type', 'seo-generator' ),
 							'type'    => 'select',
 							'choices' => [
@@ -573,15 +573,72 @@ return [
 								'repair'   => __( 'Repair/Maintenance', 'seo-generator' ),
 							],
 						],
-						'title'       => [
+						'feature_title'       => [
 							'label'     => __( 'Feature Title', 'seo-generator' ),
 							'type'      => 'text',
 							'maxlength' => 50,
 						],
-						'description' => [
+						'feature_description' => [
 							'label'     => __( 'Feature Description', 'seo-generator' ),
 							'type'      => 'text',
 							'maxlength' => 100,
+						],
+					],
+				],
+			],
+		],
+
+		/**
+		 * Block 14: Related Links
+		 */
+		'related_links' => [
+			'label'             => __( 'Related Pages', 'seo-generator' ),
+			'description'       => __( 'Internal links to related content pages', 'seo-generator' ),
+			'order'             => 14,
+			'enabled'           => true,
+			'acf_wrapper_class' => 'acf-block-related-links',
+			'ai_prompt'         => 'Select 4 most relevant pages from the provided dataset for {page_title}. Choose pages that complement the topic and provide value to users interested in {page_topic}. Return structured data for each link.',
+			'frontend_template' => 'blocks/related-links.php',
+			'fields'            => [
+				'section_heading' => [
+					'label'     => __( 'Section Heading', 'seo-generator' ),
+					'type'      => 'text',
+					'maxlength' => 100,
+				],
+				'links'           => [
+					'label'      => __( 'Related Links', 'seo-generator' ),
+					'type'       => 'repeater',
+					'max'        => 4,
+					'layout'     => 'row',
+					'sub_fields' => [
+						'link_title'       => [
+							'label'     => __( 'Link Title', 'seo-generator' ),
+							'type'      => 'text',
+							'maxlength' => 50,
+						],
+						'link_url'         => [
+							'label' => __( 'URL', 'seo-generator' ),
+							'type'  => 'url',
+						],
+						'link_description' => [
+							'label'     => __( 'Description', 'seo-generator' ),
+							'type'      => 'textarea',
+							'maxlength' => 200,
+							'rows'      => 2,
+						],
+						'link_category'    => [
+							'label' => __( 'Category', 'seo-generator' ),
+							'type'  => 'text',
+						],
+						'link_image'       => [
+							'label'         => __( 'Card Image', 'seo-generator' ),
+							'type'          => 'image',
+							'return_format' => 'array',
+							'preview_size'  => 'medium',
+						],
+						'link_item_count'  => [
+							'label' => __( 'Item Count', 'seo-generator' ),
+							'type'  => 'text',
 						],
 					],
 				],

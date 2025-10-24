@@ -39,6 +39,7 @@ class DefaultPrompts {
 			'ethics'           => self::getEthicsTemplate(),
 			'faqs'             => self::getFaqsTemplate(),
 			'cta'              => self::getCtaTemplate(),
+			'related_links'    => self::getRelatedLinksTemplate(),
 		);
 	}
 
@@ -165,23 +166,23 @@ Output as JSON (features array only):
   "features": [
     {
       "icon_type": "appropriate_icon_for_page",
-      "title": "2-3 words",
-      "description": "3-6 words"
+      "feature_title": "2-3 words",
+      "feature_description": "3-6 words"
     },
     {
       "icon_type": "appropriate_icon_for_page",
-      "title": "2-3 words",
-      "description": "3-6 words"
+      "feature_title": "2-3 words",
+      "feature_description": "3-6 words"
     },
     {
       "icon_type": "appropriate_icon_for_page",
-      "title": "2-3 words",
-      "description": "3-6 words"
+      "feature_title": "2-3 words",
+      "feature_description": "3-6 words"
     },
     {
       "icon_type": "appropriate_icon_for_page",
-      "title": "2-3 words",
-      "description": "3-6 words"
+      "feature_title": "2-3 words",
+      "feature_description": "3-6 words"
     }
   ]
 }',
@@ -588,6 +589,79 @@ Output as JSON:
 {
   "heading": "CTA heading",
   "body": "CTA body text"
+}',
+		);
+	}
+
+	/**
+	 * Get default template for related links section.
+	 *
+	 * @return array Template with system and user messages.
+	 */
+	public static function getRelatedLinksTemplate(): array {
+		return array(
+			'system' => self::SYSTEM_MESSAGE,
+			'user'   => 'Generate 4 plausible related page suggestions for {page_title}.
+
+Context:
+- Page type: {page_type}
+- Topic category: {page_topic}
+- Target keyword: {focus_keyword}
+
+Requirements:
+- Section heading: 4-8 words, action-oriented (e.g., "SHOP ENGAGEMENT RINGS", "EXPLORE MORE STYLES")
+  - First word should be a verb in uppercase (SHOP, EXPLORE, DISCOVER, BROWSE)
+  - Rest of heading should describe the category or theme
+- Generate 4 realistic related page suggestions based on common jewelry categories
+- For each suggestion:
+  - Title: 2-5 words, category or collection name (e.g., "Engagement Rings", "Men\'s Wedding Bands", "Diamond Collections")
+  - URL: Logical slug format (e.g., /engagement-rings/, /mens-wedding-bands/, /diamond-collections/)
+  - Description: 15-25 words explaining what readers would find on that page
+  - Category: Single category tag (e.g., "Rings", "Bands", "Collections", "Guides")
+  - Item count: Realistic number like "122 Items", "89 Items", "156 Items", etc.
+- Choose suggestions that:
+  - Complement the current topic naturally
+  - Represent different but related categories
+  - Help users explore related products or information
+  - Cover a variety: products, guides, comparisons, collections
+- Create realistic, diverse suggestions that make sense for a jewelry e-commerce site
+- Use your knowledge of jewelry to generate logical related topics
+
+IMPORTANT: Generate realistic suggestions even though these pages may not exist yet. The goal is to show what related content COULD be linked. Make them contextually relevant to {page_title}.
+
+Output as JSON:
+{
+  "section_heading": "VERB CATEGORY NAME",
+  "links": [
+    {
+      "link_title": "Category name",
+      "link_url": "/category-url/",
+      "link_description": "Description of what this page covers",
+      "link_category": "Category tag",
+      "link_item_count": "XX Items"
+    },
+    {
+      "link_title": "Category name",
+      "link_url": "/category-url/",
+      "link_description": "Description of what this page covers",
+      "link_category": "Category tag",
+      "link_item_count": "XX Items"
+    },
+    {
+      "link_title": "Category name",
+      "link_url": "/category-url/",
+      "link_description": "Description of what this page covers",
+      "link_category": "Category tag",
+      "link_item_count": "XX Items"
+    },
+    {
+      "link_title": "Category name",
+      "link_url": "/category-url/",
+      "link_description": "Description of what this page covers",
+      "link_category": "Category tag",
+      "link_item_count": "XX Items"
+    }
+  ]
 }',
 		);
 	}

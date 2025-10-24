@@ -49,6 +49,9 @@ class Activation {
 		// Create database tables.
 		self::createTables();
 
+		// Add database indexes for performance.
+		self::addDatabaseIndexes();
+
 		// Create default taxonomy terms.
 		self::createDefaultTerms();
 
@@ -94,6 +97,9 @@ class Activation {
 
 		// Create review cache table (Story 9.1).
 		self::createReviewTable();
+
+		// Create image cache table (AI Image Generator Bot).
+		self::createImageCacheTable();
 	}
 
 	/**
@@ -304,5 +310,87 @@ class Activation {
 
 		// Log table creation.
 		error_log( '[SEO Generator] Review table created/updated' );
+	}
+
+	/**
+	 * Create image cache table (AI Image Generator Bot).
+	 *
+	 * Stores cached AI-generated images to minimize API costs.
+	 * Cache key is based on link_title + category for reuse across pages.
+	 *
+	 * @return void
+	 */
+	private static function createImageCacheTable(): void {
+		global $wpdb;
+
+		$table_name      = $wpdb->prefix . 'seo_image_cache';
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE $table_name (
+			id BIGINT(20) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+			context_hash VARCHAR(32) NOT NULL,
+			link_title VARCHAR(255) NOT NULL,
+			link_category VARCHAR(100) NOT NULL,
+			dalle_prompt TEXT NOT NULL,
+			attachment_id BIGINT(20) UNSIGNED NOT NULL,
+			usage_count INT UNSIGNED DEFAULT 1,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			last_used DATETIME DEFAULT CURRENT_TIMESTAMP,
+			UNIQUE KEY unique_context (context_hash),
+			INDEX idx_category (link_category),
+			INDEX idx_usage (usage_count),
+			INDEX idx_last_used (last_used)
+		) $charset_collate;";
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		dbDelta( $sql );
+
+		// Update database version.
+		update_option( 'seo_generator_image_cache_db_version', '1.0' );
+
+		// Log table creation.
+		error_log( '[SEO Generator] Image cache table created/updated' );
+	}
+
+	/**
+	 * Add database indexes for performance optimization.
+	 *
+	 * Adds indexes to wp_posts table to speed up queries filtering by post_type and post_status.
+	 *
+	 * @return void
+	 */
+	private static function addDatabaseIndexes(): void {
+		global $wpdb;
+
+		$table_name = $wpdb->posts;
+
+		// Check if indexes already exist before adding them.
+		$indexes = $wpdb->get_results( "SHOW INDEX FROM {$table_name}", ARRAY_A );
+		$existing_indexes = array_column( $indexes, 'Key_name' );
+
+		// Add composite index for post_type and post_status (commonly queried together).
+		if ( ! in_array( 'idx_post_type_status', $existing_indexes, true ) ) {
+			$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX idx_post_type_status (post_type, post_status)" );
+			error_log( '[SEO Generator] Added composite index idx_post_type_status to wp_posts table' );
+		}
+
+		// Add index for post_type (for queries filtering only by post_type).
+		if ( ! in_array( 'idx_post_type', $existing_indexes, true ) && ! in_array( 'type_status_date', $existing_indexes, true ) ) {
+			// WordPress may already have a similar index, check carefully.
+			$has_post_type_index = false;
+			foreach ( $indexes as $index ) {
+				if ( 'post_type' === $index['Column_name'] && 0 === (int) $index['Seq_in_index'] ) {
+					$has_post_type_index = true;
+					break;
+				}
+			}
+
+			if ( ! $has_post_type_index ) {
+				$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX idx_post_type (post_type)" );
+				error_log( '[SEO Generator] Added index idx_post_type to wp_posts table' );
+			}
+		}
+
+		error_log( '[SEO Generator] Database indexes checked/added successfully' );
 	}
 }

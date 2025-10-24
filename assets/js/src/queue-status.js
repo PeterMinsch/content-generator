@@ -93,6 +93,33 @@
 		if ( failedEl ) {
 			failedEl.textContent = stats.failed;
 		}
+
+		// Update progress bars
+		const total = stats.pending + stats.processing + stats.completed + stats.failed;
+		if ( total > 0 ) {
+			const pendingPercent = ( stats.pending / total ) * 100;
+			const processingPercent = ( stats.processing / total ) * 100;
+			const completedPercent = ( stats.completed / total ) * 100;
+			const failedPercent = ( stats.failed / total ) * 100;
+
+			const pendingProgress = document.getElementById( 'pending-progress' );
+			const processingProgress = document.getElementById( 'processing-progress' );
+			const completedProgress = document.getElementById( 'completed-progress' );
+			const failedProgress = document.getElementById( 'failed-progress' );
+
+			if ( pendingProgress ) {
+				pendingProgress.style.width = pendingPercent + '%';
+			}
+			if ( processingProgress ) {
+				processingProgress.style.width = processingPercent + '%';
+			}
+			if ( completedProgress ) {
+				completedProgress.style.width = completedPercent + '%';
+			}
+			if ( failedProgress ) {
+				failedProgress.style.width = failedPercent + '%';
+			}
+		}
 	}
 
 	/**
@@ -478,6 +505,35 @@
 				}
 			} );
 		}
+
+		// Status filter dropdown.
+		const statusFilter = document.getElementById( 'status-filter' );
+		if ( statusFilter ) {
+			statusFilter.addEventListener( 'change', handleStatusFilter );
+		}
+	}
+
+	/**
+	 * Handle status filter change.
+	 */
+	function handleStatusFilter() {
+		const statusFilter = document.getElementById( 'status-filter' );
+		const filterValue = statusFilter ? statusFilter.value : 'all';
+		const queueList = document.getElementById( 'queue-list' );
+
+		if ( ! queueList ) {
+			return;
+		}
+
+		const rows = queueList.querySelectorAll( 'tr' );
+		rows.forEach( ( row ) => {
+			if ( filterValue === 'all' ) {
+				row.style.display = '';
+			} else {
+				const hasClass = row.classList.contains( 'status-' + filterValue );
+				row.style.display = hasClass ? '' : 'none';
+			}
+		} );
 	}
 
 	/**

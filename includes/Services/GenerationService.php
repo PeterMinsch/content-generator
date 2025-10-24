@@ -57,6 +57,7 @@ class GenerationService {
 		'ethics',
 		'faqs',
 		'cta',
+		'related_links', // NOTE: Currently generates AI-suggested placeholder links for demo purposes
 	);
 
 	/**
@@ -152,6 +153,9 @@ class GenerationService {
 				$linking_service->refreshLinks( $post_id );
 				error_log( "[Internal Linking] Calculated related links for post {$post_id}" );
 
+				// Schedule background image generation for related_links block (if it exists).
+				$this->scheduleImageGeneration( $post_id );
+
 				// Update queue status.
 				$this->queue->updateQueueStatus( $post_id, 'completed' );
 
@@ -161,7 +165,15 @@ class GenerationService {
 			}
 		} catch ( \Exception $e ) {
 			error_log( "Failed to generate post {$post_id}: " . $e->getMessage() );
-			$this->queue->updateQueueStatus( $post_id, 'failed', $e->getMessage() );
+
+			// Try to retry the job with exponential backoff.
+			$retried = $this->queue->retryFailedJob( $post_id, $e->getMessage() );
+
+			// If not retried (max retries reached), job is already marked as failed by retryFailedJob().
+			if ( ! $retried ) {
+				// Job hit max retries, ensure it's marked as failed.
+				$this->queue->updateQueueStatus( $post_id, 'failed', $e->getMessage() );
+			}
 		} finally {
 			// Always clean up cache regardless of success/failure.
 			wp_cache_flush();
@@ -305,5 +317,38 @@ class GenerationService {
 		// Update last generation time.
 		update_option( 'seo_last_generation_time', $current_time );
 		return true;
+	}
+
+	/**
+	 * Schedule background image generation for related_links block.
+	 *
+	 * This runs AFTER page generation completes to avoid timeouts.
+	 * Images are generated in a separate background job.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	private function scheduleImageGeneration( int $post_id ): void {
+		// Check if post has links field (ACF stores related_links as 'links' field).
+		$links = get_field( 'links', $post_id );
+
+		if ( empty( $links ) ) {
+			error_log( "[Image Generation] No links found for post {$post_id}, skipping image generation" );
+			return;
+		}
+
+		if ( ! is_array( $links ) ) {
+			error_log( "[Image Generation] Links field is not an array for post {$post_id}, skipping image generation" );
+			return;
+		}
+
+		// Schedule background job to generate images (run in 10 seconds to avoid conflicts).
+		$scheduled = wp_schedule_single_event( time() + 10, 'seo_generate_related_link_images', array( $post_id ) );
+
+		if ( $scheduled ) {
+			error_log( "[Image Generation] Scheduled background image generation for post {$post_id} with " . count( $links ) . " links" );
+		} else {
+			error_log( "[Image Generation] Failed to schedule background image generation for post {$post_id}" );
+		}
 	}
 }
