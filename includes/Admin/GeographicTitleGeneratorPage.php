@@ -905,9 +905,9 @@ class GeographicTitleGeneratorPage {
 
 						$title = implode( ' ', $title_parts );
 
-						// Randomly add urgent word (50% chance) if urgent words are available.
+						// Randomly add urgent word (40% chance) if urgent words are available.
 						$urgent_word = '';
-						if ( $urgent_word_count > 0 && rand( 0, 1 ) === 1 ) {
+						if ( $urgent_word_count > 0 && rand( 1, 100 ) <= 40 ) {
 							$urgent_word = $urgent_words[ array_rand( $urgent_words ) ];
 							// 80% chance to place after (SEO optimal), 20% chance to place before.
 							if ( rand( 1, 100 ) <= 80 ) {
@@ -960,9 +960,9 @@ class GeographicTitleGeneratorPage {
 					foreach ( $prepositions as $prep ) {
 						$title = $keyword . ' ' . $prep . ' ' . $location;
 
-						// Randomly add urgent word (50% chance) if urgent words are available.
+						// Randomly add urgent word (40% chance) if urgent words are available.
 						$urgent_word = '';
-						if ( $urgent_word_count > 0 && rand( 0, 1 ) === 1 ) {
+						if ( $urgent_word_count > 0 && rand( 1, 100 ) <= 40 ) {
 							$urgent_word = $urgent_words[ array_rand( $urgent_words ) ];
 							// 80% chance to place after (SEO optimal), 20% chance to place before.
 							if ( rand( 1, 100 ) <= 80 ) {
@@ -1792,11 +1792,40 @@ vintage,ruby,bracelet,silver</pre>
 			wp_send_json_error( array( 'message' => 'No geographic data found' ) );
 		}
 
-		// Get search filter if provided.
+		// Get filters from request.
 		$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+		$landmarks_only = ! empty( $_POST['landmarksOnly'] ) && ( 'true' === $_POST['landmarksOnly'] || true === $_POST['landmarksOnly'] );
+		$urgent_only = ! empty( $_POST['urgentOnly'] ) && ( 'true' === $_POST['urgentOnly'] || true === $_POST['urgentOnly'] );
+
+		// Filter locations if landmarks-only mode is enabled.
+		if ( $landmarks_only ) {
+			$original_count = count( $locations );
+			$locations = array_filter(
+				$locations,
+				function ( $location_data ) {
+					return isset( $location_data['type'] ) && 'landmark' === $location_data['type'];
+				}
+			);
+			$filtered_count = count( $locations );
+			error_log( '[GeoTitles] CSV Export - Landmarks-only filter: ' . $original_count . ' -> ' . $filtered_count . ' locations' );
+		}
 
 		// Generate all titles (no pagination).
 		$all_titles = $this->generateAllTitleCombinations( $keywords, $locations, $search );
+
+		// Filter for urgent words only if requested.
+		if ( $urgent_only ) {
+			$pre_urgent_count = count( $all_titles );
+			$all_titles = array_filter(
+				$all_titles,
+				function ( $title ) {
+					return ! empty( $title['urgent'] );
+				}
+			);
+			$all_titles = array_values( $all_titles ); // Re-index array
+			$urgent_filtered_count = $pre_urgent_count - count( $all_titles );
+			error_log( '[GeoTitles] CSV Export - Urgent-only filter: ' . $pre_urgent_count . ' -> ' . count( $all_titles ) . ' titles' );
+		}
 
 		// Filter out duplicates.
 		if ( ! empty( $all_titles ) ) {
@@ -1882,11 +1911,40 @@ vintage,ruby,bracelet,silver</pre>
 			wp_send_json_error( array( 'message' => 'No geographic data found' ) );
 		}
 
-		// Get search filter if provided.
+		// Get filters from request.
 		$search = isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( $_POST['search'] ) ) : '';
+		$landmarks_only = ! empty( $_POST['landmarksOnly'] ) && ( 'true' === $_POST['landmarksOnly'] || true === $_POST['landmarksOnly'] );
+		$urgent_only = ! empty( $_POST['urgentOnly'] ) && ( 'true' === $_POST['urgentOnly'] || true === $_POST['urgentOnly'] );
+
+		// Filter locations if landmarks-only mode is enabled.
+		if ( $landmarks_only ) {
+			$original_count = count( $locations );
+			$locations = array_filter(
+				$locations,
+				function ( $location_data ) {
+					return isset( $location_data['type'] ) && 'landmark' === $location_data['type'];
+				}
+			);
+			$filtered_count = count( $locations );
+			error_log( '[GeoTitles] Send to Import - Landmarks-only filter: ' . $original_count . ' -> ' . $filtered_count . ' locations' );
+		}
 
 		// Generate all titles (no pagination).
 		$all_titles = $this->generateAllTitleCombinations( $keywords, $locations, $search );
+
+		// Filter for urgent words only if requested.
+		if ( $urgent_only ) {
+			$pre_urgent_count = count( $all_titles );
+			$all_titles = array_filter(
+				$all_titles,
+				function ( $title ) {
+					return ! empty( $title['urgent'] );
+				}
+			);
+			$all_titles = array_values( $all_titles ); // Re-index array
+			$urgent_filtered_count = $pre_urgent_count - count( $all_titles );
+			error_log( '[GeoTitles] Send to Import - Urgent-only filter: ' . $pre_urgent_count . ' -> ' . count( $all_titles ) . ' titles' );
+		}
 
 		// Filter out duplicates.
 		if ( ! empty( $all_titles ) ) {
@@ -1991,9 +2049,9 @@ vintage,ruby,bracelet,silver</pre>
 
 						$title = implode( ' ', $title_parts );
 
-						// Randomly add urgent word (50% chance) if urgent words are available.
+						// Randomly add urgent word (40% chance) if urgent words are available.
 						$urgent_word = '';
-						if ( $urgent_word_count > 0 && rand( 0, 1 ) === 1 ) {
+						if ( $urgent_word_count > 0 && rand( 1, 100 ) <= 40 ) {
 							$urgent_word = $urgent_words[ array_rand( $urgent_words ) ];
 							// 80% chance to place after (SEO optimal), 20% chance to place before.
 							if ( rand( 1, 100 ) <= 80 ) {
@@ -2038,9 +2096,9 @@ vintage,ruby,bracelet,silver</pre>
 					foreach ( $prepositions as $prep ) {
 						$title = $keyword . ' ' . $prep . ' ' . $location;
 
-						// Randomly add urgent word (50% chance) if urgent words are available.
+						// Randomly add urgent word (40% chance) if urgent words are available.
 						$urgent_word = '';
-						if ( $urgent_word_count > 0 && rand( 0, 1 ) === 1 ) {
+						if ( $urgent_word_count > 0 && rand( 1, 100 ) <= 40 ) {
 							$urgent_word = $urgent_words[ array_rand( $urgent_words ) ];
 							// 80% chance to place after (SEO optimal), 20% chance to place before.
 							if ( rand( 1, 100 ) <= 80 ) {

@@ -230,6 +230,14 @@ class Plugin {
 		// Register generation queue cron hook.
 		add_action( 'seo_generate_queued_page', array( $this, 'processQueuedPage' ) );
 
+		// Register queue cleanup cron hook.
+		add_action( 'seo_cleanup_old_queue_jobs', array( $this, 'cleanupOldQueueJobs' ) );
+
+		// Schedule daily cleanup if not already scheduled.
+		if ( ! wp_next_scheduled( 'seo_cleanup_old_queue_jobs' ) ) {
+			wp_schedule_event( time(), 'daily', 'seo_cleanup_old_queue_jobs' );
+		}
+
 		// Register REST API routes.
 		add_action( 'rest_api_init', array( $this, 'registerRestRoutes' ) );
 	}
@@ -320,6 +328,22 @@ class Plugin {
 	public function processQueuedPage( int $post_id ): void {
 		$generation_service = new Services\GenerationService();
 		$generation_service->processQueuedPage( $post_id );
+	}
+
+	/**
+	 * Clean up old queue jobs (WordPress Cron handler).
+	 *
+	 * Runs daily to remove completed/failed jobs older than 7 days.
+	 *
+	 * @return void
+	 */
+	public function cleanupOldQueueJobs(): void {
+		$queue = new Services\GenerationQueue();
+		$count = $queue->cleanupOldJobs( 7 );
+
+		if ( $count > 0 ) {
+			error_log( "[SEO Generator] Cleaned up {$count} old queue jobs" );
+		}
 	}
 
 	/**

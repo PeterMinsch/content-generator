@@ -651,12 +651,20 @@
 		const $btn = $('#export-csv-btn');
 		const originalText = $btn.text();
 
-		if (
-			totalCount > 5000 &&
-			!confirm(
-				`You are about to export ${totalCount.toLocaleString()} titles. This may take a moment. Continue?`
-			)
-		) {
+		// Build confirmation message based on active filters
+		let confirmMessage = `You are about to export ${totalCount.toLocaleString()} titles.`;
+		if (landmarksOnly || urgentOnly) {
+			confirmMessage += '\n\nActive filters:';
+			if (landmarksOnly) {
+				confirmMessage += '\n• Landmarks only';
+			}
+			if (urgentOnly) {
+				confirmMessage += '\n• Urgent words only';
+			}
+		}
+		confirmMessage += '\n\nThis may take a moment. Continue?';
+
+		if (totalCount > 5000 && !confirm(confirmMessage)) {
 			return;
 		}
 
@@ -669,6 +677,8 @@
 				action: 'seo_export_geo_titles_csv',
 				nonce: seoGeoTitles.nonce,
 				search: searchTerm,
+				landmarksOnly: landmarksOnly,
+				urgentOnly: urgentOnly,
 			},
 			success: function (response) {
 				if (response.success) {
@@ -716,12 +726,20 @@
 		const $btn = $('#send-to-import-btn');
 		const originalText = $btn.text();
 
-		if (
-			totalCount > 5000 &&
-			!confirm(
-				`You are about to send ${totalCount.toLocaleString()} titles to the Import page. This may take a moment. Continue?`
-			)
-		) {
+		// Build confirmation message based on active filters
+		let confirmMessage = `You are about to send ${totalCount.toLocaleString()} titles to the Import page.`;
+		if (landmarksOnly || urgentOnly) {
+			confirmMessage += '\n\nActive filters:';
+			if (landmarksOnly) {
+				confirmMessage += '\n• Landmarks only';
+			}
+			if (urgentOnly) {
+				confirmMessage += '\n• Urgent words only';
+			}
+		}
+		confirmMessage += '\n\nThis may take a moment. Continue?';
+
+		if (totalCount > 5000 && !confirm(confirmMessage)) {
 			return;
 		}
 
@@ -734,6 +752,8 @@
 				action: 'seo_send_geo_to_import',
 				nonce: seoGeoTitles.nonce,
 				search: searchTerm,
+				landmarksOnly: landmarksOnly,
+				urgentOnly: urgentOnly,
 			},
 			success: function (response) {
 				if (response.success) {

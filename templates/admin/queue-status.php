@@ -137,7 +137,7 @@ wp_localize_script(
 					<code>wp seo-generator queue process</code>
 				</li>
 				<li>
-					<?php esc_html_e( 'Jobs are scheduled 30 seconds apart to respect API rate limits.', 'seo-generator' ); ?>
+					<?php esc_html_e( 'Jobs are scheduled 10 seconds apart to respect API rate limits.', 'seo-generator' ); ?>
 				</li>
 			</ul>
 		</div>

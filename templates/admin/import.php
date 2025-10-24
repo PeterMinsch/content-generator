@@ -157,7 +157,7 @@ men's tungsten rings,commercial,800,</pre>
 			</div>
 
 			<p class="text-sm text-gray mt-4">
-				<?php esc_html_e( 'Content will be auto-generated in the background. Background generation processes one page every 30 seconds to respect API rate limits.', 'seo-generator' ); ?>
+				<?php esc_html_e( 'Content will be auto-generated in the background. Background generation processes one page every 10 seconds to respect API rate limits.', 'seo-generator' ); ?>
 			</p>
 		</div>
 	</div>

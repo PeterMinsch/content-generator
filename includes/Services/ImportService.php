@@ -30,10 +30,11 @@ defined( 'ABSPATH' ) || exit;
 class ImportService {
 	/**
 	 * Batch size for processing.
+	 * Increased from 10 to 50 for better performance on large imports.
 	 *
 	 * @var int
 	 */
-	private $batch_size = 10;
+	private $batch_size = 50;
 
 	/**
 	 * Whether to check for duplicate posts.

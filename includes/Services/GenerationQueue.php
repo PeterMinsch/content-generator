@@ -36,10 +36,11 @@ class GenerationQueue {
 	const PAUSED_OPTION = 'seo_queue_paused';
 
 	/**
-	 * Rate limit in seconds (30 seconds).
-	 * Optimized from 180s to 30s for faster bulk generation while staying well within OpenAI rate limits.
+	 * Rate limit in seconds (10 seconds).
+	 * Optimized for Tier 3+ OpenAI accounts (10,000+ RPM).
+	 * For lower tiers, increase to 15-30 seconds to avoid rate limit errors.
 	 */
-	const RATE_LIMIT_SECONDS = 30;
+	const RATE_LIMIT_SECONDS = 10;
 
 	/**
 	 * Queue a post for background generation.
@@ -291,5 +292,46 @@ class GenerationQueue {
 		}
 
 		return $removed;
+	}
+
+	/**
+	 * Clean up old completed/failed jobs from the queue.
+	 *
+	 * Removes jobs that have been completed or failed for more than the specified number of days.
+	 * This prevents the queue from growing indefinitely and slowing down queries.
+	 *
+	 * @param int $days_old Number of days to keep completed/failed jobs (default: 7).
+	 * @return int Number of jobs cleaned up.
+	 */
+	public function cleanupOldJobs( int $days_old = 7 ): int {
+		$queue  = get_option( self::QUEUE_OPTION, array() );
+		$cutoff = time() - ( $days_old * DAY_IN_SECONDS );
+		$count  = 0;
+
+		$cleaned_queue = array();
+
+		foreach ( $queue as $item ) {
+			$should_keep = true;
+
+			// Only remove completed or failed jobs.
+			if ( in_array( $item['status'], array( 'completed', 'failed' ), true ) ) {
+				// Check if job is older than cutoff.
+				if ( isset( $item['scheduled_time'] ) && $item['scheduled_time'] < $cutoff ) {
+					$should_keep = false;
+					$count++;
+				}
+			}
+
+			if ( $should_keep ) {
+				$cleaned_queue[] = $item;
+			}
+		}
+
+		// Update queue if we removed anything.
+		if ( $count > 0 ) {
+			update_option( self::QUEUE_OPTION, $cleaned_queue );
+		}
+
+		return $count;
 	}
 }
