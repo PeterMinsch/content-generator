@@ -16,7 +16,7 @@ class DefaultPrompts {
 	/**
 	 * Default system message for all prompts.
 	 */
-	private const SYSTEM_MESSAGE = 'You are an expert jewelry content writer creating SEO-optimized content for an e-commerce website. Write in a knowledgeable yet approachable tone. Focus on accuracy and helpful information. Avoid promotional language and sales fluff.';
+	private const SYSTEM_MESSAGE = 'You are an expert {business_type} content writer creating SEO-optimized content for an e-commerce website. Write in a knowledgeable yet approachable tone. Focus on accuracy and helpful information. Avoid promotional language and sales fluff.';
 
 	/**
 	 * Get all default templates.
@@ -129,7 +129,7 @@ Context:
 - Page type: {page_type}
 - Topic category: {page_topic}
 - Target keyword: {focus_keyword}
-- Company: Bravo Jewelers (family-run, handcrafted jewelry in Carlsbad, CA)
+- Company: {business_name} - {business_type} in {service_area}
 
 Requirements:
 - Generate exactly 4 UNIQUE guarantees/trust factors that are RELEVANT to this specific page topic

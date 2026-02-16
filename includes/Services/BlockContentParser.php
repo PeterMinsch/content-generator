@@ -170,10 +170,30 @@ class BlockContentParser {
 			}
 		}
 
-		// Return hardcoded heading and description with AI-generated features
+		// Use business settings for heading and description, with fallbacks.
+		$settings      = get_option( 'seo_generator_settings', array() );
+		$business_name = $settings['business_name'] ?? '';
+		$business_desc = $settings['business_description'] ?? '';
+
+		// Build about heading from settings or fall back to generic.
+		if ( ! empty( $business_name ) ) {
+			$about_heading = 'ABOUT ' . strtoupper( $business_name );
+		} else {
+			$about_heading = 'ABOUT US';
+		}
+
+		// Use configured description, or fall back to AI-generated if available.
+		if ( ! empty( $business_desc ) ) {
+			$about_description = $business_desc;
+		} elseif ( $json && isset( $json['description'] ) ) {
+			$about_description = sanitize_textarea_field( $json['description'] );
+		} else {
+			$about_description = '';
+		}
+
 		return array(
-			'about_heading'     => 'ABOUT BRAVO JEWELERS',
-			'about_description' => 'Family-run and handcrafted in Carlsbad, Bravo Jewelers has over 25 years of experience serving San Diego County with timeless craftsmanship.',
+			'about_heading'     => $about_heading,
+			'about_description' => $about_description,
 			'about_features'    => $features,
 		);
 	}

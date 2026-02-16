@@ -205,16 +205,169 @@ class SettingsPage {
 	}
 
 	/**
-	 * Register Default Content section (placeholder).
+	 * Register Default Content section.
 	 *
 	 * @return void
 	 */
 	private function registerDefaultContentSection(): void {
+		// Business Identity section.
 		add_settings_section(
-			'seo_defaults_section',
-			__( 'Default Content', 'seo-generator' ),
-			array( $this, 'renderSectionDescription' ),
+			'seo_defaults_identity_section',
+			__( 'Business Identity', 'seo-generator' ),
+			array( $this, 'renderDefaultsIdentitySectionDescription' ),
 			self::PAGE_SLUG . '_defaults'
+		);
+
+		add_settings_field(
+			'business_name',
+			__( 'Business Name', 'seo-generator' ),
+			array( $this, 'renderBusinessNameField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_identity_section'
+		);
+
+		add_settings_field(
+			'business_type',
+			__( 'Business Type', 'seo-generator' ),
+			array( $this, 'renderBusinessTypeField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_identity_section'
+		);
+
+		add_settings_field(
+			'business_description',
+			__( 'Business Description', 'seo-generator' ),
+			array( $this, 'renderBusinessDescriptionField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_identity_section'
+		);
+
+		add_settings_field(
+			'years_in_business',
+			__( 'Years in Business', 'seo-generator' ),
+			array( $this, 'renderYearsInBusinessField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_identity_section'
+		);
+
+		add_settings_field(
+			'usps',
+			__( 'Unique Selling Points', 'seo-generator' ),
+			array( $this, 'renderUspsField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_identity_section'
+		);
+
+		add_settings_field(
+			'certifications',
+			__( 'Certifications', 'seo-generator' ),
+			array( $this, 'renderCertificationsField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_identity_section'
+		);
+
+		// Contact Info section divider.
+		add_settings_section(
+			'seo_defaults_contact_section',
+			__( 'Contact Information', 'seo-generator' ),
+			array( $this, 'renderDefaultsContactSectionDescription' ),
+			self::PAGE_SLUG . '_defaults'
+		);
+
+		add_settings_field(
+			'business_address',
+			__( 'Business Address', 'seo-generator' ),
+			array( $this, 'renderBusinessAddressField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_contact_section'
+		);
+
+		add_settings_field(
+			'service_area',
+			__( 'Service Area', 'seo-generator' ),
+			array( $this, 'renderServiceAreaField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_contact_section'
+		);
+
+		add_settings_field(
+			'business_phone',
+			__( 'Phone Number', 'seo-generator' ),
+			array( $this, 'renderBusinessPhoneField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_contact_section'
+		);
+
+		add_settings_field(
+			'business_email',
+			__( 'Email Address', 'seo-generator' ),
+			array( $this, 'renderBusinessEmailField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_contact_section'
+		);
+
+		add_settings_field(
+			'business_url',
+			__( 'Website URL', 'seo-generator' ),
+			array( $this, 'renderBusinessUrlField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_contact_section'
+		);
+
+		// Default CTA & Content section.
+		add_settings_section(
+			'seo_defaults_cta_section',
+			__( 'Default CTA & Content', 'seo-generator' ),
+			array( $this, 'renderDefaultsCtaSectionDescription' ),
+			self::PAGE_SLUG . '_defaults'
+		);
+
+		add_settings_field(
+			'default_cta_heading',
+			__( 'CTA Heading', 'seo-generator' ),
+			array( $this, 'renderDefaultCtaHeadingField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_cta_section'
+		);
+
+		add_settings_field(
+			'default_cta_text',
+			__( 'CTA Text', 'seo-generator' ),
+			array( $this, 'renderDefaultCtaTextField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_cta_section'
+		);
+
+		add_settings_field(
+			'default_cta_button_label',
+			__( 'CTA Button Label', 'seo-generator' ),
+			array( $this, 'renderDefaultCtaButtonLabelField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_cta_section'
+		);
+
+		add_settings_field(
+			'default_cta_button_url',
+			__( 'CTA Button URL', 'seo-generator' ),
+			array( $this, 'renderDefaultCtaButtonUrlField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_cta_section'
+		);
+
+		add_settings_field(
+			'default_warranty_text',
+			__( 'Default Warranty Text', 'seo-generator' ),
+			array( $this, 'renderDefaultWarrantyTextField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_cta_section'
+		);
+
+		add_settings_field(
+			'default_care_text',
+			__( 'Default Care Text', 'seo-generator' ),
+			array( $this, 'renderDefaultCareTextField' ),
+			self::PAGE_SLUG . '_defaults',
+			'seo_defaults_cta_section'
 		);
 	}
 
@@ -434,6 +587,306 @@ class SettingsPage {
 	 */
 	public function renderSectionDescription(): void {
 		echo '<p>' . esc_html__( 'Settings fields will be added in future stories.', 'seo-generator' ) . '</p>';
+	}
+
+	/**
+	 * Render Business Identity section description.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultsIdentitySectionDescription(): void {
+		echo '<p>' . esc_html__( 'Define your business identity. These values are used in AI prompts and frontend templates.', 'seo-generator' ) . '</p>';
+	}
+
+	/**
+	 * Render Contact Info section description.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultsContactSectionDescription(): void {
+		echo '<p>' . esc_html__( 'Contact details used across generated content and about sections.', 'seo-generator' ) . '</p>';
+	}
+
+	/**
+	 * Render Default CTA section description.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultsCtaSectionDescription(): void {
+		echo '<p>' . esc_html__( 'Default call-to-action content, warranty, and care text used across generated pages.', 'seo-generator' ) . '</p>';
+	}
+
+	/**
+	 * Render Business Name field.
+	 *
+	 * @return void
+	 */
+	public function renderBusinessNameField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['business_name'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[business_name]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. Bravo Jewelers', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Your business name as it should appear in generated content.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Business Type field.
+	 *
+	 * @return void
+	 */
+	public function renderBusinessTypeField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['business_type'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[business_type]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. jewelry store, fine jewelry retailer', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Used in AI system prompts to set content tone (e.g. "jewelry", "watches", "fashion").', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Business Description field.
+	 *
+	 * @return void
+	 */
+	public function renderBusinessDescriptionField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['business_description'] ?? '';
+		?>
+		<textarea name="<?php echo esc_attr( self::OPTION_NAME ); ?>[business_description]"
+			rows="3" class="large-text"
+			placeholder="<?php esc_attr_e( 'e.g. Family-run and handcrafted in Carlsbad, specializing in engagement rings and custom designs.', 'seo-generator' ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<p class="description"><?php esc_html_e( 'A short description of your business used in about sections and AI context.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Years in Business field.
+	 *
+	 * @return void
+	 */
+	public function renderYearsInBusinessField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['years_in_business'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[years_in_business]"
+			value="<?php echo esc_attr( $value ); ?>" class="small-text"
+			placeholder="<?php esc_attr_e( 'e.g. 25', 'seo-generator' ); ?>" />
+		<span><?php esc_html_e( 'years', 'seo-generator' ); ?></span>
+		<p class="description"><?php esc_html_e( 'How long your business has been operating.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render USPs field.
+	 *
+	 * @return void
+	 */
+	public function renderUspsField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['usps'] ?? '';
+		?>
+		<textarea name="<?php echo esc_attr( self::OPTION_NAME ); ?>[usps]"
+			rows="4" class="large-text"
+			placeholder="<?php esc_attr_e( "Family-run business\nHandcrafted jewelry\nFree lifetime resizing\nGIA-certified diamonds", 'seo-generator' ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<p class="description"><?php esc_html_e( 'One unique selling point per line. Used as context in AI-generated content.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Certifications field.
+	 *
+	 * @return void
+	 */
+	public function renderCertificationsField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['certifications'] ?? '';
+		?>
+		<textarea name="<?php echo esc_attr( self::OPTION_NAME ); ?>[certifications]"
+			rows="3" class="large-text"
+			placeholder="<?php esc_attr_e( "GIA Certified\nBBB Accredited\nAGS Member", 'seo-generator' ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<p class="description"><?php esc_html_e( 'One certification per line. Referenced in trust-related content blocks.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Business Address field.
+	 *
+	 * @return void
+	 */
+	public function renderBusinessAddressField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['business_address'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[business_address]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. 123 Main St, Carlsbad, CA 92008', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Full street address for your business.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Service Area field.
+	 *
+	 * @return void
+	 */
+	public function renderServiceAreaField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['service_area'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[service_area]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. Carlsbad, CA / San Diego County', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Geographic area your business serves. Used in location-based content.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Business Phone field.
+	 *
+	 * @return void
+	 */
+	public function renderBusinessPhoneField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['business_phone'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[business_phone]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. (760) 555-1234', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Primary business phone number.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Business Email field.
+	 *
+	 * @return void
+	 */
+	public function renderBusinessEmailField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['business_email'] ?? '';
+		?>
+		<input type="email" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[business_email]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. info@bravojewelers.com', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Primary business email address.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Business URL field.
+	 *
+	 * @return void
+	 */
+	public function renderBusinessUrlField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['business_url'] ?? '';
+		?>
+		<input type="url" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[business_url]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. https://www.bravojewelers.com', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Your business website URL.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Default CTA Heading field.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultCtaHeadingField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['default_cta_heading'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[default_cta_heading]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. Ready to Find Your Perfect Piece?', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Default heading for CTA sections when not AI-generated.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Default CTA Text field.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultCtaTextField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['default_cta_text'] ?? '';
+		?>
+		<textarea name="<?php echo esc_attr( self::OPTION_NAME ); ?>[default_cta_text]"
+			rows="3" class="large-text"
+			placeholder="<?php esc_attr_e( 'e.g. Visit our showroom or browse our collection online to find the perfect piece.', 'seo-generator' ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<p class="description"><?php esc_html_e( 'Default body text for CTA sections.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Default CTA Button Label field.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultCtaButtonLabelField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['default_cta_button_label'] ?? '';
+		?>
+		<input type="text" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[default_cta_button_label]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. Shop Now', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Default label for CTA buttons.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Default CTA Button URL field.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultCtaButtonUrlField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['default_cta_button_url'] ?? '';
+		?>
+		<input type="url" name="<?php echo esc_attr( self::OPTION_NAME ); ?>[default_cta_button_url]"
+			value="<?php echo esc_attr( $value ); ?>" class="regular-text"
+			placeholder="<?php esc_attr_e( 'e.g. https://www.bravojewelers.com/shop', 'seo-generator' ); ?>" />
+		<p class="description"><?php esc_html_e( 'Default URL for CTA buttons.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Default Warranty Text field.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultWarrantyTextField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['default_warranty_text'] ?? '';
+		?>
+		<textarea name="<?php echo esc_attr( self::OPTION_NAME ); ?>[default_warranty_text]"
+			rows="3" class="large-text"
+			placeholder="<?php esc_attr_e( 'e.g. All pieces come with a lifetime warranty covering manufacturing defects and free annual inspections.', 'seo-generator' ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<p class="description"><?php esc_html_e( 'Default warranty information used in care & warranty blocks.', 'seo-generator' ); ?></p>
+		<?php
+	}
+
+	/**
+	 * Render Default Care Text field.
+	 *
+	 * @return void
+	 */
+	public function renderDefaultCareTextField(): void {
+		$settings = get_option( self::OPTION_NAME, array() );
+		$value    = $settings['default_care_text'] ?? '';
+		?>
+		<textarea name="<?php echo esc_attr( self::OPTION_NAME ); ?>[default_care_text]"
+			rows="3" class="large-text"
+			placeholder="<?php esc_attr_e( 'e.g. Store jewelry in a soft pouch, avoid chemicals, and bring it in for professional cleaning annually.', 'seo-generator' ); ?>"><?php echo esc_textarea( $value ); ?></textarea>
+		<p class="description"><?php esc_html_e( 'Default care instructions used in care & warranty blocks.', 'seo-generator' ); ?></p>
+		<?php
 	}
 
 	/**
@@ -1117,6 +1570,77 @@ class SettingsPage {
 		} else {
 			$sanitized['max_reviews'] = $existing['max_reviews'] ?? 50;
 		}
+
+		// Business Identity fields.
+		$sanitized['business_name'] = isset( $input['business_name'] )
+			? sanitize_text_field( $input['business_name'] )
+			: ( $existing['business_name'] ?? '' );
+
+		$sanitized['business_type'] = isset( $input['business_type'] )
+			? sanitize_text_field( $input['business_type'] )
+			: ( $existing['business_type'] ?? '' );
+
+		$sanitized['business_description'] = isset( $input['business_description'] )
+			? sanitize_textarea_field( $input['business_description'] )
+			: ( $existing['business_description'] ?? '' );
+
+		$sanitized['years_in_business'] = isset( $input['years_in_business'] )
+			? sanitize_text_field( $input['years_in_business'] )
+			: ( $existing['years_in_business'] ?? '' );
+
+		$sanitized['usps'] = isset( $input['usps'] )
+			? sanitize_textarea_field( $input['usps'] )
+			: ( $existing['usps'] ?? '' );
+
+		$sanitized['certifications'] = isset( $input['certifications'] )
+			? sanitize_textarea_field( $input['certifications'] )
+			: ( $existing['certifications'] ?? '' );
+
+		// Contact Info fields.
+		$sanitized['business_address'] = isset( $input['business_address'] )
+			? sanitize_text_field( $input['business_address'] )
+			: ( $existing['business_address'] ?? '' );
+
+		$sanitized['service_area'] = isset( $input['service_area'] )
+			? sanitize_text_field( $input['service_area'] )
+			: ( $existing['service_area'] ?? '' );
+
+		$sanitized['business_phone'] = isset( $input['business_phone'] )
+			? sanitize_text_field( $input['business_phone'] )
+			: ( $existing['business_phone'] ?? '' );
+
+		$sanitized['business_email'] = isset( $input['business_email'] )
+			? sanitize_email( $input['business_email'] )
+			: ( $existing['business_email'] ?? '' );
+
+		$sanitized['business_url'] = isset( $input['business_url'] ) && ! empty( $input['business_url'] )
+			? esc_url_raw( $input['business_url'] )
+			: ( $existing['business_url'] ?? '' );
+
+		// Default CTA & Content fields.
+		$sanitized['default_cta_heading'] = isset( $input['default_cta_heading'] )
+			? sanitize_text_field( $input['default_cta_heading'] )
+			: ( $existing['default_cta_heading'] ?? '' );
+
+		$sanitized['default_cta_text'] = isset( $input['default_cta_text'] )
+			? sanitize_textarea_field( $input['default_cta_text'] )
+			: ( $existing['default_cta_text'] ?? '' );
+
+		$sanitized['default_cta_button_label'] = isset( $input['default_cta_button_label'] )
+			? sanitize_text_field( $input['default_cta_button_label'] )
+			: ( $existing['default_cta_button_label'] ?? '' );
+
+		$sanitized['default_cta_button_url'] = isset( $input['default_cta_button_url'] ) && ! empty( $input['default_cta_button_url'] )
+			? esc_url_raw( $input['default_cta_button_url'] )
+			: ( $existing['default_cta_button_url'] ?? '' );
+
+		$sanitized['default_warranty_text'] = isset( $input['default_warranty_text'] )
+			? sanitize_textarea_field( $input['default_warranty_text'] )
+			: ( $existing['default_warranty_text'] ?? '' );
+
+		$sanitized['default_care_text'] = isset( $input['default_care_text'] )
+			? sanitize_textarea_field( $input['default_care_text'] )
+			: ( $existing['default_care_text'] ?? '' );
 
 		// Preserve other existing settings (from other tabs/stories).
 		foreach ( $existing as $key => $value ) {

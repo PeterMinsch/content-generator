@@ -135,12 +135,14 @@ function seo_get_feature_icon( $icon_type ) {
 		<!-- Header Section -->
 		<header class="text-center max-w-[634px] flex flex-col gap-4">
 			<h2 class="font-cormorant text-[40px] lg:text-[80px] font-light leading-none tracking-[-2px] lg:tracking-[-4.4px] uppercase m-0 text-[#272521]">
-				About <span class="text-[#CA9652]">Bravo Jewelers</span>
+				<?php echo esc_html( $about_heading ); ?>
 			</h2>
 
-			<p class="font-avenir text-[18px] leading-[1.4] font-medium text-[rgba(39,37,33,0.65)] m-0">
-				Family-run and handcrafted in Carlsbad, Bravo Jewelers has over 25 years of experience serving San Diego County with timeless craftsmanship.
-			</p>
+			<?php if ( ! empty( $about_description ) ) : ?>
+				<p class="font-avenir text-[18px] leading-[1.4] font-medium text-[rgba(39,37,33,0.65)] m-0">
+					<?php echo esc_html( $about_description ); ?>
+				</p>
+			<?php endif; ?>
 		</header>
 
 		<!-- Features Grid -->

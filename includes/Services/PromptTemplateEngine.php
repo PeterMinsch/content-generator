@@ -46,11 +46,25 @@ class PromptTemplateEngine {
 		}
 
 		// Define variable substitutions.
+		// Fallback business_type to "content" if empty (used in system message).
+		$business_type = ! empty( $context['business_type'] ) ? $context['business_type'] : 'content';
+
 		$variables = array(
-			'{page_title}'    => $context['page_title'] ?? '',
-			'{page_topic}'    => $context['page_topic'] ?? '',
-			'{focus_keyword}' => $context['focus_keyword'] ?? '',
-			'{page_type}'     => $context['page_type'] ?? '',
+			'{page_title}'          => $context['page_title'] ?? '',
+			'{page_topic}'          => $context['page_topic'] ?? '',
+			'{focus_keyword}'       => $context['focus_keyword'] ?? '',
+			'{page_type}'           => $context['page_type'] ?? '',
+			'{business_name}'       => $context['business_name'] ?? '',
+			'{business_type}'       => $business_type,
+			'{business_description}' => $context['business_description'] ?? '',
+			'{business_address}'    => $context['business_address'] ?? '',
+			'{service_area}'        => $context['service_area'] ?? '',
+			'{business_phone}'      => $context['business_phone'] ?? '',
+			'{business_email}'      => $context['business_email'] ?? '',
+			'{business_url}'        => $context['business_url'] ?? '',
+			'{years_in_business}'   => $context['years_in_business'] ?? '',
+			'{usps}'                => $context['usps'] ?? '',
+			'{certifications}'      => $context['certifications'] ?? '',
 		);
 
 		// Perform substitution on both system and user messages.
@@ -200,6 +214,28 @@ class PromptTemplateEngine {
 			'focus_keyword' => $focus_keyword,
 			'page_type'     => $this->inferPageType( $topic_terms ),
 		);
+
+		// Merge business settings from Default Content tab.
+		$settings        = get_option( 'seo_generator_settings', array() );
+		$business_fields = array(
+			'business_name', 'business_type', 'business_description',
+			'business_address', 'service_area', 'business_phone',
+			'business_email', 'business_url', 'years_in_business',
+		);
+		foreach ( $business_fields as $field ) {
+			$context[ $field ] = $settings[ $field ] ?? '';
+		}
+
+		// USPs and certifications as comma-separated strings.
+		$usps_raw = $settings['usps'] ?? '';
+		$context['usps'] = ! empty( $usps_raw )
+			? implode( ', ', array_filter( array_map( 'trim', explode( "\n", $usps_raw ) ) ) )
+			: '';
+
+		$certs_raw = $settings['certifications'] ?? '';
+		$context['certifications'] = ! empty( $certs_raw )
+			? implode( ', ', array_filter( array_map( 'trim', explode( "\n", $certs_raw ) ) ) )
+			: '';
 
 		// Merge with additional context (additional_context takes priority).
 		return array_merge( $context, $additional_context );

@@ -52,17 +52,6 @@ $page_slug = \SEOGenerator\Admin\SettingsPage::getPageSlug();
 
 			case 'defaults':
 				do_settings_sections( $page_slug . '_defaults' );
-				?>
-				<div class="seo-card mt-4">
-					<h3 class="seo-card__title">ℹ️ Coming Soon</h3>
-					<div class="seo-card__content">
-						<p>
-							<strong><?php esc_html_e( 'Coming Soon:', 'seo-generator' ); ?></strong>
-							<?php esc_html_e( 'Set default CTA button text, URLs, warranty information, and care instructions that will be used across all generated pages.', 'seo-generator' ); ?>
-						</p>
-					</div>
-				</div>
-				<?php
 				break;
 
 			case 'prompts':
