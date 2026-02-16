@@ -88,7 +88,7 @@ class OpenAIService {
 				'top_p'             => 1,
 				'frequency_penalty' => 0.3,
 				'presence_penalty'  => 0.3,
-				'system_message'    => 'You are a helpful assistant that generates SEO-optimized content for jewelry e-commerce.',
+				'system_message'    => 'You are a helpful assistant that generates SEO-optimized content for e-commerce.',
 			)
 		);
 

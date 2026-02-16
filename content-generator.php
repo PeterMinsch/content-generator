@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SEO Content Generator
  * Plugin URI: https://github.com/your-org/content-generator
- * Description: WordPress plugin that generates structured, SEO-optimized content pages for jewelry e-commerce using OpenAI's GPT-4 API.
+ * Description: WordPress plugin that generates structured, SEO-optimized content pages for e-commerce using OpenAI's GPT-4 API.
  * Version: 1.0.0
  * Requires at least: 6.0
  * Requires PHP: 8.0

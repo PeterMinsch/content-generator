@@ -2,7 +2,7 @@
 /**
  * DALL-E Service
  *
- * Handles DALL-E 3 API integration for generating jewelry images.
+ * Handles DALL-E 3 API integration for generating product images.
  * This is Stage 2 of the two-stage AI image generation system.
  *
  * @package SEOGenerator

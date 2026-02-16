@@ -57,7 +57,7 @@ class DefaultPrompts {
 Context:
 - Page type: {page_type}
 - Topic category: {page_topic}
-- Target audience: jewelry shoppers researching this topic
+- Target audience: shoppers researching this topic
 
 Requirements:
 - Focus Keyword: 2-4 words, primary search term for this page
@@ -123,7 +123,7 @@ Output as JSON:
 	public static function getAboutSectionTemplate(): array {
 		return array(
 			'system' => self::SYSTEM_MESSAGE,
-			'user'   => 'Generate 4 key trust factors and guarantees for a jewelry company page about {page_title}.
+			'user'   => 'Generate 4 key trust factors and guarantees for a {business_type} company page about {page_title}.
 
 Context:
 - Page type: {page_type}
@@ -613,7 +613,7 @@ Requirements:
 - Section heading: 4-8 words, action-oriented (e.g., "SHOP ENGAGEMENT RINGS", "EXPLORE MORE STYLES")
   - First word should be a verb in uppercase (SHOP, EXPLORE, DISCOVER, BROWSE)
   - Rest of heading should describe the category or theme
-- Generate 4 realistic related page suggestions based on common jewelry categories
+- Generate 4 realistic related page suggestions based on common {business_type} categories
 - For each suggestion:
   - Title: 2-5 words, category or collection name (e.g., "Engagement Rings", "Men\'s Wedding Bands", "Diamond Collections")
   - URL: Logical slug format (e.g., /engagement-rings/, /mens-wedding-bands/, /diamond-collections/)
@@ -625,8 +625,8 @@ Requirements:
   - Represent different but related categories
   - Help users explore related products or information
   - Cover a variety: products, guides, comparisons, collections
-- Create realistic, diverse suggestions that make sense for a jewelry e-commerce site
-- Use your knowledge of jewelry to generate logical related topics
+- Create realistic, diverse suggestions that make sense for a {business_type} e-commerce site
+- Use your knowledge of {business_type} to generate logical related topics
 
 IMPORTANT: Generate realistic suggestions even though these pages may not exist yet. The goal is to show what related content COULD be linked. Make them contextually relevant to {page_title}.
 
@@ -815,7 +815,7 @@ For WEDDING/BRIDAL service pages:
 - Rush Service (1 Day / Same Day)
 - Wedding Set Consultation (consultation text)
 
-For GENERAL jewelry or mixed topics:
+For GENERAL or mixed topics:
 - Ring Sizing (Downsize / Upsize)
 - Bracelet Sizing (Shorten / Lengthen)
 - Chain Repair (Simple / Complex)

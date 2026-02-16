@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 // Get ACF fields or fallback to hardcoded defaults
 $pricing_hero_title = get_field( 'pricing_hero_title' ) ?: get_post_meta( get_the_ID(), 'pricing_hero_title', true ) ?: 'DIMENSIONAL ACCURACY FOR YOUR COMFORT';
-$pricing_hero_description = get_field( 'pricing_hero_description' ) ?: get_post_meta( get_the_ID(), 'pricing_hero_description', true ) ?: 'Discover the ideal fit for your favorite rings at our jewelry store. Our trained crafts utilize cutting-edge sizing, using both traditional and modern methods. Choose from a range of standard sizes for a comfortable wear. We offer personalized sizing services to cater to your unique needs. Enjoy the perfect ring, perfectly sized. With us.';
+$pricing_hero_description = get_field( 'pricing_hero_description' ) ?: get_post_meta( get_the_ID(), 'pricing_hero_description', true ) ?: 'Discover our professional services with cutting-edge techniques, using both traditional and modern methods. We offer personalized services to cater to your unique needs.';
 $pricing_items = get_field( 'pricing_items' ) ?: get_post_meta( get_the_ID(), 'pricing_items', true );
 
 // Default pricing items if empty

@@ -2,7 +2,7 @@
 /**
  * Prompt Generator Service
  *
- * Uses GPT-4 to generate optimized DALL-E prompts for jewelry images.
+ * Uses GPT-4 to generate optimized DALL-E prompts for product images.
  * This is Stage 1 of the two-stage AI image generation system.
  *
  * @package SEOGenerator
@@ -84,11 +84,14 @@ class PromptGeneratorService {
 	 * @return string
 	 */
 	private function getSystemPrompt(): string {
-		return "You are an expert at crafting DALL-E prompts for luxury jewelry photography. Your prompts should:
+		$settings      = get_option( 'seo_generator_settings', array() );
+		$business_type = ! empty( $settings['business_type'] ) ? $settings['business_type'] : 'luxury product';
+
+		return "You are an expert at crafting DALL-E prompts for {$business_type} photography. Your prompts should:
 
 1. Create elegant, high-end product photography
-2. Use professional jewelry photography lighting and composition
-3. Focus on the jewelry as the main subject
+2. Use professional product photography lighting and composition
+3. Focus on the product as the main subject
 4. Include relevant context (display, background, styling)
 5. Maintain brand consistency with luxury aesthetics
 6. Be concise but detailed (50-100 words)
@@ -107,7 +110,10 @@ Output ONLY the DALL-E prompt text. Do not include explanations or metadata.";
 	 * @return string
 	 */
 	private function buildUserPrompt( string $page_title, string $link_title, string $link_description, string $link_category ): string {
-		return "Generate a DALL-E prompt for a luxury jewelry product image.
+		$settings      = get_option( 'seo_generator_settings', array() );
+		$business_type = ! empty( $settings['business_type'] ) ? $settings['business_type'] : 'luxury product';
+
+		return "Generate a DALL-E prompt for a {$business_type} product image.
 
 Context:
 - Main page: {$page_title}
@@ -116,9 +122,9 @@ Context:
 - Category tag: {$link_category}
 
 Requirements:
-- Professional jewelry photography style
+- Professional {$business_type} photography style
 - Clean, elegant composition
-- Focus on the jewelry product
+- Focus on the product
 - Luxury brand aesthetic
 - Suitable for e-commerce category page
 

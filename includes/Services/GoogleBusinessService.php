@@ -2,7 +2,7 @@
 /**
  * Apify Google Maps Review Integration
  *
- * Fetches reviews from Google Maps via Apify scraper for Bravo Jewelers.
+ * Fetches reviews from Google Maps via Apify scraper.
  *
  * @package SEOGenerator
  */
@@ -12,7 +12,7 @@ namespace SEOGenerator\Services;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Apify Google Maps Scraper integration for Bravo Jewelers
+ * Apify Google Maps Scraper integration
  *
  * Fetches review data from Google Maps using Apify's Google Maps Scraper actor.
  * Simpler setup than official Google API - just needs Apify API token and Place URL.
@@ -24,9 +24,14 @@ class GoogleBusinessService {
 	// ============================================================================
 
 	/**
-	 * Business name for logging/debugging
+	 * Get business name from settings for logging/debugging.
+	 *
+	 * @return string Business name or 'Business'.
 	 */
-	const BUSINESS_NAME = 'Bravo Jewelers';
+	private function getBusinessName(): string {
+		$settings = get_option( 'seo_generator_settings', array() );
+		return ! empty( $settings['business_name'] ) ? $settings['business_name'] : 'Business';
+	}
 
 	/**
 	 * Apify Actor ID for Google Maps Scraper
@@ -95,7 +100,7 @@ class GoogleBusinessService {
 	}
 
 	/**
-	 * Fetch all reviews for Bravo Jewelers via Apify Google Maps Scraper
+	 * Fetch all reviews via Apify Google Maps Scraper
 	 *
 	 * @return array Array of normalized review data (empty if error).
 	 */
@@ -103,7 +108,7 @@ class GoogleBusinessService {
 		error_log( '========================================' );
 		error_log( '🚨 APIFY API CALL BEING MADE NOW! 🚨' );
 		error_log( '========================================' );
-		error_log( '[Apify Reviews] Starting review fetch for ' . self::BUSINESS_NAME );
+		error_log( '[Apify Reviews] Starting review fetch for ' . $this->getBusinessName() );
 
 		// Step 1: Start the Apify actor run.
 		$run_id = $this->startApifyRun();
@@ -132,7 +137,7 @@ class GoogleBusinessService {
 		// Normalize review data.
 		$normalized = $this->normalizeReviews( $reviews );
 
-		error_log( sprintf( '[Apify Reviews] Fetched %d reviews for %s', count( $normalized ), self::BUSINESS_NAME ) );
+		error_log( sprintf( '[Apify Reviews] Fetched %d reviews for %s', count( $normalized ), $this->getBusinessName() ) );
 		error_log( '========================================' );
 		error_log( '✅ APIFY API CALL COMPLETED' );
 		error_log( '========================================' );
