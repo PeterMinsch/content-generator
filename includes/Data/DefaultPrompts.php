@@ -40,6 +40,7 @@ class DefaultPrompts {
 			'faqs'             => self::getFaqsTemplate(),
 			'cta'              => self::getCtaTemplate(),
 			'related_links'    => self::getRelatedLinksTemplate(),
+			'pricing_hero'     => self::getPricingHeroTemplate(),
 		);
 	}
 
@@ -663,6 +664,234 @@ Output as JSON:
     }
   ]
 }',
+		);
+	}
+
+	/**
+	 * Get default template for pricing hero section.
+	 *
+	 * @return array Template with system and user messages.
+	 */
+	public static function getPricingHeroTemplate(): array {
+		return array(
+			'system' => self::SYSTEM_MESSAGE,
+			'user'   => 'Generate a contextual pricing hero section for a page about {page_title}.
+
+Context:
+- Page type: {page_type}
+- Topic category: {page_topic}
+- Target keyword: {focus_keyword}
+
+IMPORTANT:
+1. Generate service categories and subservice labels that MATCH the page topic
+2. Use PLACEHOLDER prices ($XX) - the store owner will manually add real prices later
+
+Requirements:
+- Hero Title: 6-12 words, compelling and relevant to page topic
+  - Should emphasize the service type related to the page
+  - Use uppercase for impact (e.g., "EXPERT RING SERVICES", "PROFESSIONAL WATCH REPAIR")
+  - Make it relevant to the page topic
+- Hero Description: 60-100 words
+  - Describe the services available that relate to the page topic
+  - Mention expertise, methods, and quality
+  - Emphasize professional care
+  - Professional yet approachable tone
+- Pricing Items: Generate exactly 4-5 categories
+  - Categories must be relevant to the page topic
+  - Subservice labels should be contextual (Downsize/Upsize, Basic/Premium, etc.)
+  - ALL PRICES must be "$XX" placeholder
+
+CONTEXTUAL SERVICE CATEGORIES BY TOPIC:
+
+For RING-related pages (rings, bands, engagement, wedding):
+- Ring Sizing (Downsize / Upsize)
+- Prong Retipping (2 Prongs / 4 Prongs)
+- Stone Replacement (Small Stone / Large Stone)
+- Ring Cleaning & Polishing (Basic / Deep Clean)
+- Custom Resizing (consultation text)
+
+For WATCH-related pages (watches, timepieces):
+- Watch Servicing (Basic / Full Service)
+- Battery Replacement (Standard / Premium)
+- Band Adjustment (Resize / Replace)
+- Crystal Repair (Polish / Replace)
+- Movement Service (consultation text)
+
+For BRACELET-related pages:
+- Bracelet Sizing (Shorten / Lengthen)
+- Link Repair (Single Link / Multiple Links)
+- Clasp Replacement (Standard / Security Clasp)
+- Bracelet Cleaning & Polishing (Basic / Deep Clean)
+- Custom Modifications (consultation text)
+
+For NECKLACE/CHAIN-related pages:
+- Pearl Restringing (Hand Knotted / Without Knots)
+- Clasp Replacement (Standard / Magnetic)
+- Necklace Shortening (1-2 inches / 3+ inches)
+- Necklace Lengthening (Add Chain / Add Pearls)
+- Cleaning & Restoration (consultation text)
+
+For EARRING-related pages:
+- Earring Repair (Post Repair / Backing Replacement)
+- Clasp Conversion (Post to Clip / Clip to Post)
+- Pearl Replacement (Single / Pair)
+- Earring Cleaning (Basic / Deep Clean)
+- Custom Modifications (consultation text)
+
+For REPAIR/RESTORATION pages:
+- Stone Setting (Small / Large)
+- Prong Retipping (2 Prongs / 4 Prongs)
+- Clasp Replacement (Standard / Secure)
+- Chain Repair (Simple / Complex)
+- Full Restoration (consultation text)
+
+For PENDANT/CHARM-related pages:
+- Pendant Repair (Bail Repair / Full Replacement)
+- Charm Attachment (Single / Multiple)
+- Engraving (Text Only / Design)
+- Pendant Polishing (Basic / Deep Clean)
+- Custom Pendant Creation (consultation text)
+
+For APPRAISAL pages:
+- Insurance Appraisal (Single Item / Multiple Items)
+- Estate Appraisal (Small Collection / Large Collection)
+- Damage Assessment (Minor / Major)
+- Verbal Appraisal (Quick / Detailed)
+- Written Report (consultation text)
+
+For ENGRAVING service pages:
+- Text Engraving (Short Message / Long Message)
+- Design Engraving (Simple / Complex)
+- Inside Ring Engraving (Text / Symbols)
+- Pendant Engraving (Front / Back)
+- Custom Artwork (consultation text)
+
+For CUSTOM DESIGN pages:
+- Design Consultation (1 Hour / 2 Hours)
+- CAD Rendering (Basic / Detailed)
+- Wax Model (Simple / Complex)
+- Metal Casting (Standard / Premium Metal)
+- Final Assembly (consultation text)
+
+For GEMSTONE-specific pages (sapphire, ruby, emerald, diamond, etc.):
+- Stone Sourcing (Standard / Premium)
+- Stone Setting (Simple / Complex)
+- Stone Replacement (Match Existing / Upgrade)
+- Stone Cleaning (Basic / Professional)
+- Certification (consultation text)
+
+For METAL-specific pages (gold, silver, platinum):
+- Metal Testing (Basic / Detailed)
+- Replating (Small Item / Large Item)
+- Metal Polishing (Basic / Mirror Finish)
+- Rhodium Plating (Partial / Full)
+- Metal Conversion (consultation text)
+
+For BROOCH/PIN pages:
+- Pin Repair (Clasp / Full Mechanism)
+- Pin Conversion (Brooch to Pendant / Pendant to Brooch)
+- Pin Cleaning (Basic / Detailed)
+- Stone Tightening (Single / Multiple)
+- Restoration (consultation text)
+
+For ANKLET pages:
+- Anklet Sizing (Shorten / Lengthen)
+- Clasp Replacement (Standard / Secure)
+- Charm Addition (Single / Multiple)
+- Anklet Cleaning (Basic / Deep Clean)
+- Custom Design (consultation text)
+
+For CUFFLINK/TIE ACCESSORY pages:
+- Cufflink Repair (Post / Mechanism)
+- Engraving (Single / Pair)
+- Stone Replacement (Small / Large)
+- Polishing (Basic / Premium)
+- Custom Creation (consultation text)
+
+For WEDDING/BRIDAL service pages:
+- Wedding Band Sizing (His / Hers)
+- Engraving (Inside / Outside)
+- Ring Polishing (Single / Both)
+- Rush Service (1 Day / Same Day)
+- Wedding Set Consultation (consultation text)
+
+For GENERAL jewelry or mixed topics:
+- Ring Sizing (Downsize / Upsize)
+- Bracelet Sizing (Shorten / Lengthen)
+- Chain Repair (Simple / Complex)
+- Stone Setting (Small / Large)
+- Custom Work (consultation text)
+
+STRUCTURE:
+For standard categories (most items):
+- Category name: 2-5 words describing the service type (e.g., "Ring Sizing", "Prong Retipping", "Bracelet Cleaning & Polishing")
+- Downsize label: Service variation 1 (e.g., "Downsize", "Basic", "Shorten", "Small Stone", "2 Prongs", "Single Link")
+- Downsize price: "$XX" (ALWAYS use placeholder)
+- Upsize label: Service variation 2 (e.g., "Upsize", "Premium", "Lengthen", "Large Stone", "4 Prongs", "Multiple Links")
+- Upsize price: "$XX" (ALWAYS use placeholder)
+
+For custom/consultation category (last item):
+- Category name: Related to services (e.g., "Custom Resizing", "Movement Service", "Custom Modifications")
+- Custom text: Brief message (e.g., "Prices available upon consultation", "Contact us for estimate")
+
+Output as JSON:
+{
+  "hero_title": "CONTEXTUAL TITLE MATCHING PAGE TOPIC IN UPPERCASE",
+  "hero_description": "Your 60-100 word description about the relevant services for this page topic",
+  "pricing_items": [
+    {
+      "category": "Contextual Category Name 1",
+      "downsize_label": "Contextual Variation 1",
+      "downsize_price": "$XX",
+      "upsize_label": "Contextual Variation 2",
+      "upsize_price": "$XX"
+    },
+    {
+      "category": "Contextual Category Name 2",
+      "downsize_label": "Contextual Variation 1",
+      "downsize_price": "$XX",
+      "upsize_label": "Contextual Variation 2",
+      "upsize_price": "$XX"
+    },
+    {
+      "category": "Contextual Category Name 3",
+      "downsize_label": "Contextual Variation 1",
+      "downsize_price": "$XX",
+      "upsize_label": "Contextual Variation 2",
+      "upsize_price": "$XX"
+    },
+    {
+      "category": "Contextual Category Name 4",
+      "downsize_label": "Contextual Variation 1",
+      "downsize_price": "$XX",
+      "upsize_label": "Contextual Variation 2",
+      "upsize_price": "$XX"
+    },
+    {
+      "category": "Custom/Specialty Service",
+      "custom_text": "Prices available upon consultation"
+    }
+  ]
+}
+
+CRITICAL:
+- Match services to page topic:
+  * Ring pages = ring sizing services
+  * Watch pages = watch servicing
+  * Bracelet pages = bracelet sizing/repair
+  * Necklace pages = necklace/chain services
+  * Pendant/Charm pages = pendant repair/attachment
+  * Appraisal pages = appraisal services
+  * Engraving pages = engraving services
+  * Custom Design pages = design consultation services
+  * Gemstone pages = stone sourcing/setting/cleaning
+  * Metal pages = metal testing/plating/polishing
+  * Brooch pages = pin repair/conversion
+  * Anklet pages = anklet sizing/repair
+  * Cufflink pages = cufflink repair/engraving
+  * Wedding/Bridal pages = wedding-specific services
+- Use contextual category names and subservice labels
+- ALL PRICES must be "$XX" - the store owner will manually fill in real prices',
 		);
 	}
 

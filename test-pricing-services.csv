@@ -1,0 +1,25 @@
+Title,Category,Expected Service Type,Expected Services
+Diamond Engagement Rings,product,RING,Gold Rings | Silver Rings | Platinum Rings | Rings with Stones | Custom Designs
+Wedding Bands,product,RING,Gold Rings | Silver Rings | Platinum Rings | Rings with Stones | Custom Designs
+Gold Ring Collection,product,RING,Gold Rings | Silver Rings | Platinum Rings | Rings with Stones | Custom Designs
+Sapphire Rings,product,RING,Gold Rings | Silver Rings | Platinum Rings | Rings with Stones | Custom Designs
+Luxury Watches,product,WATCH,Battery Replacement | Band Sizing | Crystal Replacement | Watch Cleaning | Movement Service
+Watch Repair Services,service,WATCH,Battery Replacement | Band Sizing | Crystal Replacement | Watch Cleaning | Movement Service
+Rolex Timepieces,product,WATCH,Battery Replacement | Band Sizing | Crystal Replacement | Watch Cleaning | Movement Service
+Swiss Watches,product,WATCH,Battery Replacement | Band Sizing | Crystal Replacement | Watch Cleaning | Movement Service
+Gold Bracelets,product,BRACELET,Gold Bracelets | Silver Bracelets | Chain Bracelets | Charm Bracelets | Custom Designs
+Tennis Bracelets,product,BRACELET,Gold Bracelets | Silver Bracelets | Chain Bracelets | Charm Bracelets | Custom Designs
+Charm Bracelets,product,BRACELET,Gold Bracelets | Silver Bracelets | Chain Bracelets | Charm Bracelets | Custom Designs
+Silver Bangle Bracelets,product,BRACELET,Gold Bracelets | Silver Bracelets | Chain Bracelets | Charm Bracelets | Custom Designs
+Gold Necklaces,product,NECKLACE,Gold Chains | Silver Chains | Pearl Restringing | Pendant Attachment | Custom Designs
+Pearl Necklace Collection,product,NECKLACE,Gold Chains | Silver Chains | Pearl Restringing | Pendant Attachment | Custom Designs
+Chain Necklaces,product,NECKLACE,Gold Chains | Silver Chains | Pearl Restringing | Pendant Attachment | Custom Designs
+Pendant Necklaces,product,NECKLACE,Gold Chains | Silver Chains | Pearl Restringing | Pendant Attachment | Custom Designs
+Jewelry Repair Services,service,REPAIR,Stone Setting | Prong Retipping | Clasp Replacement | Chain Repair | Full Restoration
+Jewelry Restoration,service,REPAIR,Stone Setting | Prong Retipping | Clasp Replacement | Chain Repair | Full Restoration
+Antique Jewelry Repair,service,REPAIR,Stone Setting | Prong Retipping | Clasp Replacement | Chain Repair | Full Restoration
+Stone Setting Services,service,REPAIR,Stone Setting | Prong Retipping | Clasp Replacement | Chain Repair | Full Restoration
+Custom Jewelry Design,service,GENERAL,Ring Sizing | Bracelet Sizing | Chain Repair | Stone Setting | Custom Work
+Fine Jewelry Collection,product,GENERAL,Ring Sizing | Bracelet Sizing | Chain Repair | Stone Setting | Custom Work
+Jewelry Store Services,service,GENERAL,Ring Sizing | Bracelet Sizing | Chain Repair | Stone Setting | Custom Work
+Estate Jewelry,product,GENERAL,Ring Sizing | Bracelet Sizing | Chain Repair | Stone Setting | Custom Work

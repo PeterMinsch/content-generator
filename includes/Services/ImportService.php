@@ -191,7 +191,9 @@ class ImportService {
 				// Queue for generation if auto_generate enabled.
 				if ( $this->generation_mode === 'auto_generate' ) {
 					$queue = new GenerationQueue();
-					$queue->queuePost( $post_result, $this->queue_index, $this->blocks_to_generate );
+					// Use custom_block_order if set (from UI), otherwise fall back to blocks_to_generate.
+				$blocks = ! empty( $this->custom_block_order ) ? $this->custom_block_order : $this->blocks_to_generate;
+				$queue->queuePost( $post_result, $this->queue_index, $blocks );
 					$this->queue_index++;
 				}
 			}
@@ -331,19 +333,23 @@ class ImportService {
 		error_log( "[Import Service] blocks_to_generate: " . wp_json_encode( $this->blocks_to_generate ) );
 		error_log( "[Import Service] custom_block_order: " . wp_json_encode( $this->custom_block_order ) );
 
-		if ( ! empty( $this->blocks_to_generate ) && is_array( $this->blocks_to_generate ) ) {
+		// IMPORTANT: Check custom_block_order FIRST (it's what user selected in UI).
+		// Only fall back to blocks_to_generate if custom_block_order is not set.
+		if ( ! empty( $this->custom_block_order ) && is_array( $this->custom_block_order ) ) {
+			// Prepend seo_metadata to the custom order (it's always generated first).
+			$full_block_order = array_merge( array( 'seo_metadata' ), $this->custom_block_order );
+			// Remove duplicates in case seo_metadata was already in the list.
+			$full_block_order = array_unique( $full_block_order );
+			update_post_meta( $post_id, '_seo_block_order', wp_json_encode( $full_block_order ) );
+			error_log( "[Import Service] Saved custom_block_order to post meta: " . wp_json_encode( $full_block_order ) );
+		} elseif ( ! empty( $this->blocks_to_generate ) && is_array( $this->blocks_to_generate ) ) {
+			// Fallback: Save blocks_to_generate if custom order not specified.
 			// Prepend seo_metadata to the blocks list (it's always generated first).
 			$blocks_with_metadata = array_merge( array( 'seo_metadata' ), $this->blocks_to_generate );
 			// Remove duplicates in case seo_metadata was already in the list.
 			$blocks_with_metadata = array_unique( $blocks_with_metadata );
 			update_post_meta( $post_id, '_seo_block_order', wp_json_encode( $blocks_with_metadata ) );
 			error_log( "[Import Service] Saved blocks_to_generate to post meta: " . wp_json_encode( $blocks_with_metadata ) );
-		} elseif ( ! empty( $this->custom_block_order ) && is_array( $this->custom_block_order ) ) {
-			// Fallback: Save custom block order if specified (for backward compatibility).
-			// Prepend seo_metadata to the custom order (it's always generated first).
-			$full_block_order = array_merge( array( 'seo_metadata' ), $this->custom_block_order );
-			update_post_meta( $post_id, '_seo_block_order', wp_json_encode( $full_block_order ) );
-			error_log( "[Import Service] Saved custom_block_order to post meta: " . wp_json_encode( $full_block_order ) );
 		} else {
 			error_log( "[Import Service] No block configuration provided - will use default order" );
 		}

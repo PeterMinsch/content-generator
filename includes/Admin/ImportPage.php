@@ -659,7 +659,7 @@ class ImportPage {
 		}
 
 		// Validate block order contains only valid block types.
-		$valid_blocks = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta', 'related_links' );
+		$valid_blocks = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta', 'related_links', 'pricing_hero' );
 		$invalid_blocks = array_diff( $block_order, $valid_blocks );
 
 		if ( ! empty( $invalid_blocks ) ) {

@@ -136,6 +136,7 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 		'faqs'              => array( 'faqs_heading', 'faq_items' ),
 		'cta'               => array( 'cta_heading', 'cta_text', 'cta_primary_label', 'cta_primary_url', 'cta_secondary_label', 'cta_secondary_url' ),
 		'related_links'     => array( 'section_heading', 'links' ),
+		'pricing_hero'      => array( 'pricing_hero_title', 'pricing_hero_description', 'pricing_items' ),
 	);
 
 	// Check if block type exists.
@@ -147,25 +148,9 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 	foreach ( $field_map[ $block_type ] as $field_name ) {
 		$field_value = get_field( $field_name, $post_id );
 
-		// DEBUG: Log hero field retrieval
-		if ( $block_type === 'hero' ) {
-			error_log( "[Hero Field] {$field_name} - ACF get_field result: " . ( empty( $field_value ) ? 'EMPTY' : gettype( $field_value ) ) );
-			if ( ! empty( $field_value ) ) {
-				error_log( "[Hero Field] {$field_name} value: " . print_r( $field_value, true ) );
-			}
-		}
-
 		// WORKAROUND: If ACF get_field returns empty but data exists in post_meta, use get_post_meta
 		if ( empty( $field_value ) ) {
 			$direct_value = get_post_meta( $post_id, $field_name, true );
-
-			// DEBUG: Log meta retrieval for hero
-			if ( $block_type === 'hero' ) {
-				error_log( "[Hero Field] {$field_name} - get_post_meta result: " . ( empty( $direct_value ) ? 'EMPTY' : gettype( $direct_value ) ) );
-				if ( ! empty( $direct_value ) ) {
-					error_log( "[Hero Field] {$field_name} meta value: " . print_r( $direct_value, true ) );
-				}
-			}
 
 			if ( ! empty( $direct_value ) ) {
 				// For repeater fields, decode JSON if needed
@@ -175,37 +160,10 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 				} else {
 					$field_value = $direct_value;
 				}
-
-				error_log( "[Field Retrieval Fallback] Using get_post_meta for {$field_name} on post {$post_id}" );
 			}
 		}
 
 		$fields[ $field_name ] = $field_value;
-	}
-
-	// DEBUG: Log about_section fields
-	if ( $block_type === 'about_section' ) {
-		error_log( '=== ABOUT SECTION DEBUG ===' );
-		error_log( 'Post ID: ' . $post_id );
-		error_log( 'ACF function exists: ' . ( function_exists( 'get_field' ) ? 'YES' : 'NO' ) );
-		error_log( 'Fields retrieved: ' . print_r( $fields, true ) );
-
-		// Try getting fields with different methods
-		error_log( 'Direct get_post_meta about_heading: ' . get_post_meta( $post_id, 'about_heading', true ) );
-		error_log( 'ACF get_field about_heading: ' . get_field( 'about_heading', $post_id ) );
-		error_log( 'ACF get_field with false encode about_heading: ' . get_field( 'about_heading', $post_id, false ) );
-
-		// Check raw post meta
-		$meta = get_post_meta( $post_id );
-		error_log( 'All post meta keys with "about": ' . print_r( array_filter( $meta, function( $key ) {
-			return strpos( $key, 'about' ) !== false;
-		}, ARRAY_FILTER_USE_KEY ), true ) );
-
-		// Check if ACF field exists
-		if ( function_exists( 'acf_get_field' ) ) {
-			$field_obj = acf_get_field( 'about_heading' );
-			error_log( 'ACF field object for about_heading: ' . print_r( $field_obj, true ) );
-		}
 	}
 
 	// Check if block has content (skip if empty).
@@ -218,16 +176,7 @@ function seo_generator_render_block( string $block_type, int $post_id = 0 ): voi
 	}
 
 	if ( ! $has_content ) {
-		// DEBUG: Log when block is skipped
-		if ( $block_type === 'about_section' ) {
-			error_log( 'ABOUT SECTION SKIPPED - No content found' );
-		}
 		return; // Skip empty blocks.
-	}
-
-	// DEBUG: Log when block will render
-	if ( $block_type === 'about_section' ) {
-		error_log( 'ABOUT SECTION WILL RENDER' );
 	}
 
 	// Allow filtering of block data.

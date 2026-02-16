@@ -352,6 +352,91 @@ export function getBlockTemplate( blockType ) {
 				</div>
 			</section>
 		`,
+
+		related_links: `
+			<div class="preview-block related-links-block">
+				<h3 class="related-links-heading" style="text-align: center; font-size: 2rem; margin-bottom: 2rem;">EXPLORE MORE STYLES</h3>
+				<div class="related-links-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+					<div class="related-link-card" style="position: relative; height: 250px; border-radius: 12px; overflow: hidden; border: 1px solid #ca9652;">
+						<div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8) 100%);"></div>
+						<div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; color: white;">
+							<h4 style="font-size: 1.25rem; margin-bottom: 0.5rem; text-transform: uppercase;">Wedding Bands</h4>
+							<p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Discover stunning wedding band collections</p>
+							<p style="font-size: 0.85rem; font-weight: 600;">145 Items</p>
+						</div>
+					</div>
+					<div class="related-link-card" style="position: relative; height: 250px; border-radius: 12px; overflow: hidden; border: 1px solid #ca9652;">
+						<div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8) 100%);"></div>
+						<div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; color: white;">
+							<h4 style="font-size: 1.25rem; margin-bottom: 0.5rem; text-transform: uppercase;">Gemstone Rings</h4>
+							<p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Browse colorful gemstone collections</p>
+							<p style="font-size: 0.85rem; font-weight: 600;">89 Items</p>
+						</div>
+					</div>
+					<div class="related-link-card" style="position: relative; height: 250px; border-radius: 12px; overflow: hidden; border: 1px solid #ca9652;">
+						<div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8) 100%);"></div>
+						<div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; color: white;">
+							<h4 style="font-size: 1.25rem; margin-bottom: 0.5rem; text-transform: uppercase;">Diamond Education</h4>
+							<p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Learn about diamond quality and care</p>
+							<p style="font-size: 0.85rem; font-weight: 600;">12 Guides</p>
+						</div>
+					</div>
+					<div class="related-link-card" style="position: relative; height: 250px; border-radius: 12px; overflow: hidden; border: 1px solid #ca9652;">
+						<div style="position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.8) 100%);"></div>
+						<div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px; color: white;">
+							<h4 style="font-size: 1.25rem; margin-bottom: 0.5rem; text-transform: uppercase;">Custom Designs</h4>
+							<p style="font-size: 0.9rem; opacity: 0.9; margin-bottom: 0.5rem;">Create your dream custom ring</p>
+							<p style="font-size: 0.85rem; font-weight: 600;">34 Items</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		`,
+
+		pricing_hero: `
+			<div class="preview-block pricing-hero-block">
+				<h2 style="text-align: center; font-size: 2.5rem; margin-bottom: 1rem;">DIMENSIONAL ACCURACY FOR <span style="color: #ca9652;">YOUR COMFORT</span></h2>
+				<div style="height: 1px; background: #ca9652; width: 300px; margin: 0 auto 2rem;"></div>
+				<p style="text-align: center; max-width: 600px; margin: 0 auto 3rem; line-height: 1.8; color: #666;">Discover the ideal fit for your favorite rings at our jewelry store. Our trained crafts utilize cutting-edge sizing, using both traditional and modern methods.</p>
+				<div class="pricing-card" style="max-width: 500px; margin: 0 auto; background: white; border: 1px solid #ca9652; border-radius: 18px; padding: 3rem;">
+					<div style="text-align: center; margin-bottom: 2rem;">
+						<div style="color: #ca9652; font-size: 1.5rem; margin-bottom: 0.5rem;">◆</div>
+						<h3 style="color: #ca9652; font-size: 1.5rem; letter-spacing: 2px; margin-bottom: 0.5rem;">PRICE LIST</h3>
+						<p style="font-size: 0.75rem; color: #ca9652;">Sizing can vary in price depending on the intricacy of the design</p>
+					</div>
+					<div style="border-top: 1px solid #ca9652; padding-top: 1.5rem; margin-bottom: 1.5rem;">
+						<h4 style="text-align: center; margin-bottom: 1rem;">Gold Rings:</h4>
+						<div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+							<span style="color: #ca9652;">Downsize</span>
+							<span style="border-bottom: 1px dotted #ca9652; flex: 1; margin: 0 1rem;"></span>
+							<span>50$</span>
+						</div>
+						<div style="display: flex; justify-content: space-between;">
+							<span style="color: #ca9652;">Upsize</span>
+							<span style="border-bottom: 1px dotted #ca9652; flex: 1; margin: 0 1rem;"></span>
+							<span>60$</span>
+						</div>
+					</div>
+					<div style="border-top: 1px solid #ca9652; padding-top: 1.5rem; margin-bottom: 1.5rem;">
+						<h4 style="text-align: center; margin-bottom: 1rem;">Silver Rings:</h4>
+						<div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+							<span style="color: #ca9652;">Downsize</span>
+							<span style="border-bottom: 1px dotted #ca9652; flex: 1; margin: 0 1rem;"></span>
+							<span>49$</span>
+						</div>
+						<div style="display: flex; justify-content: space-between;">
+							<span style="color: #ca9652;">Upsize</span>
+							<span style="border-bottom: 1px dotted #ca9652; flex: 1; margin: 0 1rem;"></span>
+							<span>80$</span>
+						</div>
+					</div>
+					<div style="border-top: 1px solid #ca9652; padding-top: 1.5rem;">
+						<h4 style="text-align: center; margin-bottom: 1rem;">Custom Designs:</h4>
+						<p style="text-align: center; color: #ca9652; font-style: italic; font-size: 0.9rem;">Prices available upon consultation</p>
+					</div>
+				</div>
+			</div>
+		`,
 	};
 
 	// Return template or fallback for unknown block type.

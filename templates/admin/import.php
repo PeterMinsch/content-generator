@@ -216,13 +216,18 @@ men's tungsten rings,commercial,800,</pre>
 				$block_config = require plugin_dir_path( dirname( __DIR__ ) ) . 'config/block-definitions.php';
 				$blocks       = $block_config['blocks'] ?? array();
 
-				// Define default order (excluding seo_metadata which is internal)
-				$default_order = array( 'hero', 'about_section', 'serp_answer', 'product_criteria', 'materials', 'process', 'comparison', 'product_showcase', 'size_fit', 'care_warranty', 'ethics', 'faqs', 'cta', 'related_links' );
+				// Filter to only enabled blocks and sort by order
+				$enabled_blocks = array_filter( $blocks, function( $block ) {
+					return isset( $block['enabled'] ) && $block['enabled'] === true;
+				} );
 
-				foreach ( $default_order as $block_key ) :
-					if ( isset( $blocks[ $block_key ] ) ) :
-						$block = $blocks[ $block_key ];
-						?>
+				// Sort by order
+				uasort( $enabled_blocks, function( $a, $b ) {
+					return ( $a['order'] ?? 999 ) - ( $b['order'] ?? 999 );
+				} );
+
+				foreach ( $enabled_blocks as $block_key => $block ) :
+					?>
 						<li class="seo-sortable-item" data-block="<?php echo esc_attr( $block_key ); ?>" data-enabled="true">
 							<span class="seo-sortable-handle" aria-label="<?php esc_attr_e( 'Drag to reorder', 'seo-generator' ); ?>">⋮⋮</span>
 							<div class="seo-sortable-content">
@@ -236,7 +241,6 @@ men's tungsten rings,commercial,800,</pre>
 							</button>
 						</li>
 						<?php
-					endif;
 				endforeach;
 				?>
 			</ul>

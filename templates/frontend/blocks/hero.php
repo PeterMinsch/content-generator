@@ -10,14 +10,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-// DEBUG: Log what variables are available
-error_log( '=== HERO BLOCK TEMPLATE DEBUG ===' );
-error_log( 'hero_title: ' . ( isset( $hero_title ) ? $hero_title : 'NOT SET' ) );
-error_log( 'hero_subtitle: ' . ( isset( $hero_subtitle ) ? $hero_subtitle : 'NOT SET' ) );
-error_log( 'hero_summary: ' . ( isset( $hero_summary ) ? $hero_summary : 'NOT SET' ) );
-error_log( 'hero_image type: ' . ( isset( $hero_image ) ? gettype( $hero_image ) : 'NOT SET' ) );
-error_log( 'hero_image value: ' . ( isset( $hero_image ) ? print_r( $hero_image, true ) : 'NOT SET' ) );
-
 // Get hero fields (these should be already extracted from the $args in seo_generator_get_template)
 $hero_title = isset( $hero_title ) ? $hero_title : get_the_title();
 $hero_subtitle = isset( $hero_subtitle ) ? $hero_subtitle : '';
@@ -27,20 +19,13 @@ $hero_image = isset( $hero_image ) ? $hero_image : '';
 // Get image URL
 $hero_image_url = '';
 if ( ! empty( $hero_image ) ) {
-    error_log( 'Hero image not empty, processing...' );
     if ( is_numeric( $hero_image ) ) {
-        error_log( 'Hero image is numeric ID: ' . $hero_image );
         $hero_image_url = wp_get_attachment_image_url( $hero_image, 'full' );
-        error_log( 'Resolved URL: ' . ( $hero_image_url ? $hero_image_url : 'FAILED' ) );
     } elseif ( is_array( $hero_image ) && isset( $hero_image['url'] ) ) {
-        error_log( 'Hero image is array with URL' );
         $hero_image_url = $hero_image['url'];
     } elseif ( is_string( $hero_image ) && filter_var( $hero_image, FILTER_VALIDATE_URL ) ) {
-        error_log( 'Hero image is URL string' );
         $hero_image_url = $hero_image;
     }
-} else {
-    error_log( 'Hero image is empty' );
 }
 
 // Fallback to featured image if no hero image

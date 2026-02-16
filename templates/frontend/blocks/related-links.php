@@ -44,10 +44,11 @@ if ( empty( $links ) || ! is_array( $links ) ) {
 		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[24px]">
 			<?php foreach ( $links as $link ) : ?>
 				<?php
-				$title      = isset( $link['link_title'] ) ? $link['link_title'] : '';
-				$url        = isset( $link['link_url'] ) ? $link['link_url'] : '#';
-				$item_count = isset( $link['link_item_count'] ) ? $link['link_item_count'] : '';
-				$image      = isset( $link['link_image'] ) ? $link['link_image'] : '';
+				$title       = isset( $link['link_title'] ) ? $link['link_title'] : '';
+				$url         = isset( $link['link_url'] ) ? $link['link_url'] : '#';
+				$description = isset( $link['link_description'] ) ? $link['link_description'] : '';
+				$item_count  = isset( $link['link_item_count'] ) ? $link['link_item_count'] : '';
+				$image       = isset( $link['link_image'] ) ? $link['link_image'] : '';
 
 				// Get image URL - handles multiple formats (ID, array, URL string).
 				$image_url = '';
@@ -92,6 +93,13 @@ if ( empty( $links ) || ! is_array( $links ) ) {
 						<h3 class="font-cormorant text-[24px] font-normal leading-none uppercase mb-2">
 							<?php echo esc_html( $title ); ?>
 						</h3>
+
+						<!-- Description -->
+						<?php if ( $description ) : ?>
+							<p class="font-avenir text-[13px] font-normal mb-2 opacity-90" style="line-height: 1.5;">
+								<?php echo esc_html( $description ); ?>
+							</p>
+						<?php endif; ?>
 
 						<!-- Item Count -->
 						<?php if ( $item_count ) : ?>

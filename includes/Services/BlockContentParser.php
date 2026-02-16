@@ -43,6 +43,7 @@ class BlockContentParser {
 			'faqs' => $this->parseFaqs( $json_data, $raw_content ),
 			'cta' => $this->parseCta( $json_data, $raw_content ),
 			'related_links' => $this->parseRelatedLinks( $json_data, $raw_content, $post_id ),
+			'pricing_hero' => $this->parsePricingHero( $json_data, $raw_content ),
 			default => throw new \Exception( "Unknown block type: {$block_type}" ),
 		};
 	}
@@ -578,4 +579,68 @@ class BlockContentParser {
 			'links'           => $links,
 		);
 	}
+
+	/**
+	 * Parse pricing_hero block content.
+	 *
+	 * Expected JSON format:
+	 * {
+	 *   "hero_title": "DIMENSIONAL ACCURACY FOR YOUR COMFORT",
+	 *   "hero_description": "Description text...",
+	 *   "pricing_items": [
+	 *     {
+	 *       "category": "Gold Rings",
+	 *       "downsize_label": "Downsize",
+	 *       "downsize_price": "50$",
+	 *       "upsize_label": "Upsize",
+	 *       "upsize_price": "60$"
+	 *     },
+	 *     {
+	 *       "category": "Custom Designs",
+	 *       "custom_text": "Prices available upon consultation"
+	 *     }
+	 *   ]
+	 * }
+	 *
+	 * @param array|null $json        Parsed JSON data.
+	 * @param string     $raw_content Raw content fallback.
+	 * @return array Parsed content for ACF fields.
+	 * @throws \Exception If parsing fails.
+	 */
+	private function parsePricingHero( ?array $json, string $raw_content ): array {
+		if ( null === $json || ! isset( $json['hero_title'], $json['pricing_items'] ) ) {
+			throw new \Exception( 'Invalid pricing_hero content structure' );
+		}
+
+		// Parse pricing items array
+		$pricing_items = array();
+		if ( isset( $json['pricing_items'] ) && is_array( $json['pricing_items'] ) ) {
+			foreach ( $json['pricing_items'] as $item ) {
+				if ( isset( $item['category'] ) ) {
+					$parsed_item = array(
+						'category' => sanitize_text_field( $item['category'] ),
+					);
+
+					// Check if it's a custom item (with custom_text) or standard pricing
+					if ( isset( $item['custom_text'] ) ) {
+						$parsed_item['custom_text'] = sanitize_text_field( $item['custom_text'] );
+					} else {
+						$parsed_item['downsize_label'] = isset( $item['downsize_label'] ) ? sanitize_text_field( $item['downsize_label'] ) : 'Downsize';
+						$parsed_item['downsize_price'] = isset( $item['downsize_price'] ) ? sanitize_text_field( $item['downsize_price'] ) : '';
+						$parsed_item['upsize_label']   = isset( $item['upsize_label'] ) ? sanitize_text_field( $item['upsize_label'] ) : 'Upsize';
+						$parsed_item['upsize_price']   = isset( $item['upsize_price'] ) ? sanitize_text_field( $item['upsize_price'] ) : '';
+					}
+
+					$pricing_items[] = $parsed_item;
+				}
+			}
+		}
+
+		return array(
+			'pricing_hero_title'       => sanitize_text_field( $json['hero_title'] ),
+			'pricing_hero_description' => isset( $json['hero_description'] ) ? sanitize_textarea_field( $json['hero_description'] ) : '',
+			'pricing_items'    => $pricing_items,
+		);
+	}
+
 }
