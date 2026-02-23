@@ -64,8 +64,11 @@ class DashboardCustomizer {
 		// Enqueue dashboard styles.
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueueDashboardStyles' ) );
 
-		// Redirect default dashboard to custom dashboard.
-		add_action( 'admin_init', array( $this, 'redirectDefaultDashboard' ) );
+		// Redirect default dashboard to custom dashboard (after menus are registered).
+		add_action( 'current_screen', array( $this, 'redirectDefaultDashboard' ) );
+
+		// Redirect after login to custom dashboard.
+		add_filter( 'login_redirect', array( $this, 'loginRedirect' ), 10, 3 );
 	}
 
 	/**
@@ -251,15 +254,33 @@ class DashboardCustomizer {
 	/**
 	 * Redirect default WordPress dashboard to custom dashboard.
 	 *
+	 * Fires on 'current_screen' which is after admin_menu, so our page is registered.
+	 *
 	 * @return void
 	 */
 	public function redirectDefaultDashboard(): void {
-		global $pagenow;
+		$screen = get_current_screen();
 
-		if ( 'index.php' === $pagenow && ! isset( $_GET['page'] ) ) {
+		if ( $screen && 'dashboard' === $screen->id ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=' . self::DASHBOARD_SLUG ) );
 			exit;
 		}
+	}
+
+	/**
+	 * Redirect to custom dashboard after login.
+	 *
+	 * @param string           $redirect_to The redirect destination URL.
+	 * @param string           $requested_redirect_to The requested redirect destination URL.
+	 * @param \WP_User|\WP_Error $user WP_User object or WP_Error on login failure.
+	 * @return string
+	 */
+	public function loginRedirect( string $redirect_to, string $requested_redirect_to, $user ): string {
+		if ( $user instanceof \WP_User && $user->has_cap( 'edit_posts' ) ) {
+			return admin_url( 'admin.php?page=' . self::DASHBOARD_SLUG );
+		}
+
+		return $redirect_to;
 	}
 
 	/**
