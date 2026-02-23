@@ -188,7 +188,7 @@ class AdminMenu {
 		// Check if we're on the main menu page.
 		if ( isset( $_GET['page'] ) && $_GET['page'] === self::MENU_SLUG ) {
 			// Redirect to the new post page for seo-page post type.
-			wp_safe_redirect( admin_url( 'post-new.php?post_type=seo-page' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=seo-dashboard' ) );
 			exit;
 		}
 	}

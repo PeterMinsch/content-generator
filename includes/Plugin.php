@@ -119,6 +119,10 @@ class Plugin {
 
 		$generation_service  = new Services\ContentGenerationService( $openai_service, $prompt_engine, $content_parser, $cost_tracking, $image_matching );
 
+		// Register dashboard customizer (depends on settings service).
+		$dashboard_customizer = new Admin\DashboardCustomizer( $settings_service );
+		$this->container->set( 'admin.dashboard', $dashboard_customizer );
+
 		$this->container->set( 'service.settings', $settings_service );
 		$this->container->set( 'service.openai', $openai_service );
 		$this->container->set( 'service.prompt_engine', $prompt_engine );
@@ -196,6 +200,9 @@ class Plugin {
 
 		// Register settings page.
 		$this->container->get( 'admin.settings' )->register();
+
+		// Register dashboard customizer (before admin menu).
+		$this->container->get( 'admin.dashboard' )->register();
 
 		// Register admin menu.
 		$this->container->get( 'admin.menu' )->register();
