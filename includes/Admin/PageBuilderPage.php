@@ -2,8 +2,8 @@
 /**
  * Page Builder Admin Page
  *
- * Admin interface for building Next.js pages with drag-and-drop blocks.
- * Supports multiple pages via tabs (Homepage, About Us, etc.).
+ * Tabbed interface — one tab per page template (Homepage, About Us).
+ * Each tab lets you reorder blocks and publish to a custom slug.
  *
  * @package SEOGenerator
  */
@@ -17,53 +17,40 @@ use SEOGenerator\Services\NextJSPageGenerator;
 class PageBuilderPage {
 
 	/**
-	 * Page generator service.
-	 *
 	 * @var NextJSPageGenerator
 	 */
 	private $generator;
 
-	/**
-	 * Constructor.
-	 */
 	public function __construct() {
 		$this->generator = new NextJSPageGenerator();
 	}
 
 	/**
 	 * Register hooks.
-	 *
-	 * @return void
 	 */
 	public function register(): void {
 		add_action( 'wp_ajax_nextjs_save_block_order', [ $this, 'ajaxSaveBlockOrder' ] );
 		add_action( 'wp_ajax_nextjs_publish_page', [ $this, 'ajaxPublishPage' ] );
-		add_action( 'wp_ajax_nextjs_get_block_order', [ $this, 'ajaxGetBlockOrder' ] );
+		add_action( 'wp_ajax_nextjs_reset_order', [ $this, 'ajaxResetOrder' ] );
 		add_action( 'wp_ajax_nextjs_save_settings', [ $this, 'ajaxSaveSettings' ] );
 	}
 
 	/**
-	 * Render the page builder admin page.
-	 *
-	 * @return void
+	 * Render the admin page.
 	 */
 	public function render(): void {
 		if ( ! current_user_can( 'edit_posts' ) ) {
-			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'seo-generator' ) );
+			wp_die( esc_html__( 'Insufficient permissions.', 'seo-generator' ) );
 		}
 
 		$this->enqueueAssets();
-
 		include SEO_GENERATOR_PLUGIN_DIR . 'templates/admin/page-builder.php';
 	}
 
 	/**
-	 * Enqueue page builder CSS and JS.
-	 *
-	 * @return void
+	 * Enqueue CSS + JS.
 	 */
 	private function enqueueAssets(): void {
-		// Reuse existing sortable + preview styles.
 		wp_enqueue_style(
 			'seo-admin-import',
 			SEO_GENERATOR_PLUGIN_URL . 'assets/css/admin-import.css',
@@ -101,69 +88,47 @@ class PageBuilderPage {
 			true
 		);
 
-		// Build per-page data for JavaScript.
+		// Build per-page data for JS.
 		$pages_data = [];
-		foreach ( $this->generator->getPages() as $slug => $page_config ) {
+		foreach ( $this->generator->getPages() as $slug => $page ) {
+			$all_blocks    = $page['blocks'];
+			$saved_order   = get_option( "seo_nextjs_block_order_{$slug}", null );
+			$default_order = $page['default_order'] ?? array_keys( $all_blocks );
+			$current_order = is_array( $saved_order ) ? $saved_order : $default_order;
+
+			$blocks_for_js = [];
+			foreach ( $all_blocks as $id => $block ) {
+				$blocks_for_js[ $id ] = [
+					'id'          => $id,
+					'label'       => $block['label'],
+					'description' => $block['description'],
+				];
+			}
+
 			$pages_data[ $slug ] = [
-				'label'        => $page_config['label'],
-				'previewRoute' => $page_config['preview_route'] ?? '/preview',
-				'blocks'       => $this->getBlocksForJS( $slug ),
-				'currentOrder' => $this->getSavedBlockOrder( $slug ),
-				'defaultOrder' => $this->generator->getDefaultOrder( $slug ),
+				'label'        => $page['label'],
+				'blocks'       => $blocks_for_js,
+				'currentOrder' => $current_order,
+				'defaultOrder' => $default_order,
+				'previewRoute' => $page['preview_route'] ?? '/preview',
+				'outputSlug'   => $this->generator->getSavedSlug( $slug ),
 			];
 		}
 
 		wp_localize_script( 'seo-page-builder', 'nextjsPageBuilder', [
-			'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
-			'nonce'       => wp_create_nonce( 'nextjs-page-builder' ),
-			'previewBase' => get_option( 'seo_nextjs_preview_url', 'http://localhost:3000' ),
-			'pages'       => $pages_data,
-			'activePage'  => 'homepage',
+			'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+			'nonce'         => wp_create_nonce( 'nextjs-page-builder' ),
+			'previewBase'   => get_option( 'seo_nextjs_preview_url', 'http://contentgeneratorwpplugin.local:3000' ),
+			'pages'         => $pages_data,
+			'projectPath'   => $this->generator->getProjectPath(),
+			'reservedSlugs' => $this->generator->getReservedSlugs(),
 		] );
 	}
 
-	/**
-	 * Get block definitions formatted for JavaScript.
-	 *
-	 * @param string $page_slug The page slug.
-	 * @return array
-	 */
-	private function getBlocksForJS( string $page_slug = 'homepage' ): array {
-		$blocks = [];
-		foreach ( $this->generator->getBlockDefinitions( $page_slug ) as $id => $block ) {
-			$blocks[ $id ] = [
-				'id'          => $id,
-				'label'       => $block['label'],
-				'description' => $block['description'],
-			];
-		}
-		return $blocks;
-	}
+	// ─── AJAX Handlers ────────────────────────────────────────────
 
 	/**
-	 * Get the saved block order from WordPress options.
-	 *
-	 * @param string $page_slug The page slug.
-	 * @return array
-	 */
-	private function getSavedBlockOrder( string $page_slug = 'homepage' ): array {
-		$option_key = 'seo_nextjs_block_order_' . $page_slug;
-		$saved      = get_option( $option_key, '' );
-
-		if ( ! empty( $saved ) && is_string( $saved ) ) {
-			$decoded = json_decode( $saved, true );
-			if ( is_array( $decoded ) ) {
-				return $decoded;
-			}
-		}
-
-		return $this->generator->getDefaultOrder( $page_slug );
-	}
-
-	/**
-	 * AJAX: Save block order to WordPress options.
-	 *
-	 * @return void
+	 * Save block order (draft — no file writing).
 	 */
 	public function ajaxSaveBlockOrder(): void {
 		check_ajax_referer( 'nextjs-page-builder', 'nonce' );
@@ -172,31 +137,26 @@ class PageBuilderPage {
 			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
 		}
 
-		$page_slug   = isset( $_POST['page_slug'] ) ? sanitize_key( wp_unslash( $_POST['page_slug'] ) ) : 'homepage';
-		$block_order = isset( $_POST['block_order'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['block_order'] ) ), true ) : [];
+		$page_slug = isset( $_POST['page_slug'] ) ? sanitize_key( wp_unslash( $_POST['page_slug'] ) ) : '';
+		$order     = isset( $_POST['block_order'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['block_order'] ) ), true ) : [];
 
-		if ( ! is_array( $block_order ) ) {
-			wp_send_json_error( [ 'message' => 'Invalid block order data.' ] );
+		if ( ! $this->generator->getPageConfig( $page_slug ) ) {
+			wp_send_json_error( [ 'message' => 'Unknown page.' ] );
 		}
 
-		$valid_ids   = array_keys( $this->generator->getBlockDefinitions( $page_slug ) );
-		$block_order = array_filter( $block_order, function( $id ) use ( $valid_ids ) {
-			return in_array( $id, $valid_ids, true );
-		} );
+		$valid_ids = array_keys( $this->generator->getBlockDefinitions( $page_slug ) );
+		$order     = array_values( array_intersect( (array) $order, $valid_ids ) );
 
-		$option_key = 'seo_nextjs_block_order_' . $page_slug;
-		update_option( $option_key, wp_json_encode( array_values( $block_order ) ) );
+		update_option( "seo_nextjs_block_order_{$page_slug}", $order );
 
 		wp_send_json_success( [
-			'message'     => 'Block order saved.',
-			'block_order' => array_values( $block_order ),
+			'message'    => 'Block order saved.',
+			'blockOrder' => $order,
 		] );
 	}
 
 	/**
-	 * AJAX: Publish — generate and write page.tsx.
-	 *
-	 * @return void
+	 * Publish page to disk at the given output slug.
 	 */
 	public function ajaxPublishPage(): void {
 		check_ajax_referer( 'nextjs-page-builder', 'nonce' );
@@ -205,19 +165,18 @@ class PageBuilderPage {
 			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
 		}
 
-		$page_slug   = isset( $_POST['page_slug'] ) ? sanitize_key( wp_unslash( $_POST['page_slug'] ) ) : 'homepage';
-		$block_order = isset( $_POST['block_order'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['block_order'] ) ), true ) : [];
+		$page_slug   = isset( $_POST['page_slug'] ) ? sanitize_key( wp_unslash( $_POST['page_slug'] ) ) : '';
+		$output_slug = isset( $_POST['output_slug'] ) ? sanitize_title( wp_unslash( $_POST['output_slug'] ) ) : '';
+		$order       = isset( $_POST['block_order'] ) ? json_decode( sanitize_text_field( wp_unslash( $_POST['block_order'] ) ), true ) : [];
 
-		if ( ! is_array( $block_order ) || empty( $block_order ) ) {
-			wp_send_json_error( [ 'message' => 'Invalid or empty block order.' ] );
+		if ( ! $this->generator->getPageConfig( $page_slug ) ) {
+			wp_send_json_error( [ 'message' => 'Unknown page.' ] );
 		}
 
-		// Save the order.
-		$option_key = 'seo_nextjs_block_order_' . $page_slug;
-		update_option( $option_key, wp_json_encode( $block_order ) );
+		$valid_ids = array_keys( $this->generator->getBlockDefinitions( $page_slug ) );
+		$order     = array_values( array_intersect( (array) $order, $valid_ids ) );
 
-		// Publish.
-		$result = $this->generator->publish( $block_order, $page_slug );
+		$result = $this->generator->publish( $page_slug, $order, $output_slug );
 
 		if ( $result['success'] ) {
 			wp_send_json_success( $result );
@@ -227,9 +186,32 @@ class PageBuilderPage {
 	}
 
 	/**
-	 * AJAX: Save page builder settings.
-	 *
-	 * @return void
+	 * Reset block order to defaults.
+	 */
+	public function ajaxResetOrder(): void {
+		check_ajax_referer( 'nextjs-page-builder', 'nonce' );
+
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
+		}
+
+		$page_slug = isset( $_POST['page_slug'] ) ? sanitize_key( wp_unslash( $_POST['page_slug'] ) ) : '';
+		$defaults  = $this->generator->getDefaultOrder( $page_slug );
+
+		if ( empty( $defaults ) ) {
+			wp_send_json_error( [ 'message' => 'Unknown page.' ] );
+		}
+
+		update_option( "seo_nextjs_block_order_{$page_slug}", $defaults );
+
+		wp_send_json_success( [
+			'message'    => 'Order reset to defaults.',
+			'blockOrder' => $defaults,
+		] );
+	}
+
+	/**
+	 * Save settings.
 	 */
 	public function ajaxSaveSettings(): void {
 		check_ajax_referer( 'nextjs-page-builder', 'nonce' );
@@ -245,21 +227,5 @@ class PageBuilderPage {
 		update_option( 'seo_nextjs_preview_url', $preview_url );
 
 		wp_send_json_success( [ 'message' => 'Settings saved.' ] );
-	}
-
-	/**
-	 * AJAX: Get current block order.
-	 *
-	 * @return void
-	 */
-	public function ajaxGetBlockOrder(): void {
-		check_ajax_referer( 'nextjs-page-builder', 'nonce' );
-
-		$page_slug = isset( $_GET['page_slug'] ) ? sanitize_key( wp_unslash( $_GET['page_slug'] ) ) : 'homepage';
-
-		wp_send_json_success( [
-			'block_order' => $this->getSavedBlockOrder( $page_slug ),
-			'blocks'      => $this->getBlocksForJS( $page_slug ),
-		] );
 	}
 }

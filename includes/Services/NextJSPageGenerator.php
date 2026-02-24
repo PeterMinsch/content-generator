@@ -2,9 +2,9 @@
 /**
  * Next.js Page Generator
  *
- * Generates page.tsx files for the Bravo Jewellers Next.js site
- * based on a given block order from the page builder.
- * Supports multiple pages (homepage, about, etc.).
+ * Generates page.tsx files at NEW routes based on user-specified slugs.
+ * Each page tab (Homepage, About) writes to its own slug — never
+ * overwrites the original page.tsx or about/page.tsx.
  *
  * @package SEOGenerator
  */
@@ -16,96 +16,103 @@ defined( 'ABSPATH' ) || exit;
 class NextJSPageGenerator {
 
 	/**
-	 * Full config loaded from the definitions file.
-	 *
 	 * @var array
 	 */
 	private $config;
 
-	/**
-	 * Constructor.
-	 */
 	public function __construct() {
 		$this->config = require SEO_GENERATOR_PLUGIN_DIR . 'config/nextjs-block-definitions.php';
 	}
 
+	// ─── Config Accessors ─────────────────────────────────────────
+
+	public function getPages(): array {
+		return $this->config['pages'] ?? [];
+	}
+
+	public function getPageConfig( string $page_slug ): ?array {
+		return $this->config['pages'][ $page_slug ] ?? null;
+	}
+
+	public function getBlockDefinitions( string $page_slug ): array {
+		$page = $this->getPageConfig( $page_slug );
+		return $page ? ( $page['blocks'] ?? [] ) : [];
+	}
+
+	public function getDefaultOrder( string $page_slug ): array {
+		$page = $this->getPageConfig( $page_slug );
+		return $page ? ( $page['default_order'] ?? [] ) : [];
+	}
+
+	// ─── Slug Management ──────────────────────────────────────────
+
 	/**
-	 * Get the Next.js project path from settings.
-	 *
-	 * @return string
+	 * Get the saved output slug for a page tab.
 	 */
+	public function getSavedSlug( string $page_slug ): string {
+		return get_option( "seo_nextjs_output_slug_{$page_slug}", '' );
+	}
+
+	/**
+	 * Save the output slug for a page tab.
+	 */
+	public function saveSlug( string $page_slug, string $output_slug ): void {
+		update_option( "seo_nextjs_output_slug_{$page_slug}", sanitize_title( $output_slug ) );
+	}
+
+	/**
+	 * Routes that must never be overwritten.
+	 */
+	public function getReservedSlugs(): array {
+		return [
+			'', 'about', 'contacts', 'custom-design', 'diamonds',
+			'engagement-rings', 'preview', 'api', 'admin',
+		];
+	}
+
+	public function isSlugSafe( string $slug ): bool {
+		return ! in_array( $slug, $this->getReservedSlugs(), true );
+	}
+
+	// ─── Path Helpers ─────────────────────────────────────────────
+
 	public function getProjectPath(): string {
 		return get_option( 'seo_nextjs_project_path', '' );
 	}
 
 	/**
-	 * Get all page definitions.
-	 *
-	 * @return array
+	 * Build the target file path for a given output slug.
 	 */
-	public function getPages(): array {
-		return $this->config['pages'] ?? [];
-	}
-
-	/**
-	 * Get a single page definition by slug.
-	 *
-	 * @param string $page_slug The page slug (e.g. 'homepage', 'about').
-	 * @return array|null
-	 */
-	public function getPageConfig( string $page_slug ): ?array {
-		return $this->config['pages'][ $page_slug ] ?? null;
-	}
-
-	/**
-	 * Get block definitions for a specific page.
-	 *
-	 * @param string $page_slug The page slug.
-	 * @return array
-	 */
-	public function getBlockDefinitions( string $page_slug = 'homepage' ): array {
-		$page = $this->getPageConfig( $page_slug );
-		return $page['blocks'] ?? [];
-	}
-
-	/**
-	 * Get the default block order for a page.
-	 *
-	 * @param string $page_slug The page slug.
-	 * @return array
-	 */
-	public function getDefaultOrder( string $page_slug = 'homepage' ): array {
-		$page = $this->getPageConfig( $page_slug );
-		return $page['default_order'] ?? [];
-	}
-
-	/**
-	 * Get the target page.tsx file path for a page.
-	 *
-	 * @param string $page_slug The page slug.
-	 * @return string
-	 */
-	public function getPageFilePath( string $page_slug = 'homepage' ): string {
+	public function getOutputFilePath( string $output_slug ): string {
 		$project_path = rtrim( $this->getProjectPath(), '/\\' );
-		$page         = $this->getPageConfig( $page_slug );
-		$relative     = $page['file_path'] ?? 'src/app/page.tsx';
-
-		return $project_path . DIRECTORY_SEPARATOR . str_replace( '/', DIRECTORY_SEPARATOR, $relative );
+		return $project_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'app'
+			. DIRECTORY_SEPARATOR . $output_slug . DIRECTORY_SEPARATOR . 'page.tsx';
 	}
 
+	// ─── Code Generation ──────────────────────────────────────────
+
 	/**
-	 * Generate the page.tsx content from a block order array.
-	 *
-	 * @param array  $block_order Array of block IDs in desired order.
-	 * @param string $page_slug   The page slug.
-	 * @return string The full page.tsx file content.
+	 * Generate page.tsx content for a page tab + block order.
 	 */
-	public function generatePageContent( array $block_order, string $page_slug = 'homepage' ): string {
+	public function generatePageContent( string $page_slug, array $block_order, string $output_slug ): string {
 		$page   = $this->getPageConfig( $page_slug );
-		$blocks = $page['blocks'] ?? [];
+		$blocks = $this->getBlockDefinitions( $page_slug );
+
+		if ( ! $page ) {
+			return '';
+		}
+
+		$wrapper_open  = $page['wrapper_open'] ?? '';
+		$wrapper_close = $page['wrapper_close'] ?? '';
+		$metadata      = $page['default_metadata'] ?? null;
 
 		$imports    = [];
 		$components = [];
+
+		// Metadata type import if page has metadata.
+		if ( $metadata ) {
+			$imports[] = "import type { Metadata } from 'next';";
+		}
 
 		foreach ( $block_order as $block_id ) {
 			if ( ! isset( $blocks[ $block_id ] ) ) {
@@ -114,13 +121,11 @@ class NextJSPageGenerator {
 
 			$block = $blocks[ $block_id ];
 
-			// Build import line — deduplicate by import_path.
 			$import_line = "import { {$block['export_name']} } from '{$block['import_path']}';";
 			if ( ! in_array( $import_line, $imports, true ) ) {
 				$imports[] = $import_line;
 			}
 
-			// Build component JSX tag.
 			$props        = $block['props'] ?? '';
 			$components[] = "      <{$block['export_name']}{$props} />";
 		}
@@ -128,95 +133,64 @@ class NextJSPageGenerator {
 		$imports_str    = implode( "\n", $imports );
 		$components_str = implode( "\n", $components );
 
-		// Determine wrapper.
-		$wrapper_open  = $page['wrapper_open'] ?? '';
-		$wrapper_close = $page['wrapper_close'] ?? '';
+		// Function name from output slug.
+		$func_name = str_replace( ' ', '', ucwords( str_replace( '-', ' ', $output_slug ) ) );
 
-		// Determine function name from page slug.
-		$func_name = $page_slug === 'homepage' ? 'Home' : ucfirst( $page_slug );
-
-		// Build metadata export if present.
-		$metadata_str = '';
-		if ( ! empty( $page['metadata'] ) ) {
-			$meta = $page['metadata'];
-			$meta_title = addslashes( $meta['title'] ?? '' );
-			$meta_desc  = addslashes( $meta['description'] ?? '' );
-			$metadata_str = <<<TSX
-
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: '{$meta_title}',
-  description: '{$meta_desc}',
-};
-
-TSX;
+		// Use Fragment or wrapper div.
+		if ( empty( $wrapper_open ) ) {
+			$wrapper_open  = '<>';
+			$wrapper_close = '</>';
 		}
 
-		if ( ! empty( $wrapper_open ) ) {
-			$content = <<<TSX
-{$imports_str}
-{$metadata_str}
-export default function {$func_name}() {
-  return (
-    {$wrapper_open}
-{$components_str}
-    {$wrapper_close}
-  );
-}
-TSX;
-		} else {
-			$content = <<<TSX
-{$imports_str}
-{$metadata_str}
-export default function {$func_name}() {
-  return (
-    <>
-{$components_str}
-    </>
-  );
-}
-TSX;
+		// Build file content.
+		$content = $imports_str . "\n";
+
+		if ( $metadata ) {
+			$meta_title = addslashes( $metadata['title'] ?? '' );
+			$meta_desc  = addslashes( $metadata['description'] ?? '' );
+			$content .= "\nexport const metadata: Metadata = {\n";
+			$content .= "  title: '{$meta_title}',\n";
+			$content .= "  description: '{$meta_desc}',\n";
+			$content .= "};\n";
 		}
+
+		$content .= "\nexport default function {$func_name}() {\n";
+		$content .= "  return (\n";
+		$content .= "    {$wrapper_open}\n";
+		$content .= $components_str . "\n";
+		$content .= "    {$wrapper_close}\n";
+		$content .= "  );\n";
+		$content .= "}\n";
 
 		return $content;
 	}
 
+	// ─── Publish ──────────────────────────────────────────────────
+
 	/**
-	 * Write the generated page.tsx to disk.
-	 *
-	 * @param array  $block_order Array of block IDs in desired order.
-	 * @param string $page_slug   The page slug.
-	 * @return array [ 'success' => bool, 'message' => string, 'path' => string ]
+	 * Publish a page — creates directory + writes page.tsx at the output slug.
 	 */
-	public function publish( array $block_order, string $page_slug = 'homepage' ): array {
+	public function publish( string $page_slug, array $block_order, string $output_slug ): array {
 		$project_path = $this->getProjectPath();
 
 		if ( empty( $project_path ) ) {
 			return [
 				'success' => false,
-				'message' => 'Next.js project path is not configured. Go to Settings to set it.',
-				'path'    => '',
+				'message' => 'Next.js project path is not configured. Set it in Settings.',
 			];
 		}
 
-		$page_config = $this->getPageConfig( $page_slug );
-		if ( ! $page_config ) {
+		if ( empty( $output_slug ) ) {
 			return [
 				'success' => false,
-				'message' => "Unknown page: {$page_slug}",
-				'path'    => '',
+				'message' => 'Output slug is required.',
 			];
 		}
 
-		$file_path = $this->getPageFilePath( $page_slug );
-
-		$dir = dirname( $file_path );
-		if ( ! is_dir( $dir ) ) {
+		if ( ! $this->isSlugSafe( $output_slug ) ) {
 			return [
 				'success' => false,
-				'message' => "Target directory does not exist: {$dir}",
-				'path'    => $file_path,
+				'message' => "The slug \"{$output_slug}\" is reserved. Choose a different slug.",
 			];
 		}
 
@@ -224,45 +198,45 @@ TSX;
 			return [
 				'success' => false,
 				'message' => 'Cannot publish an empty page. Add at least one block.',
-				'path'    => $file_path,
 			];
 		}
 
-		$content = $this->generatePageContent( $block_order, $page_slug );
+		$file_path = $this->getOutputFilePath( $output_slug );
+		$dir       = dirname( $file_path );
+
+		// Create directory.
+		if ( ! is_dir( $dir ) ) {
+			if ( ! mkdir( $dir, 0755, true ) ) {
+				return [
+					'success' => false,
+					'message' => "Failed to create directory: {$dir}",
+				];
+			}
+		}
 
 		// Backup existing file.
 		if ( file_exists( $file_path ) ) {
-			$backup_path = $file_path . '.backup-' . date( 'Y-m-d-His' );
-			copy( $file_path, $backup_path );
+			copy( $file_path, $file_path . '.backup-' . date( 'Y-m-d-His' ) );
 		}
 
-		$result = file_put_contents( $file_path, $content );
+		$content = $this->generatePageContent( $page_slug, $block_order, $output_slug );
+		$result  = file_put_contents( $file_path, $content );
 
 		if ( false === $result ) {
 			return [
 				'success' => false,
-				'message' => "Failed to write file. Check permissions for: {$file_path}",
-				'path'    => $file_path,
+				'message' => "Failed to write file: {$file_path}",
 			];
 		}
 
-		$label = $page_config['label'] ?? $page_slug;
+		// Persist the slug + block order.
+		$this->saveSlug( $page_slug, $output_slug );
+		update_option( "seo_nextjs_block_order_{$page_slug}", $block_order );
 
 		return [
 			'success' => true,
-			'message' => "{$label} published successfully! Next.js will hot-reload automatically.",
+			'message' => "Published to /{$output_slug} successfully!",
 			'path'    => $file_path,
 		];
-	}
-
-	/**
-	 * Preview what the generated content would look like (without writing).
-	 *
-	 * @param array  $block_order Array of block IDs.
-	 * @param string $page_slug   The page slug.
-	 * @return string The generated TSX content.
-	 */
-	public function preview( array $block_order, string $page_slug = 'homepage' ): string {
-		return $this->generatePageContent( $block_order, $page_slug );
 	}
 }

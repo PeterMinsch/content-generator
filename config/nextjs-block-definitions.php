@@ -2,9 +2,9 @@
 /**
  * Next.js Block Definitions Configuration
  *
- * Defines blocks for each page of the Bravo Jewellers Next.js site.
- * Each block maps to a self-contained React component — no HTML templates,
- * just metadata for the page builder to reference.
+ * Defines blocks for each page template. Each page has its own set of
+ * widgets that can be reordered and published to a NEW route (never
+ * overwrites existing pages).
  *
  * @package SEOGenerator
  */
@@ -13,17 +13,12 @@ defined( 'ABSPATH' ) || exit;
 
 return [
 
-	/**
-	 * ──────────────────────────────────────────────────────────────
-	 * Page registry — each key is a page slug.
-	 * ──────────────────────────────────────────────────────────────
-	 */
 	'pages' => [
 
-		// ─── Homepage ─────────────────────────────────────────────
+		// ─── Homepage Template ────────────────────────────────────
 		'homepage' => [
 			'label'          => __( 'Homepage', 'seo-generator' ),
-			'file_path'      => 'src/app/page.tsx',
+			'original_path'  => 'src/app/page.tsx',           // For reference only — never overwritten.
 			'preview_route'  => '/preview',
 			'wrapper_open'   => '',
 			'wrapper_close'  => '',
@@ -145,16 +140,16 @@ return [
 			],
 		],
 
-		// ─── About Us ─────────────────────────────────────────────
+		// ─── About Us Template ────────────────────────────────────
 		'about' => [
 			'label'          => __( 'About Us', 'seo-generator' ),
-			'file_path'      => 'src/app/about/page.tsx',
-			'preview_route'  => '/preview/about',
+			'original_path'  => 'src/app/about/page.tsx',     // For reference only — never overwritten.
+			'preview_route'  => '/preview',
 			'wrapper_open'   => "<div className='flex flex-col gap-[200px] max-[1439px]:gap-[132px] max-md:gap-[100px]'>",
 			'wrapper_close'  => '</div>',
-			'metadata'       => [
-				'title'       => "About Us - Bravo Jewellers | Our Story, Team & Mission",
-				'description' => "Discover the story behind Bravo Jewellers. Meet our expert team of jewelers, gemologists, and designers. Learn about our mission to create exceptional custom jewelry with integrity and personal touch.",
+			'default_metadata' => [
+				'title'       => 'About Us - Bravo Jewellers | Our Story, Team & Mission',
+				'description' => 'Discover the story behind Bravo Jewellers. Meet our expert team of jewelers, gemologists, and designers.',
 			],
 			'blocks'         => [
 

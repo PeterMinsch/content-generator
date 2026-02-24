@@ -1,8 +1,9 @@
 /**
- * Next.js Page Builder
+ * Next.js SEO Page Builder
  *
- * Multi-page drag-and-drop block management for the Bravo Jewellers Next.js site.
- * Tabs switch between pages; each page has its own blocks, order, and preview route.
+ * Tabbed interface — one tab per page template (Homepage, About Us).
+ * Each tab has its own block list, sortable order, output slug, and preview.
+ * Publishes to a new URL slug — never overwrites existing pages.
  *
  * @package SEOGenerator
  */
@@ -10,54 +11,49 @@
 ( function () {
 	'use strict';
 
-	// ─── Config from wp_localize_script ───────────────────────────
-	const config       = window.nextjsPageBuilder || {};
-	const AJAX_URL     = config.ajaxUrl || '/wp-admin/admin-ajax.php';
-	const NONCE        = config.nonce || '';
-	const PREVIEW_BASE = config.previewBase || 'http://localhost:3000';
-	const PAGES        = config.pages || {};
+	// ─── Config ───────────────────────────────────────────────────
+	const cfg           = window.nextjsPageBuilder || {};
+	const AJAX_URL      = cfg.ajaxUrl || '/wp-admin/admin-ajax.php';
+	const NONCE         = cfg.nonce || '';
+	const PREVIEW_BASE  = cfg.previewBase || 'http://localhost:3000';
+	const PAGES         = cfg.pages || {};
+	const RESERVED      = cfg.reservedSlugs || [];
 
 	// ─── State ────────────────────────────────────────────────────
-	let activePage   = config.activePage || Object.keys( PAGES )[0] || 'homepage';
-	let currentOrder = []; // managed per-page
-	let sortableInstance = null;
+	let activePage    = Object.keys( PAGES )[0] || 'homepage';
+	let sortableInst  = null;
 
-	// ─── DOM References ───────────────────────────────────────────
+	// ─── DOM ──────────────────────────────────────────────────────
 	const sortableList     = document.getElementById( 'sortable-blocks' );
-	const removedSection   = document.getElementById( 'removed-blocks-section' );
-	const removedList      = document.getElementById( 'removed-blocks' );
 	const previewIframe    = document.getElementById( 'block-preview-iframe' );
 	const previewContainer = document.getElementById( 'block-preview-container' );
-	const publishBtn       = document.getElementById( 'publish-page-btn' );
-	const resetBtn         = document.getElementById( 'reset-order-btn' );
-	const saveStatus       = document.getElementById( 'save-status' );
 	const cardTitle        = document.getElementById( 'card-title' );
+	const outputSlugInput  = document.getElementById( 'output-slug' );
+	const saveStatus       = document.getElementById( 'save-status' );
 
 	if ( ! sortableList ) return;
 
 	// ─── Helpers ──────────────────────────────────────────────────
 
-	function escHtml( str ) {
-		var div = document.createElement( 'div' );
-		div.textContent = str || '';
-		return div.innerHTML;
+	function esc( str ) {
+		var d = document.createElement( 'div' );
+		d.textContent = str || '';
+		return d.innerHTML;
 	}
 
-	function showStatus( el, message, type ) {
+	function showStatus( el, msg, type ) {
 		if ( ! el ) return;
-		el.textContent = message;
-		el.className = 'page-builder-save-status';
-		if ( type ) el.classList.add( 'page-builder-save-status--' + type );
-		if ( message ) {
-			clearTimeout( el._timeout );
-			el._timeout = setTimeout( function () {
-				el.textContent = '';
-				el.className = 'page-builder-save-status';
-			}, 5000 );
-		}
+		el.textContent = msg;
+		el.className = 'page-builder-save-status' + ( type ? ' page-builder-save-status--' + type : '' );
+		clearTimeout( el._t );
+		if ( msg ) el._t = setTimeout( function () { el.textContent = ''; el.className = 'page-builder-save-status'; }, 5000 );
 	}
 
-	function getPageData() {
+	function getBlockOrder() {
+		return Array.from( sortableList.children ).map( function ( li ) { return li.dataset.block; } );
+	}
+
+	function pageData() {
 		return PAGES[ activePage ] || {};
 	}
 
@@ -65,169 +61,84 @@
 
 	function renderBlocks( order, allBlocks ) {
 		sortableList.innerHTML = '';
-		if ( removedList ) removedList.innerHTML = '';
-		if ( removedSection ) removedSection.style.display = 'none';
 
-		// Active blocks.
 		order.forEach( function ( blockId ) {
 			var block = allBlocks[ blockId ];
 			if ( ! block ) return;
-			sortableList.appendChild( createBlockItem( blockId, block ) );
-		} );
 
-		// Removed blocks (in allBlocks but not in order).
-		var removedIds = Object.keys( allBlocks ).filter( function ( id ) {
-			return order.indexOf( id ) === -1;
-		} );
-		if ( removedIds.length > 0 && removedList ) {
-			removedIds.forEach( function ( blockId ) {
-				var block = allBlocks[ blockId ];
-				if ( ! block ) return;
-				removedList.appendChild( createRemovedItem( blockId, block ) );
-			} );
-			removedSection.style.display = '';
-		}
+			var li = document.createElement( 'li' );
+			li.className = 'seo-sortable-item';
+			li.dataset.block = blockId;
+			li.innerHTML =
+				'<span class="seo-sortable-handle" aria-label="Drag to reorder">⋮⋮</span>' +
+				'<div class="seo-sortable-content">' +
+					'<strong class="seo-sortable-label">' + esc( block.label ) + '</strong>' +
+					'<span class="seo-sortable-desc">' + esc( block.description ) + '</span>' +
+				'</div>' +
+				'<button type="button" class="seo-sortable-remove" aria-label="Remove block">' +
+					'<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+				'</button>';
 
-		// Update tab count badge.
-		var countEl = document.getElementById( 'tab-count-' + activePage );
-		if ( countEl ) countEl.textContent = order.length;
+			sortableList.appendChild( li );
+		} );
 
 		initSortable();
+		updateTabBadges();
 	}
 
-	function createBlockItem( blockId, block ) {
-		var li = document.createElement( 'li' );
-		li.className = 'seo-sortable-item';
-		li.dataset.block = blockId;
-		li.dataset.enabled = 'true';
-		li.innerHTML =
-			'<span class="seo-sortable-handle" aria-label="Drag to reorder">⋮⋮</span>' +
-			'<div class="seo-sortable-content">' +
-				'<strong class="seo-sortable-label">' + escHtml( block.label ) + '</strong>' +
-				'<span class="seo-sortable-desc">' + escHtml( block.description ) + '</span>' +
-			'</div>' +
-			'<button type="button" class="seo-sortable-remove" aria-label="Remove block" title="Click to remove this block">' +
-				'<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-					'<path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
-				'</svg>' +
-			'</button>';
-		return li;
-	}
-
-	function createRemovedItem( blockId, block ) {
-		var li = document.createElement( 'li' );
-		li.className = 'seo-sortable-item';
-		li.dataset.block = blockId;
-		li.innerHTML =
-			'<div class="seo-sortable-content">' +
-				'<strong class="seo-sortable-label">' + escHtml( block.label ) + '</strong>' +
-				'<span class="seo-sortable-desc">' + escHtml( block.description ) + '</span>' +
-			'</div>' +
-			'<button type="button" class="seo-sortable-add-back" title="Add back" style="' +
-				'padding: 4px 12px; background: rgba(202,150,82,0.1); color: #CA9652;' +
-				'border: 1px solid rgba(202,150,82,0.3); border-radius: 6px; cursor: pointer;' +
-				'font-size: 12px; font-weight: 600;">+ Add</button>';
-
-		li.querySelector( '.seo-sortable-add-back' ).addEventListener( 'click', function () {
-			addBlockBack( blockId, li );
-		} );
-
-		return li;
-	}
-
-	// ─── SortableJS ───────────────────────────────────────────────
+	// ─── Sortable ─────────────────────────────────────────────────
 
 	function initSortable() {
-		if ( sortableInstance ) {
-			sortableInstance.destroy();
-		}
+		if ( sortableInst ) sortableInst.destroy();
 		if ( typeof Sortable !== 'undefined' ) {
-			sortableInstance = Sortable.create( sortableList, {
+			sortableInst = Sortable.create( sortableList, {
 				animation: 200,
-				easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
 				handle: '.seo-sortable-handle',
 				ghostClass: 'seo-sortable-ghost',
-				dragClass: 'seo-sortable-drag',
-				chosenClass: 'seo-sortable-chosen',
-				swapThreshold: 0.65,
 				onEnd: function () {
 					updatePreview();
+					updateTabBadges();
 				},
 			} );
 		}
 	}
 
-	// ─── Block Actions ────────────────────────────────────────────
-
+	// Remove block handler.
 	sortableList.addEventListener( 'click', function ( e ) {
-		var removeBtn = e.target.closest( '.seo-sortable-remove' );
-		if ( ! removeBtn ) return;
+		var btn = e.target.closest( '.seo-sortable-remove' );
+		if ( ! btn ) return;
+		var li = btn.closest( '.seo-sortable-item' );
+		if ( ! li ) return;
 
-		var listItem = removeBtn.closest( '.seo-sortable-item' );
-		if ( ! listItem ) return;
-
-		var blockId   = listItem.dataset.block;
-		var pageData  = getPageData();
-		var blockData = pageData.blocks ? pageData.blocks[ blockId ] : null;
-
-		listItem.classList.add( 'removing' );
+		li.style.transition = 'opacity 0.2s, transform 0.2s';
+		li.style.opacity = '0';
+		li.style.transform = 'translateX(20px)';
 		setTimeout( function () {
-			listItem.remove();
-
-			if ( blockData && removedList ) {
-				removedList.appendChild( createRemovedItem( blockId, blockData ) );
-				removedSection.style.display = '';
-			}
-
+			li.remove();
 			updatePreview();
-			updateTabCount();
-		}, 300 );
+			updateTabBadges();
+		}, 200 );
 	} );
-
-	function addBlockBack( blockId, removedLi ) {
-		var pageData  = getPageData();
-		var blockData = pageData.blocks ? pageData.blocks[ blockId ] : null;
-		if ( ! blockData ) return;
-
-		removedLi.remove();
-		if ( removedList && removedList.children.length === 0 ) {
-			removedSection.style.display = 'none';
-		}
-
-		sortableList.appendChild( createBlockItem( blockId, blockData ) );
-		updatePreview();
-		updateTabCount();
-	}
-
-	function updateTabCount() {
-		var count = getBlockOrder().length;
-		var countEl = document.getElementById( 'tab-count-' + activePage );
-		if ( countEl ) countEl.textContent = count;
-	}
-
-	// ─── Get Block Order from DOM ─────────────────────────────────
-
-	function getBlockOrder() {
-		return Array.from( sortableList.children )
-			.filter( function ( li ) { return ! li.classList.contains( 'removing' ); } )
-			.map( function ( li ) { return li.dataset.block; } );
-	}
 
 	// ─── Preview ──────────────────────────────────────────────────
 
 	function updatePreview() {
 		if ( ! previewIframe ) return;
-		var pageData    = getPageData();
-		var route       = pageData.previewRoute || '/preview';
-		var blocksParam = getBlockOrder().join( ',' );
-		previewIframe.src = PREVIEW_BASE + route + '?blocks=' + blocksParam;
+		var blocks = getBlockOrder();
+		var pd = pageData();
+		var route = pd.previewRoute || '/preview';
+
+		if ( blocks.length === 0 ) {
+			previewIframe.src = 'about:blank';
+			return;
+		}
+
+		previewIframe.src = PREVIEW_BASE + route + '?blocks=' + blocks.join( ',' );
 	}
 
 	// Device toggle.
 	document.querySelectorAll( '.device-toggle-btn' ).forEach( function ( btn ) {
 		btn.addEventListener( 'click', function () {
-			var device = btn.dataset.device;
-
 			document.querySelectorAll( '.device-toggle-btn' ).forEach( function ( b ) {
 				b.classList.remove( 'active' );
 				b.setAttribute( 'aria-selected', 'false' );
@@ -235,164 +146,210 @@
 			btn.classList.add( 'active' );
 			btn.setAttribute( 'aria-selected', 'true' );
 
-			var frameEl = previewContainer.querySelector( '.device-frame' );
-			if ( frameEl ) {
-				frameEl.className = 'device-frame ' + device + '-frame';
-			}
+			var device = btn.dataset.device;
+			var frame = previewContainer.querySelector( '.device-frame' );
+			if ( frame ) frame.className = 'device-frame ' + device + '-frame';
 			previewContainer.dataset.device = device;
 
-			if ( device === 'desktop' ) {
-				setTimeout( updateDesktopScale, 50 );
-			} else {
-				// Reset any scaling.
-				previewContainer.style.minHeight = '';
-			}
+			if ( device === 'desktop' ) setTimeout( updateDesktopScale, 50 );
+			else previewContainer.style.minHeight = '';
 		} );
 	} );
 
-	// ─── Desktop Scale ────────────────────────────────────────────
-
 	function updateDesktopScale() {
-		var frameEl = previewContainer ? previewContainer.querySelector( '.desktop-frame .device-screen' ) : null;
-		if ( ! frameEl ) return;
-
-		var panelWidth = previewContainer.offsetWidth - 40;
-		var scale = Math.min( panelWidth / 1440, 1 );
-		frameEl.style.transform = 'scale(' + scale + ')';
-
-		var iframeHeight = frameEl.querySelector( 'iframe' )?.offsetHeight || 900;
-		previewContainer.style.minHeight = ( iframeHeight * scale + 80 ) + 'px';
+		var screen = previewContainer ? previewContainer.querySelector( '.desktop-frame .device-screen' ) : null;
+		if ( ! screen ) return;
+		var pw = previewContainer.offsetWidth - 40;
+		var scale = Math.min( pw / 1440, 1 );
+		screen.style.transform = 'scale(' + scale + ')';
+		previewContainer.style.minHeight = ( 900 * scale + 80 ) + 'px';
 	}
 
 	window.addEventListener( 'resize', function () {
-		if ( previewContainer && previewContainer.dataset.device === 'desktop' ) {
-			updateDesktopScale();
-		}
+		if ( previewContainer && previewContainer.dataset.device === 'desktop' ) updateDesktopScale();
 	} );
 
 	// ─── Tab Switching ────────────────────────────────────────────
 
+	function switchToPage( slug ) {
+		activePage = slug;
+		var pd = pageData();
+
+		// Update tab active state.
+		document.querySelectorAll( '.page-builder-tab' ).forEach( function ( tab ) {
+			var isActive = tab.dataset.page === slug;
+			tab.classList.toggle( 'active', isActive );
+			tab.setAttribute( 'aria-selected', isActive ? 'true' : 'false' );
+		} );
+
+		// Update card title.
+		if ( cardTitle ) {
+			cardTitle.textContent = 'Customize Block Order — ' + ( pd.label || slug );
+		}
+
+		// Update output slug input.
+		if ( outputSlugInput ) {
+			outputSlugInput.value = pd.outputSlug || '';
+		}
+
+		// Render blocks.
+		renderBlocks( pd.currentOrder || [], pd.blocks || {} );
+
+		// Update preview.
+		updatePreview();
+	}
+
 	document.querySelectorAll( '.page-builder-tab' ).forEach( function ( tab ) {
 		tab.addEventListener( 'click', function () {
-			var pageSlug = tab.dataset.page;
-			if ( pageSlug === activePage ) return;
-
-			// Update tab active state.
-			document.querySelectorAll( '.page-builder-tab' ).forEach( function ( t ) {
-				t.classList.remove( 'active' );
-				t.setAttribute( 'aria-selected', 'false' );
-			} );
-			tab.classList.add( 'active' );
-			tab.setAttribute( 'aria-selected', 'true' );
-
-			// Switch page.
-			activePage = pageSlug;
-			var pageData = getPageData();
-
-			// Update title.
-			if ( cardTitle ) {
-				cardTitle.textContent = 'Customize Block Order — ' + ( pageData.label || pageSlug );
-			}
-
-			// Render blocks for this page.
-			renderBlocks( pageData.currentOrder || pageData.defaultOrder, pageData.blocks || {} );
-
-			// Update preview.
-			updatePreview();
-
-			// Clear status.
-			showStatus( saveStatus, '', '' );
+			switchToPage( tab.dataset.page );
 		} );
 	} );
 
-	// ─── Publish ──────────────────────────────────────────────────
+	// ─── Tab Badges ───────────────────────────────────────────────
 
-	publishBtn.addEventListener( 'click', async function () {
-		var blockOrder = getBlockOrder();
-
-		if ( blockOrder.length === 0 ) {
-			alert( 'Add at least one block before publishing.' );
-			return;
-		}
-
-		var pageData = getPageData();
-		publishBtn.disabled = true;
-		publishBtn.textContent = 'Publishing ' + ( pageData.label || '' ) + '...';
-		showStatus( saveStatus, '', '' );
-
-		try {
-			var formData = new FormData();
-			formData.append( 'action', 'nextjs_publish_page' );
-			formData.append( 'nonce', NONCE );
-			formData.append( 'page_slug', activePage );
-			formData.append( 'block_order', JSON.stringify( blockOrder ) );
-
-			var res  = await fetch( AJAX_URL, { method: 'POST', body: formData } );
-			var json = await res.json();
-
-			if ( json.success ) {
-				showStatus( saveStatus, '✓ ' + json.data.message, 'success' );
-				// Update the saved order in our local state.
-				if ( PAGES[ activePage ] ) {
-					PAGES[ activePage ].currentOrder = blockOrder;
-				}
-			} else {
-				showStatus( saveStatus, '✕ ' + ( json.data?.message || 'Publish failed.' ), 'error' );
-			}
-		} catch ( err ) {
-			showStatus( saveStatus, '✕ Network error: ' + err.message, 'error' );
-		}
-
-		publishBtn.disabled = false;
-		publishBtn.textContent = 'Publish to Next.js →';
-	} );
-
-	// ─── Reset ────────────────────────────────────────────────────
-
-	resetBtn.addEventListener( 'click', function () {
-		var pageData = getPageData();
-		renderBlocks( pageData.defaultOrder || [], pageData.blocks || {} );
-
-		sortableList.classList.add( 'seo-sortable-reset' );
-		setTimeout( function () {
-			sortableList.classList.remove( 'seo-sortable-reset' );
-		}, 400 );
-
-		updatePreview();
-		showStatus( saveStatus, '↩ Reset to default order', 'info' );
-	} );
-
-	// ─── Save Settings ────────────────────────────────────────────
-
-	var saveSettingsBtn = document.getElementById( 'save-settings-btn' );
-	var settingsStatus  = document.getElementById( 'settings-status' );
-
-	if ( saveSettingsBtn ) {
-		saveSettingsBtn.addEventListener( 'click', async function () {
-			var projectPath = document.getElementById( 'nextjs-project-path' )?.value || '';
-			var previewUrl  = document.getElementById( 'nextjs-preview-url' )?.value || '';
-
-			var formData = new FormData();
-			formData.append( 'action', 'nextjs_save_settings' );
-			formData.append( 'nonce', NONCE );
-			formData.append( 'project_path', projectPath );
-			formData.append( 'preview_url', previewUrl );
-
-			try {
-				var res  = await fetch( AJAX_URL, { method: 'POST', body: formData } );
-				var json = await res.json();
-				if ( json.success ) {
-					showStatus( settingsStatus, '✓ Settings saved', 'success' );
-				} else {
-					showStatus( settingsStatus, '✕ Failed to save', 'error' );
-				}
-			} catch ( err ) {
-				showStatus( settingsStatus, '✕ ' + err.message, 'error' );
+	function updateTabBadges() {
+		// Update active tab's badge with current sortable count.
+		document.querySelectorAll( '.page-builder-tab' ).forEach( function ( tab ) {
+			if ( tab.dataset.page === activePage ) {
+				var badge = tab.querySelector( '.tab-block-count' );
+				if ( badge ) badge.textContent = sortableList.children.length;
 			}
 		} );
 	}
 
-	// ─── Initial Load ─────────────────────────────────────────────
-	setTimeout( updatePreview, 300 );
+	// ─── Save Order ───────────────────────────────────────────────
+
+	document.getElementById( 'save-order-btn' ).addEventListener( 'click', async function () {
+		var order = getBlockOrder();
+
+		var fd = new FormData();
+		fd.append( 'action', 'nextjs_save_block_order' );
+		fd.append( 'nonce', NONCE );
+		fd.append( 'page_slug', activePage );
+		fd.append( 'block_order', JSON.stringify( order ) );
+
+		try {
+			var res = await fetch( AJAX_URL, { method: 'POST', body: fd } );
+			var json = await res.json();
+			if ( json.success ) {
+				showStatus( saveStatus, '✓ Order saved', 'success' );
+				// Update local state.
+				if ( PAGES[ activePage ] ) PAGES[ activePage ].currentOrder = order;
+			} else {
+				showStatus( saveStatus, '✕ ' + ( json.data?.message || 'Failed' ), 'error' );
+			}
+		} catch ( e ) {
+			showStatus( saveStatus, '✕ ' + e.message, 'error' );
+		}
+	} );
+
+	// ─── Reset Order ──────────────────────────────────────────────
+
+	document.getElementById( 'reset-order-btn' ).addEventListener( 'click', async function () {
+		if ( ! confirm( 'Reset block order to defaults for this page?' ) ) return;
+
+		var fd = new FormData();
+		fd.append( 'action', 'nextjs_reset_order' );
+		fd.append( 'nonce', NONCE );
+		fd.append( 'page_slug', activePage );
+
+		try {
+			var res = await fetch( AJAX_URL, { method: 'POST', body: fd } );
+			var json = await res.json();
+			if ( json.success ) {
+				showStatus( saveStatus, '✓ Reset to defaults', 'success' );
+				var newOrder = json.data.blockOrder || [];
+				if ( PAGES[ activePage ] ) PAGES[ activePage ].currentOrder = newOrder;
+				renderBlocks( newOrder, pageData().blocks || {} );
+				updatePreview();
+			} else {
+				showStatus( saveStatus, '✕ ' + ( json.data?.message || 'Failed' ), 'error' );
+			}
+		} catch ( e ) {
+			showStatus( saveStatus, '✕ ' + e.message, 'error' );
+		}
+	} );
+
+	// ─── Publish ──────────────────────────────────────────────────
+
+	document.getElementById( 'publish-btn' ).addEventListener( 'click', async function () {
+		var slug = ( outputSlugInput ? outputSlugInput.value.trim() : '' );
+
+		if ( ! slug ) {
+			alert( 'Enter an output URL slug (e.g. "san-diego-jewelry-store").' );
+			outputSlugInput.focus();
+			return;
+		}
+
+		if ( RESERVED.indexOf( slug ) !== -1 ) {
+			alert( 'The slug "/' + slug + '" is reserved. Choose a different one.' );
+			outputSlugInput.focus();
+			return;
+		}
+
+		var order = getBlockOrder();
+		if ( order.length === 0 ) {
+			alert( 'Add at least one block before publishing.' );
+			return;
+		}
+
+		var btn = document.getElementById( 'publish-btn' );
+		btn.disabled = true;
+		btn.textContent = 'Publishing...';
+
+		var fd = new FormData();
+		fd.append( 'action', 'nextjs_publish_page' );
+		fd.append( 'nonce', NONCE );
+		fd.append( 'page_slug', activePage );
+		fd.append( 'output_slug', slug );
+		fd.append( 'block_order', JSON.stringify( order ) );
+
+		try {
+			var res = await fetch( AJAX_URL, { method: 'POST', body: fd } );
+			var json = await res.json();
+			if ( json.success ) {
+				showStatus( saveStatus, '✓ ' + json.data.message, 'success' );
+				// Update local state.
+				if ( PAGES[ activePage ] ) {
+					PAGES[ activePage ].currentOrder = order;
+					PAGES[ activePage ].outputSlug = slug;
+				}
+			} else {
+				showStatus( saveStatus, '✕ ' + ( json.data?.message || 'Publish failed' ), 'error' );
+			}
+		} catch ( e ) {
+			showStatus( saveStatus, '✕ ' + e.message, 'error' );
+		}
+
+		btn.disabled = false;
+		btn.textContent = 'Publish to Next.js →';
+	} );
+
+	// ─── Settings ─────────────────────────────────────────────────
+
+	var settingsBtn    = document.getElementById( 'save-settings-btn' );
+	var settingsStatus = document.getElementById( 'settings-status' );
+
+	if ( settingsBtn ) {
+		settingsBtn.addEventListener( 'click', async function () {
+			var fd = new FormData();
+			fd.append( 'action', 'nextjs_save_settings' );
+			fd.append( 'nonce', NONCE );
+			fd.append( 'project_path', document.getElementById( 'nextjs-project-path' ).value );
+			fd.append( 'preview_url', document.getElementById( 'nextjs-preview-url' ).value );
+
+			try {
+				var res = await fetch( AJAX_URL, { method: 'POST', body: fd } );
+				var json = await res.json();
+				showStatus( settingsStatus, json.success ? '✓ Saved' : '✕ Failed', json.success ? 'success' : 'error' );
+			} catch ( e ) {
+				showStatus( settingsStatus, '✕ ' + e.message, 'error' );
+			}
+		} );
+	}
+
+	// ─── Init ─────────────────────────────────────────────────────
+	initSortable();
+	updatePreview();
 
 } )();

@@ -1,8 +1,8 @@
 /**
  * Page Builder Admin Styles
  *
- * Minimal additions — the main block ordering and preview styles
- * are already in admin-import.css and admin-block-preview.css.
+ * Tab bar, output slug field, and status styles layered on top of
+ * the shared sortable + device preview CSS.
  *
  * @package SEOGenerator
  */
@@ -12,39 +12,41 @@
 .page-builder-tabs {
 	display: flex;
 	gap: 0;
-	margin-top: 20px;
-}
-
-.page-builder-tab {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	padding: 12px 24px;
-	background: #f0f0f1;
-	border: 1px solid #c3c4c7;
-	border-bottom: none;
-	border-radius: 4px 4px 0 0;
-	color: #50575e;
-	font-size: 14px;
-	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.2s ease;
+	border-bottom: 2px solid #e0e0e0;
+	margin-bottom: -2px;
 	position: relative;
-	bottom: -1px;
 	z-index: 1;
 }
 
+.page-builder-tab {
+	padding: 10px 20px;
+	background: #f0f0f1;
+	border: 2px solid #e0e0e0;
+	border-bottom: 2px solid #e0e0e0;
+	border-radius: 6px 6px 0 0;
+	font-weight: 600;
+	font-size: 13px;
+	cursor: pointer;
+	color: #50575e;
+	transition: all 0.15s;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin-right: -2px;
+}
+
 .page-builder-tab:hover {
-	background: #e8e8ea;
+	background: #fff;
 	color: #1d2327;
 }
 
 .page-builder-tab.active {
 	background: #fff;
-	color: #1d2327;
 	border-bottom-color: #fff;
-	z-index: 2;
+	color: #1d2327;
 }
+
+/* ─── Tab Block Count Badge ────────────────────────────────────── */
 
 .tab-block-count {
 	display: inline-flex;
@@ -61,10 +63,6 @@
 	line-height: 1;
 }
 
-.page-builder-tab.active .tab-block-count {
-	background: rgba(202, 150, 82, 0.2);
-}
-
 /* ─── Save / Publish Status ────────────────────────────────────── */
 
 .page-builder-save-status {
@@ -73,16 +71,14 @@
 	transition: opacity 0.3s;
 }
 
-.page-builder-save-status--success {
-	color: #00a32a;
-}
+.page-builder-save-status--success { color: #00a32a; }
+.page-builder-save-status--error   { color: #d63638; }
+.page-builder-save-status--info    { color: #2271b1; }
 
-.page-builder-save-status--error {
-	color: #d63638;
-}
+/* ─── Output Slug Row ──────────────────────────────────────────── */
 
-.page-builder-save-status--info {
-	color: #2271b1;
+.output-slug-row input {
+	font-family: monospace;
 }
 
 /* ─── Settings Table ───────────────────────────────────────────── */
@@ -109,3 +105,9 @@
 	width: 1440px;
 	min-height: 900px;
 }
+
+/* ─── Misc ─────────────────────────────────────────────────────── */
+
+.text-muted { color: #646970; }
+.mt-4 { margin-top: 16px; }
+.mt-6 { margin-top: 24px; }
