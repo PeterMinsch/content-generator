@@ -47,8 +47,8 @@ class DashboardCustomizer {
 	 * @return void
 	 */
 	public function register(): void {
-		// Custom dashboard page.
-		add_action( 'admin_menu', array( $this, 'addDashboardPage' ), 5 );
+		// Custom dashboard page (priority 11, after AdminMenu registers parent at 10).
+		add_action( 'admin_menu', array( $this, 'addDashboardPage' ), 11 );
 
 		// Sidebar cleanup (high priority to run after all menus registered).
 		add_action( 'admin_menu', array( $this, 'cleanupSidebar' ), 999 );
@@ -77,15 +77,29 @@ class DashboardCustomizer {
 	 * @return void
 	 */
 	public function addDashboardPage(): void {
+		// Register as hidden page first (ensures it's in $_registered_pages).
 		add_submenu_page(
-			'seo-content-generator',
+			null,
 			__( 'Dashboard', 'seo-generator' ),
 			__( 'Dashboard', 'seo-generator' ),
 			'edit_posts',
 			self::DASHBOARD_SLUG,
-			array( $this, 'renderDashboard' ),
-			0
+			array( $this, 'renderDashboard' )
 		);
+
+		// Also add it visually under Content Generator menu.
+		global $submenu;
+		if ( isset( $submenu['seo-content-generator'] ) ) {
+			// Insert Dashboard at the top of the submenu.
+			array_unshift(
+				$submenu['seo-content-generator'],
+				array(
+					__( 'Dashboard', 'seo-generator' ),
+					'edit_posts',
+					'admin.php?page=' . self::DASHBOARD_SLUG,
+				)
+			);
+		}
 	}
 
 	/**
