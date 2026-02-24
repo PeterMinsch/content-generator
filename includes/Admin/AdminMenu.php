@@ -168,6 +168,16 @@ class AdminMenu {
 			array( $this, 'renderSettingsPage' )
 		);
 
+		// Add "Page Builder" submenu.
+		add_submenu_page(
+			self::MENU_SLUG,
+			__( 'Page Builder', 'seo-generator' ),
+			__( 'Page Builder', 'seo-generator' ),
+			'edit_posts',
+			'seo-page-builder',
+			array( $this, 'renderPageBuilderPage' )
+		);
+
 		// Add "Analytics" submenu (placeholder).
 		add_submenu_page(
 			self::MENU_SLUG,
@@ -241,6 +251,16 @@ class AdminMenu {
 			</div>
 		</div>
 		<?php
+	}
+
+	/**
+	 * Render the Page Builder page.
+	 *
+	 * @return void
+	 */
+	public function renderPageBuilderPage(): void {
+		$page_builder = new PageBuilderPage();
+		$page_builder->render();
 	}
 
 	/**

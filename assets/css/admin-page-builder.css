@@ -1,0 +1,111 @@
+/**
+ * Page Builder Admin Styles
+ *
+ * Minimal additions — the main block ordering and preview styles
+ * are already in admin-import.css and admin-block-preview.css.
+ *
+ * @package SEOGenerator
+ */
+
+/* ─── Page Tabs ────────────────────────────────────────────────── */
+
+.page-builder-tabs {
+	display: flex;
+	gap: 0;
+	margin-top: 20px;
+}
+
+.page-builder-tab {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 24px;
+	background: #f0f0f1;
+	border: 1px solid #c3c4c7;
+	border-bottom: none;
+	border-radius: 4px 4px 0 0;
+	color: #50575e;
+	font-size: 14px;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	position: relative;
+	bottom: -1px;
+	z-index: 1;
+}
+
+.page-builder-tab:hover {
+	background: #e8e8ea;
+	color: #1d2327;
+}
+
+.page-builder-tab.active {
+	background: #fff;
+	color: #1d2327;
+	border-bottom-color: #fff;
+	z-index: 2;
+}
+
+.tab-block-count {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 22px;
+	height: 22px;
+	padding: 0 6px;
+	background: rgba(202, 150, 82, 0.15);
+	color: #CA9652;
+	border-radius: 11px;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+}
+
+.page-builder-tab.active .tab-block-count {
+	background: rgba(202, 150, 82, 0.2);
+}
+
+/* ─── Save / Publish Status ────────────────────────────────────── */
+
+.page-builder-save-status {
+	font-size: 13px;
+	font-weight: 600;
+	transition: opacity 0.3s;
+}
+
+.page-builder-save-status--success {
+	color: #00a32a;
+}
+
+.page-builder-save-status--error {
+	color: #d63638;
+}
+
+.page-builder-save-status--info {
+	color: #2271b1;
+}
+
+/* ─── Settings Table ───────────────────────────────────────────── */
+
+.seo-card .form-table th {
+	width: 200px;
+	font-weight: 600;
+}
+
+/* ─── Desktop Preview: Scale-to-fit ────────────────────────────── */
+
+.desktop-frame {
+	max-width: 100% !important;
+	width: 100% !important;
+}
+
+.desktop-frame .device-screen {
+	width: 1440px;
+	transform-origin: top left;
+	transform: scale(var(--desktop-scale, 0.55));
+}
+
+.desktop-frame #block-preview-iframe {
+	width: 1440px;
+	min-height: 900px;
+}

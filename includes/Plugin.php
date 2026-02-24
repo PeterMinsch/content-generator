@@ -94,6 +94,10 @@ class Plugin {
 		$page_editor = new Admin\PageEditor();
 		$this->container->set( 'admin.page_editor', $page_editor );
 
+		// Register page builder (Next.js).
+		$page_builder = new Admin\PageBuilderPage();
+		$this->container->set( 'admin.page_builder', $page_builder );
+
 		// Register post list columns.
 		$post_list_columns = new Admin\PostListColumns();
 		$this->container->set( 'admin.post_list_columns', $post_list_columns );
@@ -209,6 +213,9 @@ class Plugin {
 
 		// Register page editor.
 		$this->container->get( 'admin.page_editor' )->register();
+
+		// Register page builder AJAX handlers.
+		$this->container->get( 'admin.page_builder' )->register();
 
 		// Register post list columns.
 		$this->container->get( 'admin.post_list_columns' )->register();
