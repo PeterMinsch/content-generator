@@ -254,7 +254,7 @@ class NextJSPageGenerator {
 		if ( function_exists( 'exec' ) ) {
 			$escaped_path = escapeshellarg( rtrim( $project_path, '/\\' ) );
 			exec(
-				"bash -lc 'cd {$escaped_path} && npm run build >> /tmp/nextjs-build.log 2>&1 && pm2 restart bravo-jewelry >> /tmp/nextjs-build.log 2>&1' &"
+				"sudo bash -lc 'cd {$escaped_path} && rm -rf .next && npm run build >> /tmp/nextjs-build.log 2>&1 && pm2 restart bravo-nextjs >> /tmp/nextjs-build.log 2>&1' &"
 			);
 			$build_status = 'started';
 		}
