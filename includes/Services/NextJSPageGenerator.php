@@ -3,10 +3,7 @@
  * Next.js Page Generator
  *
  * Generates page.tsx files at NEW routes based on user-specified slugs.
- * Each page tab (Homepage, About) writes to its own slug — never
- * overwrites the original page.tsx or about/page.tsx.
- *
- * Blocks from ANY page can be used on ANY tab (cross-page block sharing).
+ * Uses a shared block catalog — any block can be used on any page tab.
  *
  * @package SEOGenerator
  */
@@ -28,6 +25,29 @@ class NextJSPageGenerator {
 
 	// ─── Config Accessors ─────────────────────────────────────────
 
+	/**
+	 * Get ALL block groups (the shared catalog).
+	 */
+	public function getBlockGroups(): array {
+		return $this->config['groups'] ?? [];
+	}
+
+	/**
+	 * Get a flat map of ALL block definitions across all groups.
+	 */
+	public function getAllBlocks(): array {
+		$all = [];
+		foreach ( $this->config['groups'] as $group ) {
+			foreach ( $group['blocks'] as $id => $block ) {
+				$all[ $id ] = $block;
+			}
+		}
+		return $all;
+	}
+
+	/**
+	 * Get page tab definitions.
+	 */
 	public function getPages(): array {
 		return $this->config['pages'] ?? [];
 	}
@@ -36,46 +56,9 @@ class NextJSPageGenerator {
 		return $this->config['pages'][ $page_slug ] ?? null;
 	}
 
-	public function getBlockDefinitions( string $page_slug ): array {
-		$page = $this->getPageConfig( $page_slug );
-		return $page ? ( $page['blocks'] ?? [] ) : [];
-	}
-
 	public function getDefaultOrder( string $page_slug ): array {
 		$page = $this->getPageConfig( $page_slug );
 		return $page ? ( $page['default_order'] ?? [] ) : [];
-	}
-
-	/**
-	 * Get ALL blocks from ALL pages as a flat array.
-	 * Used to resolve blocks when cross-page sharing is enabled.
-	 *
-	 * @return array [ block_id => block_definition, ... ]
-	 */
-	public function getAllBlocks(): array {
-		$all = [];
-		foreach ( $this->getPages() as $page ) {
-			foreach ( ( $page['blocks'] ?? [] ) as $id => $block ) {
-				$all[ $id ] = $block;
-			}
-		}
-		return $all;
-	}
-
-	/**
-	 * Get all blocks grouped by their source page (for the picker UI).
-	 *
-	 * @return array [ page_slug => [ 'label' => ..., 'blocks' => [...] ], ... ]
-	 */
-	public function getBlocksByPage(): array {
-		$grouped = [];
-		foreach ( $this->getPages() as $slug => $page ) {
-			$grouped[ $slug ] = [
-				'label'  => $page['label'],
-				'blocks' => $page['blocks'] ?? [],
-			];
-		}
-		return $grouped;
 	}
 
 	// ─── Slug Management ──────────────────────────────────────────
@@ -116,11 +99,11 @@ class NextJSPageGenerator {
 	/**
 	 * Generate page.tsx content.
 	 *
-	 * Resolves blocks from the GLOBAL pool so cross-page blocks work.
+	 * Block order can include ANY block from the shared catalog.
 	 */
 	public function generatePageContent( string $page_slug, array $block_order, string $output_slug ): string {
-		$page      = $this->getPageConfig( $page_slug );
-		$allBlocks = $this->getAllBlocks();
+		$page       = $this->getPageConfig( $page_slug );
+		$all_blocks = $this->getAllBlocks();
 
 		if ( ! $page ) {
 			return '';
@@ -138,12 +121,11 @@ class NextJSPageGenerator {
 		}
 
 		foreach ( $block_order as $block_id ) {
-			// Resolve from global pool — allows cross-page blocks.
-			if ( ! isset( $allBlocks[ $block_id ] ) ) {
+			if ( ! isset( $all_blocks[ $block_id ] ) ) {
 				continue;
 			}
 
-			$block = $allBlocks[ $block_id ];
+			$block = $all_blocks[ $block_id ];
 
 			$import_line = "import { {$block['export_name']} } from '{$block['import_path']}';";
 			if ( ! in_array( $import_line, $imports, true ) ) {

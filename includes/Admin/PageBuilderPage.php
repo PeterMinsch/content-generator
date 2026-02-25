@@ -3,7 +3,7 @@
  * Page Builder Admin Page
  *
  * Tabbed interface — one tab per page template (Homepage, About Us).
- * Each tab lets you reorder blocks and publish to a custom slug.
+ * Shared block catalog — any block from any group can be added to any tab.
  *
  * @package SEOGenerator
  */
@@ -88,36 +88,9 @@ class PageBuilderPage {
 			true
 		);
 
-		// Build per-page data for JS.
-		$pages_data = [];
-		foreach ( $this->generator->getPages() as $slug => $page ) {
-			$all_blocks    = $page['blocks'];
-			$saved_order   = get_option( "seo_nextjs_block_order_{$slug}", null );
-			$default_order = $page['default_order'] ?? array_keys( $all_blocks );
-			$current_order = is_array( $saved_order ) ? $saved_order : $default_order;
-
-			$blocks_for_js = [];
-			foreach ( $all_blocks as $id => $block ) {
-				$blocks_for_js[ $id ] = [
-					'id'          => $id,
-					'label'       => $block['label'],
-					'description' => $block['description'],
-				];
-			}
-
-			$pages_data[ $slug ] = [
-				'label'        => $page['label'],
-				'blocks'       => $blocks_for_js,
-				'currentOrder' => $current_order,
-				'defaultOrder' => $default_order,
-				'previewRoute' => $page['preview_route'] ?? '/preview',
-				'outputSlug'   => $this->generator->getSavedSlug( $slug ),
-			];
-		}
-
-		// Build all-blocks-by-page for the "Add Block" picker.
-		$all_blocks_grouped = [];
-		foreach ( $this->generator->getBlocksByPage() as $page_slug => $group ) {
+		// Build block groups for JS (shared catalog).
+		$groups_for_js = [];
+		foreach ( $this->generator->getBlockGroups() as $group_id => $group ) {
 			$blocks_js = [];
 			foreach ( $group['blocks'] as $id => $block ) {
 				$blocks_js[ $id ] = [
@@ -126,17 +99,33 @@ class PageBuilderPage {
 					'description' => $block['description'],
 				];
 			}
-			$all_blocks_grouped[ $page_slug ] = [
+			$groups_for_js[ $group_id ] = [
 				'label'  => $group['label'],
 				'blocks' => $blocks_js,
 			];
 		}
 
+		// Build per-page data for JS.
+		$pages_data = [];
+		foreach ( $this->generator->getPages() as $slug => $page ) {
+			$saved_order   = get_option( "seo_nextjs_block_order_{$slug}", null );
+			$default_order = $page['default_order'] ?? [];
+			$current_order = is_array( $saved_order ) ? $saved_order : $default_order;
+
+			$pages_data[ $slug ] = [
+				'label'        => $page['label'],
+				'currentOrder' => $current_order,
+				'defaultOrder' => $default_order,
+				'previewRoute' => $page['preview_route'] ?? '/preview',
+				'outputSlug'   => $this->generator->getSavedSlug( $slug ),
+			];
+		}
+
 		wp_localize_script( 'seo-page-builder', 'nextjsPageBuilder', [
-			'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
-			'nonce'            => wp_create_nonce( 'nextjs-page-builder' ),
-			'allBlocksGrouped' => $all_blocks_grouped,
+			'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+			'nonce'         => wp_create_nonce( 'nextjs-page-builder' ),
 			'previewBase'   => get_option( 'seo_nextjs_preview_url', 'http://contentgeneratorwpplugin.local:3000' ),
+			'blockGroups'   => $groups_for_js,
 			'pages'         => $pages_data,
 			'projectPath'   => $this->generator->getProjectPath(),
 			'reservedSlugs' => $this->generator->getReservedSlugs(),
@@ -147,6 +136,7 @@ class PageBuilderPage {
 
 	/**
 	 * Save block order (draft — no file writing).
+	 * Accepts ANY block ID from the shared catalog.
 	 */
 	public function ajaxSaveBlockOrder(): void {
 		check_ajax_referer( 'nextjs-page-builder', 'nonce' );
@@ -162,7 +152,7 @@ class PageBuilderPage {
 			wp_send_json_error( [ 'message' => 'Unknown page.' ] );
 		}
 
-		// Accept blocks from ANY page (cross-page sharing).
+		// Validate block IDs against the ENTIRE shared catalog.
 		$valid_ids = array_keys( $this->generator->getAllBlocks() );
 		$order     = array_values( array_intersect( (array) $order, $valid_ids ) );
 
@@ -192,7 +182,7 @@ class PageBuilderPage {
 			wp_send_json_error( [ 'message' => 'Unknown page.' ] );
 		}
 
-		// Accept blocks from ANY page (cross-page sharing).
+		// Validate against shared catalog.
 		$valid_ids = array_keys( $this->generator->getAllBlocks() );
 		$order     = array_values( array_intersect( (array) $order, $valid_ids ) );
 

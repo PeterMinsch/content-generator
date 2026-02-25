@@ -2,8 +2,8 @@
  * Next.js SEO Page Builder
  *
  * Tabbed interface — one tab per page template (Homepage, About Us).
- * Each tab has its own block list, sortable order, output slug, and preview.
- * "Add Block" picker lets you add blocks from ANY page template.
+ * Shared block catalog — click "+ Add Block" to pick from any group
+ * (Homepage, About, Diamonds, Custom Design, Engagement, Contacts).
  * Publishes to a new URL slug — never overwrites existing pages.
  *
  * @package SEOGenerator
@@ -13,17 +13,18 @@
 	'use strict';
 
 	// ─── Config ───────────────────────────────────────────────────
-	const cfg              = window.nextjsPageBuilder || {};
-	const AJAX_URL         = cfg.ajaxUrl || '/wp-admin/admin-ajax.php';
-	const NONCE            = cfg.nonce || '';
-	const PREVIEW_BASE     = cfg.previewBase || 'http://localhost:3000';
-	const PAGES            = cfg.pages || {};
-	const ALL_BLOCKS       = cfg.allBlocksGrouped || {};
-	const RESERVED         = cfg.reservedSlugs || [];
+	const cfg           = window.nextjsPageBuilder || {};
+	const AJAX_URL      = cfg.ajaxUrl || '/wp-admin/admin-ajax.php';
+	const NONCE         = cfg.nonce || '';
+	const PREVIEW_BASE  = cfg.previewBase || 'http://localhost:3000';
+	const BLOCK_GROUPS  = cfg.blockGroups || {};
+	const PAGES         = cfg.pages || {};
+	const RESERVED      = cfg.reservedSlugs || [];
 
 	// ─── State ────────────────────────────────────────────────────
 	let activePage    = Object.keys( PAGES )[0] || 'homepage';
 	let sortableInst  = null;
+	let pickerOpen    = false;
 
 	// ─── DOM ──────────────────────────────────────────────────────
 	const sortableList     = document.getElementById( 'sortable-blocks' );
@@ -32,13 +33,10 @@
 	const cardTitle        = document.getElementById( 'card-title' );
 	const outputSlugInput  = document.getElementById( 'output-slug' );
 	const saveStatus       = document.getElementById( 'save-status' );
-
-	// Picker DOM
-	const pickerOverlay    = document.getElementById( 'block-picker-overlay' );
-	const pickerBody       = document.getElementById( 'block-picker-body' );
-	const pickerSearch     = document.getElementById( 'block-picker-search' );
-	const pickerCloseBtn   = document.getElementById( 'block-picker-close' );
-	const addBlockBtn      = document.getElementById( 'add-block-btn' );
+	const blockPicker      = document.getElementById( 'block-picker' );
+	const blockCatalog     = document.getElementById( 'block-catalog' );
+	const groupTabs        = document.getElementById( 'block-group-tabs' );
+	const addBlockToggle   = document.getElementById( 'add-block-toggle' );
 
 	if ( ! sortableList ) return;
 
@@ -67,49 +65,127 @@
 	}
 
 	/**
-	 * Resolve a block definition from the global pool.
-	 * Checks the active page's blocks first, then all pages.
+	 * Get a flat map of ALL blocks across all groups.
 	 */
-	function resolveBlock( blockId ) {
-		// Check active page first.
-		var pd = pageData();
-		if ( pd.blocks && pd.blocks[ blockId ] ) return pd.blocks[ blockId ];
+	function getAllBlocks() {
+		var all = {};
+		Object.values( BLOCK_GROUPS ).forEach( function ( g ) {
+			Object.assign( all, g.blocks || {} );
+		} );
+		return all;
+	}
 
-		// Check all pages.
-		for ( var pageSlug in ALL_BLOCKS ) {
-			var group = ALL_BLOCKS[ pageSlug ];
-			if ( group.blocks && group.blocks[ blockId ] ) return group.blocks[ blockId ];
-		}
-		return null;
+	// ─── Block Catalog (Shared Picker) ────────────────────────────
+
+	function renderBlockCatalog( filterGroup ) {
+		blockCatalog.innerHTML = '';
+
+		Object.keys( BLOCK_GROUPS ).forEach( function ( groupId ) {
+			var group = BLOCK_GROUPS[ groupId ];
+			if ( filterGroup && filterGroup !== 'all' && filterGroup !== groupId ) return;
+
+			var groupEl = document.createElement( 'div' );
+			groupEl.className = 'block-catalog-group';
+			groupEl.innerHTML = '<h5 class="block-catalog-group-label">' + esc( group.label ) + '</h5>';
+
+			var grid = document.createElement( 'div' );
+			grid.className = 'block-catalog-grid';
+
+			Object.keys( group.blocks ).forEach( function ( blockId ) {
+				var block = group.blocks[ blockId ];
+				var btn = document.createElement( 'button' );
+				btn.type = 'button';
+				btn.className = 'block-catalog-item';
+				btn.dataset.blockId = blockId;
+				btn.innerHTML =
+					'<strong>' + esc( block.label ) + '</strong>' +
+					'<span>' + esc( block.description ) + '</span>';
+				btn.addEventListener( 'click', function () {
+					addBlockToPage( blockId, block );
+					updatePreview();
+				} );
+				grid.appendChild( btn );
+			} );
+
+			groupEl.appendChild( grid );
+			blockCatalog.appendChild( groupEl );
+		} );
+	}
+
+	function renderGroupTabs() {
+		Object.keys( BLOCK_GROUPS ).forEach( function ( groupId ) {
+			var group = BLOCK_GROUPS[ groupId ];
+			var btn = document.createElement( 'button' );
+			btn.type = 'button';
+			btn.className = 'block-group-tab';
+			btn.dataset.group = groupId;
+			btn.textContent = group.label;
+			groupTabs.appendChild( btn );
+		} );
+
+		groupTabs.addEventListener( 'click', function ( e ) {
+			var tab = e.target.closest( '.block-group-tab' );
+			if ( ! tab ) return;
+			groupTabs.querySelectorAll( '.block-group-tab' ).forEach( function ( t ) { t.classList.remove( 'active' ); } );
+			tab.classList.add( 'active' );
+			renderBlockCatalog( tab.dataset.group );
+		} );
+	}
+
+	// Toggle picker visibility.
+	if ( addBlockToggle ) {
+		addBlockToggle.addEventListener( 'click', function () {
+			pickerOpen = ! pickerOpen;
+			blockPicker.style.display = pickerOpen ? '' : 'none';
+			addBlockToggle.textContent = pickerOpen ? '− Close' : '+ Add Block';
+		} );
 	}
 
 	// ─── Render Blocks for Active Page ────────────────────────────
 
-	function renderBlocks( order, allBlocks ) {
+	function renderBlocks( order ) {
+		var allBlocks = getAllBlocks();
 		sortableList.innerHTML = '';
 
 		order.forEach( function ( blockId ) {
-			// Resolve from active page blocks OR global pool.
-			var block = ( allBlocks && allBlocks[ blockId ] ) || resolveBlock( blockId );
+			var block = allBlocks[ blockId ];
 			if ( ! block ) return;
-
-			var li = document.createElement( 'li' );
-			li.className = 'seo-sortable-item';
-			li.dataset.block = blockId;
-			li.innerHTML =
-				'<span class="seo-sortable-handle" aria-label="Drag to reorder">⋮⋮</span>' +
-				'<div class="seo-sortable-content">' +
-					'<strong class="seo-sortable-label">' + esc( block.label ) + '</strong>' +
-					'<span class="seo-sortable-desc">' + esc( block.description ) + '</span>' +
-				'</div>' +
-				'<button type="button" class="seo-sortable-remove" aria-label="Remove block">' +
-					'<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
-				'</button>';
-
-			sortableList.appendChild( li );
+			addBlockToPage( blockId, block, true );
 		} );
 
 		initSortable();
+		updateTabBadges();
+	}
+
+	function addBlockToPage( blockId, block, skipAnimation ) {
+		var li = document.createElement( 'li' );
+		li.className = 'seo-sortable-item';
+		li.dataset.block = blockId;
+		li.innerHTML =
+			'<span class="seo-sortable-handle" aria-label="Drag to reorder">⠿</span>' +
+			'<div class="seo-sortable-content">' +
+				'<strong class="seo-sortable-label">' + esc( block.label ) + '</strong>' +
+				'<span class="seo-sortable-desc">' + esc( block.description ) + '</span>' +
+			'</div>' +
+			'<button type="button" class="seo-sortable-remove" aria-label="Remove block">' +
+				'<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+			'</button>';
+
+		if ( ! skipAnimation ) {
+			li.style.opacity = '0';
+			li.style.transform = 'translateY(-10px)';
+		}
+
+		sortableList.appendChild( li );
+
+		if ( ! skipAnimation ) {
+			requestAnimationFrame( function () {
+				li.style.transition = 'opacity 0.2s, transform 0.2s';
+				li.style.opacity = '1';
+				li.style.transform = '';
+			} );
+		}
+
 		updateTabBadges();
 	}
 
@@ -146,157 +222,6 @@
 			updateTabBadges();
 		}, 200 );
 	} );
-
-	// ─── Block Picker ─────────────────────────────────────────────
-
-	function openPicker() {
-		if ( ! pickerOverlay ) return;
-		buildPickerContent( '' );
-		pickerOverlay.style.display = 'flex';
-		if ( pickerSearch ) {
-			pickerSearch.value = '';
-			pickerSearch.focus();
-		}
-	}
-
-	function closePicker() {
-		if ( pickerOverlay ) pickerOverlay.style.display = 'none';
-	}
-
-	function buildPickerContent( filter ) {
-		if ( ! pickerBody ) return;
-		pickerBody.innerHTML = '';
-
-		var currentIds = getBlockOrder();
-		var filterLower = ( filter || '' ).toLowerCase();
-		var hasResults = false;
-
-		for ( var pageSlug in ALL_BLOCKS ) {
-			var group = ALL_BLOCKS[ pageSlug ];
-			var blocks = group.blocks || {};
-			var groupHtml = '';
-			var visibleCount = 0;
-
-			for ( var blockId in blocks ) {
-				var block = blocks[ blockId ];
-				var alreadyAdded = currentIds.indexOf( blockId ) !== -1;
-
-				// Filter by search.
-				if ( filterLower ) {
-					var matchLabel = ( block.label || '' ).toLowerCase().indexOf( filterLower ) !== -1;
-					var matchDesc  = ( block.description || '' ).toLowerCase().indexOf( filterLower ) !== -1;
-					if ( ! matchLabel && ! matchDesc ) continue;
-				}
-
-				visibleCount++;
-				hasResults = true;
-
-				groupHtml +=
-					'<div class="picker-block-item' + ( alreadyAdded ? ' picker-block-added' : '' ) + '" data-block-id="' + esc( blockId ) + '">' +
-						'<div class="picker-block-info">' +
-							'<strong>' + esc( block.label ) + '</strong>' +
-							'<span class="picker-block-desc">' + esc( block.description ) + '</span>' +
-						'</div>' +
-						( alreadyAdded
-							? '<span class="picker-block-badge">Added</span>'
-							: '<button type="button" class="picker-add-btn seo-btn-secondary">+ Add</button>'
-						) +
-					'</div>';
-			}
-
-			if ( visibleCount > 0 ) {
-				var section = document.createElement( 'div' );
-				section.className = 'picker-group';
-				section.innerHTML =
-					'<h4 class="picker-group-label">' + esc( group.label ) + ' <span class="picker-group-count">' + visibleCount + '</span></h4>' +
-					groupHtml;
-				pickerBody.appendChild( section );
-			}
-		}
-
-		if ( ! hasResults ) {
-			pickerBody.innerHTML = '<p class="picker-empty">No blocks found.</p>';
-		}
-	}
-
-	// Picker event: add block.
-	if ( pickerBody ) {
-		pickerBody.addEventListener( 'click', function ( e ) {
-			var btn = e.target.closest( '.picker-add-btn' );
-			if ( ! btn ) return;
-
-			var item = btn.closest( '.picker-block-item' );
-			if ( ! item ) return;
-
-			var blockId = item.dataset.blockId;
-			if ( ! blockId ) return;
-
-			// Add to sortable list.
-			addBlockToList( blockId );
-
-			// Update this item in the picker to show "Added".
-			item.classList.add( 'picker-block-added' );
-			btn.replaceWith( createBadge( 'Added' ) );
-		} );
-	}
-
-	function createBadge( text ) {
-		var span = document.createElement( 'span' );
-		span.className = 'picker-block-badge';
-		span.textContent = text;
-		return span;
-	}
-
-	function addBlockToList( blockId ) {
-		var block = resolveBlock( blockId );
-		if ( ! block ) return;
-
-		var li = document.createElement( 'li' );
-		li.className = 'seo-sortable-item seo-sortable-item--new';
-		li.dataset.block = blockId;
-		li.innerHTML =
-			'<span class="seo-sortable-handle" aria-label="Drag to reorder">⋮⋮</span>' +
-			'<div class="seo-sortable-content">' +
-				'<strong class="seo-sortable-label">' + esc( block.label ) + '</strong>' +
-				'<span class="seo-sortable-desc">' + esc( block.description ) + '</span>' +
-			'</div>' +
-			'<button type="button" class="seo-sortable-remove" aria-label="Remove block">' +
-				'<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
-			'</button>';
-
-		sortableList.appendChild( li );
-
-		// Brief highlight animation.
-		requestAnimationFrame( function () {
-			li.classList.remove( 'seo-sortable-item--new' );
-		} );
-
-		updatePreview();
-		updateTabBadges();
-	}
-
-	// Picker search.
-	if ( pickerSearch ) {
-		pickerSearch.addEventListener( 'input', function () {
-			buildPickerContent( pickerSearch.value );
-		} );
-	}
-
-	// Picker open/close.
-	if ( addBlockBtn ) {
-		addBlockBtn.addEventListener( 'click', openPicker );
-	}
-	if ( pickerCloseBtn ) {
-		pickerCloseBtn.addEventListener( 'click', closePicker );
-	}
-	if ( pickerOverlay ) {
-		pickerOverlay.addEventListener( 'click', function ( e ) {
-			if ( e.target === pickerOverlay ) closePicker();
-		} );
-		document.addEventListener( 'keydown', function ( e ) {
-			if ( e.key === 'Escape' && pickerOverlay.style.display !== 'none' ) closePicker();
-		} );
-	}
 
 	// ─── Preview ──────────────────────────────────────────────────
 
@@ -370,8 +295,15 @@
 			outputSlugInput.value = pd.outputSlug || '';
 		}
 
-		// Render blocks — pass page blocks + resolve cross-page from global pool.
-		renderBlocks( pd.currentOrder || [], pd.blocks || {} );
+		// Render blocks.
+		renderBlocks( pd.currentOrder || [] );
+
+		// Close picker on tab switch.
+		if ( pickerOpen ) {
+			pickerOpen = false;
+			blockPicker.style.display = 'none';
+			if ( addBlockToggle ) addBlockToggle.textContent = '+ Add Block';
+		}
 
 		// Update preview.
 		updatePreview();
@@ -386,7 +318,6 @@
 	// ─── Tab Badges ───────────────────────────────────────────────
 
 	function updateTabBadges() {
-		// Update active tab's badge with current sortable count.
 		document.querySelectorAll( '.page-builder-tab' ).forEach( function ( tab ) {
 			if ( tab.dataset.page === activePage ) {
 				var badge = tab.querySelector( '.tab-block-count' );
@@ -411,7 +342,6 @@
 			var json = await res.json();
 			if ( json.success ) {
 				showStatus( saveStatus, '✓ Order saved', 'success' );
-				// Update local state.
 				if ( PAGES[ activePage ] ) PAGES[ activePage ].currentOrder = order;
 			} else {
 				showStatus( saveStatus, '✕ ' + ( json.data?.message || 'Failed' ), 'error' );
@@ -438,7 +368,7 @@
 				showStatus( saveStatus, '✓ Reset to defaults', 'success' );
 				var newOrder = json.data.blockOrder || [];
 				if ( PAGES[ activePage ] ) PAGES[ activePage ].currentOrder = newOrder;
-				renderBlocks( newOrder, pageData().blocks || {} );
+				renderBlocks( newOrder );
 				updatePreview();
 			} else {
 				showStatus( saveStatus, '✕ ' + ( json.data?.message || 'Failed' ), 'error' );
@@ -487,7 +417,6 @@
 			var json = await res.json();
 			if ( json.success ) {
 				showStatus( saveStatus, '✓ ' + json.data.message, 'success' );
-				// Update local state.
 				if ( PAGES[ activePage ] ) {
 					PAGES[ activePage ].currentOrder = order;
 					PAGES[ activePage ].outputSlug = slug;
@@ -527,6 +456,8 @@
 	}
 
 	// ─── Init ─────────────────────────────────────────────────────
+	renderGroupTabs();
+	renderBlockCatalog( 'all' );
 	initSortable();
 	updatePreview();
 
