@@ -351,9 +351,12 @@ return [
 					'label'       => __( 'Metal Selector', 'seo-generator' ),
 					'description' => __( 'Choose ring metal type', 'seo-generator' ),
 					'import_path' => '@/widgets/engagement-rings/metals-selector',
-					'export_name' => 'MetalsSelector',
-					'import_type' => 'default',
-					'props'       => '',
+					'export_name'  => 'MetalsSelector',
+					'import_type'  => 'default',
+					'data_imports' => [
+						[ 'name' => 'METALS', 'path' => '@/widgets/engagement-rings/metals-selector/metals' ],
+					],
+					'props'        => ' metals={METALS}',
 				],
 				'simple_buying' => [
 					'label'       => __( 'Simple Buying Guide', 'seo-generator' ),
