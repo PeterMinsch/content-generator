@@ -416,10 +416,14 @@
 			var res = await fetch( AJAX_URL, { method: 'POST', body: fd } );
 			var json = await res.json();
 			if ( json.success ) {
-				showStatus( saveStatus, '✓ ' + json.data.message, 'success' );
 				if ( PAGES[ activePage ] ) {
 					PAGES[ activePage ].currentOrder = order;
 					PAGES[ activePage ].outputSlug = slug;
+				}
+				if ( json.data.build_status === 'started' ) {
+					showStatus( saveStatus, '✓ Published! Building & restarting — may take a few minutes.', 'success' );
+				} else {
+					showStatus( saveStatus, '✓ Published! Run npm run build on the server to go live.', 'success' );
 				}
 			} else {
 				showStatus( saveStatus, '✕ ' + ( json.data?.message || 'Publish failed' ), 'error' );

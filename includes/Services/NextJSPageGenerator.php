@@ -125,11 +125,26 @@ class NextJSPageGenerator {
 				continue;
 			}
 
-			$block = $all_blocks[ $block_id ];
+			$block       = $all_blocks[ $block_id ];
+			$import_type = $block['import_type'] ?? 'named';
 
-			$import_line = "import { {$block['export_name']} } from '{$block['import_path']}';";
+			if ( 'default' === $import_type ) {
+				$import_line = "import {$block['export_name']} from '{$block['import_path']}';";
+			} else {
+				$import_line = "import { {$block['export_name']} } from '{$block['import_path']}';";
+			}
 			if ( ! in_array( $import_line, $imports, true ) ) {
 				$imports[] = $import_line;
+			}
+
+			// Data dependency imports (e.g. category data for widgets).
+			if ( ! empty( $block['data_imports'] ) ) {
+				foreach ( $block['data_imports'] as $data_import ) {
+					$data_line = "import { {$data_import['name']} } from '{$data_import['path']}';";
+					if ( ! in_array( $data_line, $imports, true ) ) {
+						$imports[] = $data_line;
+					}
+				}
 			}
 
 			$props        = $block['props'] ?? '';
@@ -146,7 +161,11 @@ class NextJSPageGenerator {
 			$wrapper_close = '</>';
 		}
 
-		$content = $imports_str . "\n";
+		$content = '';
+		if ( ! empty( $page['use_client'] ) ) {
+			$content .= "'use client';\n\n";
+		}
+		$content .= $imports_str . "\n";
 
 		if ( $metadata ) {
 			$meta_title = addslashes( $metadata['title'] ?? '' );
@@ -230,10 +249,21 @@ class NextJSPageGenerator {
 		$this->saveSlug( $page_slug, $output_slug );
 		update_option( "seo_nextjs_block_order_{$page_slug}", $block_order );
 
+		// Attempt automatic build + PM2 restart.
+		$build_status = 'manual';
+		if ( function_exists( 'exec' ) ) {
+			$escaped_path = escapeshellarg( rtrim( $project_path, '/\\' ) );
+			exec(
+				"cd {$escaped_path} && npm run build >> /tmp/nextjs-build.log 2>&1 && pm2 restart bravo-jewelry >> /tmp/nextjs-build.log 2>&1 &"
+			);
+			$build_status = 'started';
+		}
+
 		return [
-			'success' => true,
-			'message' => "Published to /{$output_slug} successfully!",
-			'path'    => $file_path,
+			'success'      => true,
+			'message'      => "Published to /{$output_slug} successfully!",
+			'path'         => $file_path,
+			'build_status' => $build_status,
 		];
 	}
 }
