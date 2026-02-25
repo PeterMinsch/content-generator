@@ -4,6 +4,7 @@
  *
  * Tabbed layout: one tab per page template (Homepage, About Us).
  * Each tab shows sortable blocks + output slug + device preview.
+ * "Add Block" picker allows adding blocks from any page.
  *
  * @package SEOGenerator
  */
@@ -95,16 +96,22 @@ $first_slug   = array_key_first( $pages );
 
 				<!-- Left Pane: Sortable Blocks -->
 				<div class="block-ordering-pane">
+					<div class="block-pane-toolbar" style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+						<button type="button" id="add-block-btn" class="seo-btn-secondary" style="font-size: 13px; padding: 6px 14px;">
+							+ <?php esc_html_e( 'Add Block', 'seo-generator' ); ?>
+						</button>
+						<span class="text-muted" style="font-size: 12px;"><?php esc_html_e( 'Add widgets from any page', 'seo-generator' ); ?></span>
+					</div>
 					<ul id="sortable-blocks" class="seo-sortable-list">
 						<?php
 						// Render blocks for the first (active) page.
-						$active_blocks = $first_page['blocks'] ?? [];
+						$all_blocks    = $generator->getAllBlocks();
 						$saved_order   = get_option( "seo_nextjs_block_order_{$first_slug}", null );
 						$active_order  = is_array( $saved_order ) ? $saved_order : ( $first_page['default_order'] ?? [] );
 
 						foreach ( $active_order as $block_id ) :
-							if ( ! isset( $active_blocks[ $block_id ] ) ) continue;
-							$block = $active_blocks[ $block_id ];
+							if ( ! isset( $all_blocks[ $block_id ] ) ) continue;
+							$block = $all_blocks[ $block_id ];
 						?>
 							<li class="seo-sortable-item" data-block="<?php echo esc_attr( $block_id ); ?>">
 								<span class="seo-sortable-handle" aria-label="<?php esc_attr_e( 'Drag to reorder', 'seo-generator' ); ?>">⋮⋮</span>
@@ -198,4 +205,20 @@ $first_slug   = array_key_first( $pages );
 		</div>
 	</div>
 
+</div>
+
+<!-- Add Block Picker Modal -->
+<div id="block-picker-overlay" class="block-picker-overlay" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="block-picker-title">
+	<div class="block-picker-modal">
+		<div class="block-picker-header">
+			<h3 id="block-picker-title"><?php esc_html_e( 'Add Block', 'seo-generator' ); ?></h3>
+			<button type="button" id="block-picker-close" class="block-picker-close" aria-label="<?php esc_attr_e( 'Close', 'seo-generator' ); ?>">&times;</button>
+		</div>
+		<div class="block-picker-search" style="padding: 0 20px 12px;">
+			<input type="text" id="block-picker-search" class="regular-text" style="width:100%;" placeholder="<?php esc_attr_e( 'Search blocks…', 'seo-generator' ); ?>">
+		</div>
+		<div class="block-picker-body" id="block-picker-body">
+			<!-- Populated by JS -->
+		</div>
+	</div>
 </div>

@@ -6,6 +6,8 @@
  * Each page tab (Homepage, About) writes to its own slug — never
  * overwrites the original page.tsx or about/page.tsx.
  *
+ * Blocks from ANY page can be used on ANY tab (cross-page block sharing).
+ *
  * @package SEOGenerator
  */
 
@@ -44,25 +46,48 @@ class NextJSPageGenerator {
 		return $page ? ( $page['default_order'] ?? [] ) : [];
 	}
 
-	// ─── Slug Management ──────────────────────────────────────────
+	/**
+	 * Get ALL blocks from ALL pages as a flat array.
+	 * Used to resolve blocks when cross-page sharing is enabled.
+	 *
+	 * @return array [ block_id => block_definition, ... ]
+	 */
+	public function getAllBlocks(): array {
+		$all = [];
+		foreach ( $this->getPages() as $page ) {
+			foreach ( ( $page['blocks'] ?? [] ) as $id => $block ) {
+				$all[ $id ] = $block;
+			}
+		}
+		return $all;
+	}
 
 	/**
-	 * Get the saved output slug for a page tab.
+	 * Get all blocks grouped by their source page (for the picker UI).
+	 *
+	 * @return array [ page_slug => [ 'label' => ..., 'blocks' => [...] ], ... ]
 	 */
+	public function getBlocksByPage(): array {
+		$grouped = [];
+		foreach ( $this->getPages() as $slug => $page ) {
+			$grouped[ $slug ] = [
+				'label'  => $page['label'],
+				'blocks' => $page['blocks'] ?? [],
+			];
+		}
+		return $grouped;
+	}
+
+	// ─── Slug Management ──────────────────────────────────────────
+
 	public function getSavedSlug( string $page_slug ): string {
 		return get_option( "seo_nextjs_output_slug_{$page_slug}", '' );
 	}
 
-	/**
-	 * Save the output slug for a page tab.
-	 */
 	public function saveSlug( string $page_slug, string $output_slug ): void {
 		update_option( "seo_nextjs_output_slug_{$page_slug}", sanitize_title( $output_slug ) );
 	}
 
-	/**
-	 * Routes that must never be overwritten.
-	 */
 	public function getReservedSlugs(): array {
 		return [
 			'', 'about', 'contacts', 'custom-design', 'diamonds',
@@ -80,9 +105,6 @@ class NextJSPageGenerator {
 		return get_option( 'seo_nextjs_project_path', '' );
 	}
 
-	/**
-	 * Build the target file path for a given output slug.
-	 */
 	public function getOutputFilePath( string $output_slug ): string {
 		$project_path = rtrim( $this->getProjectPath(), '/\\' );
 		return $project_path . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'app'
@@ -92,11 +114,13 @@ class NextJSPageGenerator {
 	// ─── Code Generation ──────────────────────────────────────────
 
 	/**
-	 * Generate page.tsx content for a page tab + block order.
+	 * Generate page.tsx content.
+	 *
+	 * Resolves blocks from the GLOBAL pool so cross-page blocks work.
 	 */
 	public function generatePageContent( string $page_slug, array $block_order, string $output_slug ): string {
-		$page   = $this->getPageConfig( $page_slug );
-		$blocks = $this->getBlockDefinitions( $page_slug );
+		$page      = $this->getPageConfig( $page_slug );
+		$allBlocks = $this->getAllBlocks();
 
 		if ( ! $page ) {
 			return '';
@@ -109,17 +133,17 @@ class NextJSPageGenerator {
 		$imports    = [];
 		$components = [];
 
-		// Metadata type import if page has metadata.
 		if ( $metadata ) {
 			$imports[] = "import type { Metadata } from 'next';";
 		}
 
 		foreach ( $block_order as $block_id ) {
-			if ( ! isset( $blocks[ $block_id ] ) ) {
+			// Resolve from global pool — allows cross-page blocks.
+			if ( ! isset( $allBlocks[ $block_id ] ) ) {
 				continue;
 			}
 
-			$block = $blocks[ $block_id ];
+			$block = $allBlocks[ $block_id ];
 
 			$import_line = "import { {$block['export_name']} } from '{$block['import_path']}';";
 			if ( ! in_array( $import_line, $imports, true ) ) {
@@ -133,16 +157,13 @@ class NextJSPageGenerator {
 		$imports_str    = implode( "\n", $imports );
 		$components_str = implode( "\n", $components );
 
-		// Function name from output slug.
 		$func_name = str_replace( ' ', '', ucwords( str_replace( '-', ' ', $output_slug ) ) );
 
-		// Use Fragment or wrapper div.
 		if ( empty( $wrapper_open ) ) {
 			$wrapper_open  = '<>';
 			$wrapper_close = '</>';
 		}
 
-		// Build file content.
 		$content = $imports_str . "\n";
 
 		if ( $metadata ) {
@@ -167,9 +188,6 @@ class NextJSPageGenerator {
 
 	// ─── Publish ──────────────────────────────────────────────────
 
-	/**
-	 * Publish a page — creates directory + writes page.tsx at the output slug.
-	 */
 	public function publish( string $page_slug, array $block_order, string $output_slug ): array {
 		$project_path = $this->getProjectPath();
 
@@ -204,7 +222,6 @@ class NextJSPageGenerator {
 		$file_path = $this->getOutputFilePath( $output_slug );
 		$dir       = dirname( $file_path );
 
-		// Create directory.
 		if ( ! is_dir( $dir ) ) {
 			if ( ! mkdir( $dir, 0755, true ) ) {
 				return [
@@ -214,7 +231,6 @@ class NextJSPageGenerator {
 			}
 		}
 
-		// Backup existing file.
 		if ( file_exists( $file_path ) ) {
 			copy( $file_path, $file_path . '.backup-' . date( 'Y-m-d-His' ) );
 		}
@@ -229,7 +245,6 @@ class NextJSPageGenerator {
 			];
 		}
 
-		// Persist the slug + block order.
 		$this->saveSlug( $page_slug, $output_slug );
 		update_option( "seo_nextjs_block_order_{$page_slug}", $block_order );
 

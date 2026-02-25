@@ -115,9 +115,27 @@ class PageBuilderPage {
 			];
 		}
 
+		// Build all-blocks-by-page for the "Add Block" picker.
+		$all_blocks_grouped = [];
+		foreach ( $this->generator->getBlocksByPage() as $page_slug => $group ) {
+			$blocks_js = [];
+			foreach ( $group['blocks'] as $id => $block ) {
+				$blocks_js[ $id ] = [
+					'id'          => $id,
+					'label'       => $block['label'],
+					'description' => $block['description'],
+				];
+			}
+			$all_blocks_grouped[ $page_slug ] = [
+				'label'  => $group['label'],
+				'blocks' => $blocks_js,
+			];
+		}
+
 		wp_localize_script( 'seo-page-builder', 'nextjsPageBuilder', [
-			'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
-			'nonce'         => wp_create_nonce( 'nextjs-page-builder' ),
+			'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+			'nonce'            => wp_create_nonce( 'nextjs-page-builder' ),
+			'allBlocksGrouped' => $all_blocks_grouped,
 			'previewBase'   => get_option( 'seo_nextjs_preview_url', 'http://contentgeneratorwpplugin.local:3000' ),
 			'pages'         => $pages_data,
 			'projectPath'   => $this->generator->getProjectPath(),
@@ -144,7 +162,8 @@ class PageBuilderPage {
 			wp_send_json_error( [ 'message' => 'Unknown page.' ] );
 		}
 
-		$valid_ids = array_keys( $this->generator->getBlockDefinitions( $page_slug ) );
+		// Accept blocks from ANY page (cross-page sharing).
+		$valid_ids = array_keys( $this->generator->getAllBlocks() );
 		$order     = array_values( array_intersect( (array) $order, $valid_ids ) );
 
 		update_option( "seo_nextjs_block_order_{$page_slug}", $order );
@@ -173,7 +192,8 @@ class PageBuilderPage {
 			wp_send_json_error( [ 'message' => 'Unknown page.' ] );
 		}
 
-		$valid_ids = array_keys( $this->generator->getBlockDefinitions( $page_slug ) );
+		// Accept blocks from ANY page (cross-page sharing).
+		$valid_ids = array_keys( $this->generator->getAllBlocks() );
 		$order     = array_values( array_intersect( (array) $order, $valid_ids ) );
 
 		$result = $this->generator->publish( $page_slug, $order, $output_slug );

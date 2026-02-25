@@ -3,6 +3,7 @@
  *
  * Tabbed interface — one tab per page template (Homepage, About Us).
  * Each tab has its own block list, sortable order, output slug, and preview.
+ * "Add Block" picker lets you add blocks from ANY page template.
  * Publishes to a new URL slug — never overwrites existing pages.
  *
  * @package SEOGenerator
@@ -12,12 +13,13 @@
 	'use strict';
 
 	// ─── Config ───────────────────────────────────────────────────
-	const cfg           = window.nextjsPageBuilder || {};
-	const AJAX_URL      = cfg.ajaxUrl || '/wp-admin/admin-ajax.php';
-	const NONCE         = cfg.nonce || '';
-	const PREVIEW_BASE  = cfg.previewBase || 'http://localhost:3000';
-	const PAGES         = cfg.pages || {};
-	const RESERVED      = cfg.reservedSlugs || [];
+	const cfg              = window.nextjsPageBuilder || {};
+	const AJAX_URL         = cfg.ajaxUrl || '/wp-admin/admin-ajax.php';
+	const NONCE            = cfg.nonce || '';
+	const PREVIEW_BASE     = cfg.previewBase || 'http://localhost:3000';
+	const PAGES            = cfg.pages || {};
+	const ALL_BLOCKS       = cfg.allBlocksGrouped || {};
+	const RESERVED         = cfg.reservedSlugs || [];
 
 	// ─── State ────────────────────────────────────────────────────
 	let activePage    = Object.keys( PAGES )[0] || 'homepage';
@@ -30,6 +32,13 @@
 	const cardTitle        = document.getElementById( 'card-title' );
 	const outputSlugInput  = document.getElementById( 'output-slug' );
 	const saveStatus       = document.getElementById( 'save-status' );
+
+	// Picker DOM
+	const pickerOverlay    = document.getElementById( 'block-picker-overlay' );
+	const pickerBody       = document.getElementById( 'block-picker-body' );
+	const pickerSearch     = document.getElementById( 'block-picker-search' );
+	const pickerCloseBtn   = document.getElementById( 'block-picker-close' );
+	const addBlockBtn      = document.getElementById( 'add-block-btn' );
 
 	if ( ! sortableList ) return;
 
@@ -57,13 +66,31 @@
 		return PAGES[ activePage ] || {};
 	}
 
+	/**
+	 * Resolve a block definition from the global pool.
+	 * Checks the active page's blocks first, then all pages.
+	 */
+	function resolveBlock( blockId ) {
+		// Check active page first.
+		var pd = pageData();
+		if ( pd.blocks && pd.blocks[ blockId ] ) return pd.blocks[ blockId ];
+
+		// Check all pages.
+		for ( var pageSlug in ALL_BLOCKS ) {
+			var group = ALL_BLOCKS[ pageSlug ];
+			if ( group.blocks && group.blocks[ blockId ] ) return group.blocks[ blockId ];
+		}
+		return null;
+	}
+
 	// ─── Render Blocks for Active Page ────────────────────────────
 
 	function renderBlocks( order, allBlocks ) {
 		sortableList.innerHTML = '';
 
 		order.forEach( function ( blockId ) {
-			var block = allBlocks[ blockId ];
+			// Resolve from active page blocks OR global pool.
+			var block = ( allBlocks && allBlocks[ blockId ] ) || resolveBlock( blockId );
 			if ( ! block ) return;
 
 			var li = document.createElement( 'li' );
@@ -119,6 +146,157 @@
 			updateTabBadges();
 		}, 200 );
 	} );
+
+	// ─── Block Picker ─────────────────────────────────────────────
+
+	function openPicker() {
+		if ( ! pickerOverlay ) return;
+		buildPickerContent( '' );
+		pickerOverlay.style.display = 'flex';
+		if ( pickerSearch ) {
+			pickerSearch.value = '';
+			pickerSearch.focus();
+		}
+	}
+
+	function closePicker() {
+		if ( pickerOverlay ) pickerOverlay.style.display = 'none';
+	}
+
+	function buildPickerContent( filter ) {
+		if ( ! pickerBody ) return;
+		pickerBody.innerHTML = '';
+
+		var currentIds = getBlockOrder();
+		var filterLower = ( filter || '' ).toLowerCase();
+		var hasResults = false;
+
+		for ( var pageSlug in ALL_BLOCKS ) {
+			var group = ALL_BLOCKS[ pageSlug ];
+			var blocks = group.blocks || {};
+			var groupHtml = '';
+			var visibleCount = 0;
+
+			for ( var blockId in blocks ) {
+				var block = blocks[ blockId ];
+				var alreadyAdded = currentIds.indexOf( blockId ) !== -1;
+
+				// Filter by search.
+				if ( filterLower ) {
+					var matchLabel = ( block.label || '' ).toLowerCase().indexOf( filterLower ) !== -1;
+					var matchDesc  = ( block.description || '' ).toLowerCase().indexOf( filterLower ) !== -1;
+					if ( ! matchLabel && ! matchDesc ) continue;
+				}
+
+				visibleCount++;
+				hasResults = true;
+
+				groupHtml +=
+					'<div class="picker-block-item' + ( alreadyAdded ? ' picker-block-added' : '' ) + '" data-block-id="' + esc( blockId ) + '">' +
+						'<div class="picker-block-info">' +
+							'<strong>' + esc( block.label ) + '</strong>' +
+							'<span class="picker-block-desc">' + esc( block.description ) + '</span>' +
+						'</div>' +
+						( alreadyAdded
+							? '<span class="picker-block-badge">Added</span>'
+							: '<button type="button" class="picker-add-btn seo-btn-secondary">+ Add</button>'
+						) +
+					'</div>';
+			}
+
+			if ( visibleCount > 0 ) {
+				var section = document.createElement( 'div' );
+				section.className = 'picker-group';
+				section.innerHTML =
+					'<h4 class="picker-group-label">' + esc( group.label ) + ' <span class="picker-group-count">' + visibleCount + '</span></h4>' +
+					groupHtml;
+				pickerBody.appendChild( section );
+			}
+		}
+
+		if ( ! hasResults ) {
+			pickerBody.innerHTML = '<p class="picker-empty">No blocks found.</p>';
+		}
+	}
+
+	// Picker event: add block.
+	if ( pickerBody ) {
+		pickerBody.addEventListener( 'click', function ( e ) {
+			var btn = e.target.closest( '.picker-add-btn' );
+			if ( ! btn ) return;
+
+			var item = btn.closest( '.picker-block-item' );
+			if ( ! item ) return;
+
+			var blockId = item.dataset.blockId;
+			if ( ! blockId ) return;
+
+			// Add to sortable list.
+			addBlockToList( blockId );
+
+			// Update this item in the picker to show "Added".
+			item.classList.add( 'picker-block-added' );
+			btn.replaceWith( createBadge( 'Added' ) );
+		} );
+	}
+
+	function createBadge( text ) {
+		var span = document.createElement( 'span' );
+		span.className = 'picker-block-badge';
+		span.textContent = text;
+		return span;
+	}
+
+	function addBlockToList( blockId ) {
+		var block = resolveBlock( blockId );
+		if ( ! block ) return;
+
+		var li = document.createElement( 'li' );
+		li.className = 'seo-sortable-item seo-sortable-item--new';
+		li.dataset.block = blockId;
+		li.innerHTML =
+			'<span class="seo-sortable-handle" aria-label="Drag to reorder">⋮⋮</span>' +
+			'<div class="seo-sortable-content">' +
+				'<strong class="seo-sortable-label">' + esc( block.label ) + '</strong>' +
+				'<span class="seo-sortable-desc">' + esc( block.description ) + '</span>' +
+			'</div>' +
+			'<button type="button" class="seo-sortable-remove" aria-label="Remove block">' +
+				'<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
+			'</button>';
+
+		sortableList.appendChild( li );
+
+		// Brief highlight animation.
+		requestAnimationFrame( function () {
+			li.classList.remove( 'seo-sortable-item--new' );
+		} );
+
+		updatePreview();
+		updateTabBadges();
+	}
+
+	// Picker search.
+	if ( pickerSearch ) {
+		pickerSearch.addEventListener( 'input', function () {
+			buildPickerContent( pickerSearch.value );
+		} );
+	}
+
+	// Picker open/close.
+	if ( addBlockBtn ) {
+		addBlockBtn.addEventListener( 'click', openPicker );
+	}
+	if ( pickerCloseBtn ) {
+		pickerCloseBtn.addEventListener( 'click', closePicker );
+	}
+	if ( pickerOverlay ) {
+		pickerOverlay.addEventListener( 'click', function ( e ) {
+			if ( e.target === pickerOverlay ) closePicker();
+		} );
+		document.addEventListener( 'keydown', function ( e ) {
+			if ( e.key === 'Escape' && pickerOverlay.style.display !== 'none' ) closePicker();
+		} );
+	}
 
 	// ─── Preview ──────────────────────────────────────────────────
 
@@ -192,7 +370,7 @@
 			outputSlugInput.value = pd.outputSlug || '';
 		}
 
-		// Render blocks.
+		// Render blocks — pass page blocks + resolve cross-page from global pool.
 		renderBlocks( pd.currentOrder || [], pd.blocks || {} );
 
 		// Update preview.
