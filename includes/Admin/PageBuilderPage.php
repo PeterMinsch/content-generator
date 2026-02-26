@@ -131,6 +131,7 @@ class PageBuilderPage {
 			'projectPath'      => $this->generator->getProjectPath(),
 			'reservedSlugs'    => $this->generator->getReservedSlugs(),
 			'dynamicSetupDone' => (bool) get_option( 'seo_nextjs_dynamic_setup_done', false ),
+			'slotSchemas'      => $this->generator->getAllSlotSchemas(),
 		] );
 	}
 

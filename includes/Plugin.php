@@ -98,6 +98,10 @@ class Plugin {
 		$page_builder = new Admin\PageBuilderPage();
 		$this->container->set( 'admin.page_builder', $page_builder );
 
+		// Register bulk publish page.
+		$bulk_publish_page = new Admin\BulkPublishPage();
+		$this->container->set( 'admin.bulk_publish', $bulk_publish_page );
+
 		// Register post list columns.
 		$post_list_columns = new Admin\PostListColumns();
 		$this->container->set( 'admin.post_list_columns', $post_list_columns );
@@ -217,6 +221,9 @@ class Plugin {
 		// Register page builder AJAX handlers.
 		$this->container->get( 'admin.page_builder' )->register();
 
+		// Register bulk publish AJAX handlers.
+		$this->container->get( 'admin.bulk_publish' )->register();
+
 		// Register post list columns.
 		$this->container->get( 'admin.post_list_columns' )->register();
 
@@ -243,6 +250,9 @@ class Plugin {
 
 		// Register generation queue cron hook.
 		add_action( 'seo_generate_queued_page', array( $this, 'processQueuedPage' ) );
+
+		// Register dynamic publish cron hook.
+		add_action( 'seo_process_dynamic_publish', array( $this, 'processDynamicPublish' ) );
 
 		// Register background image generation cron hook.
 		add_action( 'seo_generate_related_link_images', array( $this, 'generateRelatedLinkImages' ) );
@@ -373,6 +383,37 @@ class Plugin {
 
 		if ( $count > 0 ) {
 			error_log( "[SEO Generator] Cleaned up {$count} old queue jobs" );
+		}
+	}
+
+	/**
+	 * Process a queued dynamic page publish job (WordPress Cron handler).
+	 *
+	 * @param string $slug Page slug to process.
+	 * @return void
+	 */
+	public function processDynamicPublish( string $slug ): void {
+		$queue = new Services\GenerationQueue();
+		$job   = $queue->getDynamicPublishJob( $slug );
+
+		if ( ! $job || $job['status'] !== 'pending' ) {
+			return;
+		}
+
+		$queue->updateDynamicPublishStatus( $slug, 'processing' );
+
+		$settings_service = new Services\SettingsService();
+		$openai_service   = new Services\OpenAIService( $settings_service );
+		$page_generator   = new Services\NextJSPageGenerator();
+		$slot_generator   = new Services\SlotContentGenerator( $openai_service, $page_generator );
+		$bulk_service     = new Services\BulkPublishService( $slot_generator, $page_generator );
+
+		$result = $bulk_service->processQueuedJob( $job['job_data'] );
+
+		if ( $result['success'] ) {
+			$queue->updateDynamicPublishStatus( $slug, 'completed' );
+		} else {
+			$queue->updateDynamicPublishStatus( $slug, 'failed', $result['message'] );
 		}
 	}
 

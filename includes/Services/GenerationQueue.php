@@ -367,6 +367,155 @@ class GenerationQueue {
 		return $removed;
 	}
 
+	// ─── Dynamic Publish Queue ──────────────────────────────────
+
+	/**
+	 * Option key for dynamic publish queue storage.
+	 */
+	const DYNAMIC_QUEUE_OPTION = 'seo_dynamic_publish_queue';
+
+	/**
+	 * Queue a dynamic page publish job for background processing.
+	 *
+	 * @param int   $index    Queue index for scheduling offset.
+	 * @param array $job_data Job data: keyword, slug, page_template, blocks, context.
+	 * @return bool True on success.
+	 */
+	public function queueDynamicPublish( int $index, array $job_data ): bool {
+		$queue = get_option( self::DYNAMIC_QUEUE_OPTION, [] );
+
+		// Check for duplicate by slug.
+		foreach ( $queue as $item ) {
+			if ( $item['slug'] === $job_data['slug'] && $item['status'] === 'pending' ) {
+				return false;
+			}
+		}
+
+		$scheduled_time = time() + ( $index * self::RATE_LIMIT_SECONDS );
+
+		$queue_item = [
+			'slug'           => $job_data['slug'],
+			'job_data'       => $job_data,
+			'scheduled_time' => $scheduled_time,
+			'status'         => 'pending',
+			'queued_at'      => current_time( 'mysql' ),
+			'retry_count'    => 0,
+		];
+
+		$queue[] = $queue_item;
+		update_option( self::DYNAMIC_QUEUE_OPTION, $queue );
+
+		// Schedule WordPress Cron event.
+		wp_schedule_single_event( $scheduled_time, 'seo_process_dynamic_publish', [ $job_data['slug'] ] );
+
+		return true;
+	}
+
+	/**
+	 * Get dynamic publish queue items, optionally filtered by status.
+	 *
+	 * @param string|null $status Optional status filter.
+	 * @return array Array of queue items.
+	 */
+	public function getDynamicPublishQueue( ?string $status = null ): array {
+		$queue = get_option( self::DYNAMIC_QUEUE_OPTION, [] );
+
+		if ( $status ) {
+			return array_filter( $queue, function ( $item ) use ( $status ) {
+				return $item['status'] === $status;
+			} );
+		}
+
+		return $queue;
+	}
+
+	/**
+	 * Update dynamic publish queue status for a specific slug.
+	 *
+	 * @param string      $slug   Page slug.
+	 * @param string      $status New status.
+	 * @param string|null $error  Optional error message.
+	 * @return bool True if updated.
+	 */
+	public function updateDynamicPublishStatus( string $slug, string $status, ?string $error = null ): bool {
+		$queue   = get_option( self::DYNAMIC_QUEUE_OPTION, [] );
+		$updated = false;
+
+		foreach ( $queue as &$item ) {
+			if ( $item['slug'] === $slug ) {
+				$item['status']     = $status;
+				$item['updated_at'] = current_time( 'mysql' );
+
+				if ( $error ) {
+					$item['error'] = $error;
+				}
+
+				$updated = true;
+				break;
+			}
+		}
+
+		if ( $updated ) {
+			update_option( self::DYNAMIC_QUEUE_OPTION, $queue );
+		}
+
+		return $updated;
+	}
+
+	/**
+	 * Get the job data for a dynamic publish queue item by slug.
+	 *
+	 * @param string $slug Page slug.
+	 * @return array|null Job data or null if not found.
+	 */
+	public function getDynamicPublishJob( string $slug ): ?array {
+		$queue = get_option( self::DYNAMIC_QUEUE_OPTION, [] );
+
+		foreach ( $queue as $item ) {
+			if ( $item['slug'] === $slug ) {
+				return $item;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get dynamic publish queue statistics.
+	 *
+	 * @return array Stats by status.
+	 */
+	public function getDynamicPublishStats(): array {
+		$queue = get_option( self::DYNAMIC_QUEUE_OPTION, [] );
+
+		$stats = [ 'pending' => 0, 'processing' => 0, 'completed' => 0, 'failed' => 0, 'total' => count( $queue ) ];
+		foreach ( $queue as $item ) {
+			$s = $item['status'] ?? 'pending';
+			if ( isset( $stats[ $s ] ) ) {
+				$stats[ $s ]++;
+			}
+		}
+
+		return $stats;
+	}
+
+	/**
+	 * Clear the dynamic publish queue.
+	 *
+	 * @return void
+	 */
+	public function clearDynamicPublishQueue(): void {
+		$queue = get_option( self::DYNAMIC_QUEUE_OPTION, [] );
+
+		foreach ( $queue as $item ) {
+			if ( $item['status'] === 'pending' ) {
+				wp_clear_scheduled_hook( 'seo_process_dynamic_publish', [ $item['slug'] ] );
+			}
+		}
+
+		delete_option( self::DYNAMIC_QUEUE_OPTION );
+	}
+
 	/**
 	 * Clean up old completed/failed jobs from the queue.
 	 *

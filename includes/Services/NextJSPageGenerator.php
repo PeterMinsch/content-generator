@@ -61,6 +61,35 @@ class NextJSPageGenerator {
 		return $page ? ( $page['default_order'] ?? [] ) : [];
 	}
 
+	// ─── Slot Schema Accessors ───────────────────────────────────
+
+	/**
+	 * Get the content_slots definition for a single block.
+	 *
+	 * @param string $block_id Block identifier.
+	 * @return array Slot schema (empty array if none defined).
+	 */
+	public function getSlotSchema( string $block_id ): array {
+		$all = $this->getAllBlocks();
+		return $all[ $block_id ]['content_slots'] ?? [];
+	}
+
+	/**
+	 * Get slot schemas for ALL blocks that have non-empty content_slots.
+	 *
+	 * @return array { block_id => { slot_name => { type, max_length, ai_hint } } }
+	 */
+	public function getAllSlotSchemas(): array {
+		$schemas = [];
+		foreach ( $this->getAllBlocks() as $id => $block ) {
+			$slots = $block['content_slots'] ?? [];
+			if ( ! empty( $slots ) ) {
+				$schemas[ $id ] = $slots;
+			}
+		}
+		return $schemas;
+	}
+
 	// ─── Slug Management ──────────────────────────────────────────
 
 	public function getSavedSlug( string $page_slug ): string {
@@ -189,7 +218,7 @@ class NextJSPageGenerator {
 
 	// ─── Publish ──────────────────────────────────────────────────
 
-	public function publish( string $page_slug, array $block_order, string $output_slug ): array {
+	public function publish( string $page_slug, array $block_order, string $output_slug, array $slot_content = [], ?array $metadata = null ): array {
 		$project_path = $this->getProjectPath();
 
 		if ( empty( $project_path ) ) {
@@ -222,7 +251,7 @@ class NextJSPageGenerator {
 
 		// If dynamic routing is set up, just write JSON — no build needed.
 		if ( get_option( 'seo_nextjs_dynamic_setup_done', false ) ) {
-			return $this->publishDynamic( $page_slug, $block_order, $output_slug );
+			return $this->publishDynamic( $page_slug, $block_order, $output_slug, $slot_content, $metadata );
 		}
 
 		$file_path = $this->getOutputFilePath( $output_slug );
@@ -470,6 +499,7 @@ class NextJSPageGenerator {
 		$out .= "  pageTemplate: string;\n";
 		$out .= "  blocks: string[];\n";
 		$out .= "  metadata: { title: string; description: string } | null;\n";
+		$out .= "  slotContent?: Record<string, Record<string, string>> | null;\n";
 		$out .= "}\n\n";
 		$out .= "function getPublishedPages(): Record<string, PageConfig> {\n";
 		$out .= "  try {\n";
@@ -505,6 +535,7 @@ class NextJSPageGenerator {
 		$out .= "    <DynamicPage\n";
 		$out .= "      blocks={page.blocks}\n";
 		$out .= "      pageTemplate={page.pageTemplate}\n";
+		$out .= "      slotContent={page.slotContent || {}}\n";
 		$out .= "    />\n";
 		$out .= "  );\n";
 		$out .= "}\n";
@@ -521,14 +552,16 @@ class NextJSPageGenerator {
 		$out .= "interface DynamicPageProps {\n";
 		$out .= "  blocks: string[];\n";
 		$out .= "  pageTemplate: string;\n";
+		$out .= "  slotContent: Record<string, Record<string, string>>;\n";
 		$out .= "}\n\n";
-		$out .= "export default function DynamicPage({ blocks, pageTemplate }: DynamicPageProps) {\n";
+		$out .= "export default function DynamicPage({ blocks, pageTemplate, slotContent }: DynamicPageProps) {\n";
 		$out .= "  const wrapperClass = pageWrappers[pageTemplate];\n\n";
 		$out .= "  const content = blocks.map((blockId, i) => {\n";
 		$out .= "    const entry = blockRegistry[blockId];\n";
 		$out .= "    if (!entry) return null;\n";
 		$out .= "    const { Component, props } = entry;\n";
-		$out .= "    return <Component key={`\${blockId}-\${i}`} {...props} />;\n";
+		$out .= "    const slots = slotContent[blockId] || {};\n";
+		$out .= "    return <Component key={`\${blockId}-\${i}`} {...props} {...slots} />;\n";
 		$out .= "  });\n\n";
 		$out .= "  if (wrapperClass) {\n";
 		$out .= "    return <div className={wrapperClass}>{content}</div>;\n";
@@ -607,8 +640,14 @@ class NextJSPageGenerator {
 
 	/**
 	 * Publish a page by writing to published-pages.json (no build needed).
+	 *
+	 * @param string     $page_slug    Page template slug.
+	 * @param array      $block_order  Ordered block IDs.
+	 * @param string     $output_slug  URL slug for the page.
+	 * @param array      $slot_content Per-block content overrides: { block_id: { slot: value } }.
+	 * @param array|null $metadata     SEO metadata: { title, description }.
 	 */
-	private function publishDynamic( string $page_slug, array $block_order, string $output_slug ): array {
+	private function publishDynamic( string $page_slug, array $block_order, string $output_slug, array $slot_content = [], ?array $metadata = null ): array {
 		$json_path = $this->getPublishedPagesJsonPath();
 
 		// Read existing pages.
@@ -624,7 +663,8 @@ class NextJSPageGenerator {
 		$pages[ $output_slug ] = [
 			'pageTemplate' => $page_slug,
 			'blocks'       => $block_order,
-			'metadata'     => null,
+			'metadata'     => $metadata,
+			'slotContent'  => ! empty( $slot_content ) ? $slot_content : null,
 		];
 
 		// Atomic write: .tmp → rename.

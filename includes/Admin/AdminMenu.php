@@ -178,6 +178,16 @@ class AdminMenu {
 			array( $this, 'renderPageBuilderPage' )
 		);
 
+		// Add "Bulk Publish" submenu.
+		add_submenu_page(
+			self::MENU_SLUG,
+			__( 'Bulk Publish', 'seo-generator' ),
+			__( 'Bulk Publish', 'seo-generator' ),
+			'edit_posts',
+			'seo-bulk-publish',
+			array( $this, 'renderBulkPublishPage' )
+		);
+
 		// Add "Analytics" submenu (placeholder).
 		add_submenu_page(
 			self::MENU_SLUG,
@@ -288,5 +298,15 @@ class AdminMenu {
 	 */
 	public function renderGeoTitlesPage(): void {
 		$this->geo_titles_page->render();
+	}
+
+	/**
+	 * Render the Bulk Publish page.
+	 *
+	 * @return void
+	 */
+	public function renderBulkPublishPage(): void {
+		$bulk_publish = new BulkPublishPage();
+		$bulk_publish->render();
 	}
 }
