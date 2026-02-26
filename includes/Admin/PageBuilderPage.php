@@ -33,6 +33,7 @@ class PageBuilderPage {
 		add_action( 'wp_ajax_nextjs_publish_page', [ $this, 'ajaxPublishPage' ] );
 		add_action( 'wp_ajax_nextjs_reset_order', [ $this, 'ajaxResetOrder' ] );
 		add_action( 'wp_ajax_nextjs_save_settings', [ $this, 'ajaxSaveSettings' ] );
+		add_action( 'wp_ajax_nextjs_setup_dynamic', [ $this, 'ajaxSetupDynamic' ] );
 	}
 
 	/**
@@ -122,13 +123,14 @@ class PageBuilderPage {
 		}
 
 		wp_localize_script( 'seo-page-builder', 'nextjsPageBuilder', [
-			'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
-			'nonce'         => wp_create_nonce( 'nextjs-page-builder' ),
-			'previewBase'   => get_option( 'seo_nextjs_preview_url', 'http://contentgeneratorwpplugin.local:3000' ),
-			'blockGroups'   => $groups_for_js,
-			'pages'         => $pages_data,
-			'projectPath'   => $this->generator->getProjectPath(),
-			'reservedSlugs' => $this->generator->getReservedSlugs(),
+			'ajaxUrl'          => admin_url( 'admin-ajax.php' ),
+			'nonce'            => wp_create_nonce( 'nextjs-page-builder' ),
+			'previewBase'      => get_option( 'seo_nextjs_preview_url', 'http://contentgeneratorwpplugin.local:3000' ),
+			'blockGroups'      => $groups_for_js,
+			'pages'            => $pages_data,
+			'projectPath'      => $this->generator->getProjectPath(),
+			'reservedSlugs'    => $this->generator->getReservedSlugs(),
+			'dynamicSetupDone' => (bool) get_option( 'seo_nextjs_dynamic_setup_done', false ),
 		] );
 	}
 
@@ -218,6 +220,25 @@ class PageBuilderPage {
 			'message'    => 'Order reset to defaults.',
 			'blockOrder' => $defaults,
 		] );
+	}
+
+	/**
+	 * Set up the dynamic [slug] catch-all route.
+	 */
+	public function ajaxSetupDynamic(): void {
+		check_ajax_referer( 'nextjs-page-builder', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
+		}
+
+		$result = $this->generator->setupDynamicRoute();
+
+		if ( $result['success'] ) {
+			wp_send_json_success( $result );
+		} else {
+			wp_send_json_error( $result );
+		}
 	}
 
 	/**

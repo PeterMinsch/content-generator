@@ -220,6 +220,11 @@ class NextJSPageGenerator {
 			];
 		}
 
+		// If dynamic routing is set up, just write JSON — no build needed.
+		if ( get_option( 'seo_nextjs_dynamic_setup_done', false ) ) {
+			return $this->publishDynamic( $page_slug, $block_order, $output_slug );
+		}
+
 		$file_path = $this->getOutputFilePath( $output_slug );
 		$dir       = dirname( $file_path );
 
@@ -264,6 +269,398 @@ class NextJSPageGenerator {
 			'message'      => "Published to /{$output_slug} successfully!",
 			'path'         => $file_path,
 			'build_status' => $build_status,
+		];
+	}
+
+	// ─── Dynamic Route Methods ───────────────────────────────────
+
+	/**
+	 * Path to the published-pages.json file in the Next.js project.
+	 */
+	public function getPublishedPagesJsonPath(): string {
+		$project_path = rtrim( $this->getProjectPath(), '/\\' );
+		return $project_path . '/published-pages.json';
+	}
+
+	/**
+	 * Convert a JSX props string into a JS object literal.
+	 *
+	 * " page='default'"              → { page: 'default' }
+	 * " categories={ringsCategories}" → { categories: ringsCategories }
+	 * ""                              → {}
+	 */
+	public function parsePropsToObject( string $props_string ): string {
+		$props_string = trim( $props_string );
+		if ( empty( $props_string ) ) {
+			return '{}';
+		}
+
+		$pairs = [];
+		if ( preg_match_all( "/(\w+)=(?:'([^']*)'|\{([^}]*)\})/", $props_string, $matches, PREG_SET_ORDER ) ) {
+			foreach ( $matches as $m ) {
+				$name = $m[1];
+				if ( isset( $m[3] ) && '' !== $m[3] ) {
+					$pairs[] = "{$name}: {$m[3]}";
+				} else {
+					$pairs[] = "{$name}: '{$m[2]}'";
+				}
+			}
+		}
+
+		return empty( $pairs ) ? '{}' : '{ ' . implode( ', ', $pairs ) . ' }';
+	}
+
+	/**
+	 * Generate src/lib/block-registry.tsx content.
+	 *
+	 * Imports all widget components and data dependencies, exports:
+	 * - blockRegistry:  block ID → { Component, props }
+	 * - pageWrappers:   template → className | null
+	 * - pageMetadata:   template → { title, description } | null
+	 */
+	public function generateBlockRegistry(): string {
+		$all_blocks = $this->getAllBlocks();
+
+		// ── Pass 1: determine imports and detect name collisions ──
+		$name_first_path  = [];
+		$seen_imports     = [];
+		$block_local_name = [];
+		$path_imports     = [];
+
+		foreach ( $all_blocks as $block_id => $block ) {
+			$name = $block['export_name'];
+			$path = $block['import_path'];
+			$type = $block['import_type'] ?? 'named';
+			$key  = "{$name}|{$path}";
+
+			if ( isset( $seen_imports[ $key ] ) ) {
+				$block_local_name[ $block_id ] = $seen_imports[ $key ];
+				continue;
+			}
+
+			if ( ! isset( $name_first_path[ $name ] ) ) {
+				$name_first_path[ $name ] = $path;
+				$local_name = $name;
+			} elseif ( $name_first_path[ $name ] === $path ) {
+				$local_name = $name;
+			} else {
+				$local_name = $name . '_' . $block_id;
+			}
+
+			$seen_imports[ $key ]         = $local_name;
+			$block_local_name[ $block_id ] = $local_name;
+
+			if ( ! isset( $path_imports[ $path ] ) ) {
+				$path_imports[ $path ] = [];
+			}
+			$path_imports[ $path ][] = [
+				'name'       => $name,
+				'local_name' => $local_name,
+				'type'       => $type,
+			];
+		}
+
+		// ── Build component import lines ─────────────────────────
+		$import_lines = [];
+		foreach ( $path_imports as $path => $entries ) {
+			$defaults = [];
+			$named    = [];
+
+			foreach ( $entries as $entry ) {
+				if ( 'default' === $entry['type'] ) {
+					$defaults[] = $entry['local_name'];
+				} else {
+					$named[] = ( $entry['name'] !== $entry['local_name'] )
+						? "{$entry['name']} as {$entry['local_name']}"
+						: $entry['name'];
+				}
+			}
+
+			if ( ! empty( $defaults ) && ! empty( $named ) ) {
+				$import_lines[] = 'import ' . $defaults[0] . ', { ' . implode( ', ', $named ) . " } from '{$path}';";
+			} elseif ( ! empty( $defaults ) ) {
+				$import_lines[] = "import {$defaults[0]} from '{$path}';";
+			} elseif ( ! empty( $named ) ) {
+				$import_lines[] = 'import { ' . implode( ', ', array_unique( $named ) ) . " } from '{$path}';";
+			}
+		}
+
+		// ── Data-dependency imports ──────────────────────────────
+		$data_map = [];
+		foreach ( $all_blocks as $block ) {
+			if ( empty( $block['data_imports'] ) ) {
+				continue;
+			}
+			foreach ( $block['data_imports'] as $di ) {
+				if ( ! isset( $data_map[ $di['path'] ] ) ) {
+					$data_map[ $di['path'] ] = [];
+				}
+				if ( ! in_array( $di['name'], $data_map[ $di['path'] ], true ) ) {
+					$data_map[ $di['path'] ][] = $di['name'];
+				}
+			}
+		}
+		foreach ( $data_map as $path => $names ) {
+			$import_lines[] = 'import { ' . implode( ', ', $names ) . " } from '{$path}';";
+		}
+
+		// ── Registry entries ─────────────────────────────────────
+		$registry = [];
+		foreach ( $all_blocks as $block_id => $block ) {
+			$comp  = $block_local_name[ $block_id ];
+			$props = $this->parsePropsToObject( $block['props'] ?? '' );
+			$registry[] = "  {$block_id}: { Component: {$comp}, props: {$props} }";
+		}
+
+		// ── Page wrappers ────────────────────────────────────────
+		$wrappers = [];
+		foreach ( $this->getPages() as $slug => $page ) {
+			$open = $page['wrapper_open'] ?? '';
+			if ( ! empty( $open ) && preg_match( "/className='([^']*)'/", $open, $m ) ) {
+				$wrappers[] = "  {$slug}: '{$m[1]}'";
+			} else {
+				$wrappers[] = "  {$slug}: null";
+			}
+		}
+
+		// ── Page metadata ────────────────────────────────────────
+		$meta_entries = [];
+		foreach ( $this->getPages() as $slug => $page ) {
+			$meta = $page['default_metadata'] ?? null;
+			if ( $meta ) {
+				$title = addslashes( $meta['title'] ?? '' );
+				$desc  = addslashes( $meta['description'] ?? '' );
+				$meta_entries[] = "  {$slug}: { title: '{$title}', description: '{$desc}' }";
+			} else {
+				$meta_entries[] = "  {$slug}: null";
+			}
+		}
+
+		// ── Assemble file ────────────────────────────────────────
+		$out  = "'use client';\n\n";
+		$out .= implode( "\n", $import_lines ) . "\n";
+		$out .= "\nexport const blockRegistry: Record<string, { Component: any; props: Record<string, any> }> = {\n";
+		$out .= implode( ",\n", $registry ) . ",\n";
+		$out .= "};\n";
+		$out .= "\nexport const pageWrappers: Record<string, string | null> = {\n";
+		$out .= implode( ",\n", $wrappers ) . ",\n";
+		$out .= "};\n";
+		$out .= "\nexport const pageMetadata: Record<string, { title: string; description: string } | null> = {\n";
+		$out .= implode( ",\n", $meta_entries ) . ",\n";
+		$out .= "};\n";
+
+		return $out;
+	}
+
+	/**
+	 * Generate src/app/[slug]/page.tsx — the server component.
+	 */
+	public function generateCatchAllServerPage(): string {
+		$project_path = rtrim( $this->getProjectPath(), '/\\' );
+		$json_path    = str_replace( '\\', '/', $project_path . '/published-pages.json' );
+
+		$out  = "import { notFound } from 'next/navigation';\n";
+		$out .= "import fs from 'fs';\n";
+		$out .= "import DynamicPage from './DynamicPage';\n";
+		$out .= "import { pageMetadata } from '@/lib/block-registry';\n";
+		$out .= "import type { Metadata } from 'next';\n\n";
+		$out .= "export const dynamic = 'force-dynamic';\n\n";
+		$out .= "const PAGES_JSON_PATH = process.env.PUBLISHED_PAGES_PATH || '{$json_path}';\n\n";
+		$out .= "interface PageConfig {\n";
+		$out .= "  pageTemplate: string;\n";
+		$out .= "  blocks: string[];\n";
+		$out .= "  metadata: { title: string; description: string } | null;\n";
+		$out .= "}\n\n";
+		$out .= "function getPublishedPages(): Record<string, PageConfig> {\n";
+		$out .= "  try {\n";
+		$out .= "    const raw = fs.readFileSync(PAGES_JSON_PATH, 'utf-8');\n";
+		$out .= "    return JSON.parse(raw);\n";
+		$out .= "  } catch {\n";
+		$out .= "    return {};\n";
+		$out .= "  }\n";
+		$out .= "}\n\n";
+		$out .= "export async function generateMetadata({\n";
+		$out .= "  params,\n";
+		$out .= "}: {\n";
+		$out .= "  params: Promise<{ slug: string }>;\n";
+		$out .= "}): Promise<Metadata> {\n";
+		$out .= "  const { slug } = await params;\n";
+		$out .= "  const pages = getPublishedPages();\n";
+		$out .= "  const page = pages[slug];\n";
+		$out .= "  if (!page) return {};\n";
+		$out .= "  if (page.metadata) return page.metadata;\n\n";
+		$out .= "  const templateMeta = pageMetadata[page.pageTemplate];\n";
+		$out .= "  return templateMeta || {};\n";
+		$out .= "}\n\n";
+		$out .= "export default async function SlugPage({\n";
+		$out .= "  params,\n";
+		$out .= "}: {\n";
+		$out .= "  params: Promise<{ slug: string }>;\n";
+		$out .= "}) {\n";
+		$out .= "  const { slug } = await params;\n";
+		$out .= "  const pages = getPublishedPages();\n";
+		$out .= "  const page = pages[slug];\n";
+		$out .= "  if (!page) notFound();\n\n";
+		$out .= "  return (\n";
+		$out .= "    <DynamicPage\n";
+		$out .= "      blocks={page.blocks}\n";
+		$out .= "      pageTemplate={page.pageTemplate}\n";
+		$out .= "    />\n";
+		$out .= "  );\n";
+		$out .= "}\n";
+
+		return $out;
+	}
+
+	/**
+	 * Generate src/app/[slug]/DynamicPage.tsx — the client component.
+	 */
+	public function generateDynamicPageClientComponent(): string {
+		$out  = "'use client';\n\n";
+		$out .= "import { blockRegistry, pageWrappers } from '@/lib/block-registry';\n\n";
+		$out .= "interface DynamicPageProps {\n";
+		$out .= "  blocks: string[];\n";
+		$out .= "  pageTemplate: string;\n";
+		$out .= "}\n\n";
+		$out .= "export default function DynamicPage({ blocks, pageTemplate }: DynamicPageProps) {\n";
+		$out .= "  const wrapperClass = pageWrappers[pageTemplate];\n\n";
+		$out .= "  const content = blocks.map((blockId, i) => {\n";
+		$out .= "    const entry = blockRegistry[blockId];\n";
+		$out .= "    if (!entry) return null;\n";
+		$out .= "    const { Component, props } = entry;\n";
+		$out .= "    return <Component key={`\${blockId}-\${i}`} {...props} />;\n";
+		$out .= "  });\n\n";
+		$out .= "  if (wrapperClass) {\n";
+		$out .= "    return <div className={wrapperClass}>{content}</div>;\n";
+		$out .= "  }\n\n";
+		$out .= "  return <>{content}</>;\n";
+		$out .= "}\n";
+
+		return $out;
+	}
+
+	/**
+	 * Write all dynamic route files and mark setup as done.
+	 */
+	public function setupDynamicRoute(): array {
+		$project_path = $this->getProjectPath();
+
+		if ( empty( $project_path ) ) {
+			return [
+				'success' => false,
+				'message' => 'Next.js project path is not configured.',
+			];
+		}
+
+		$project_path = rtrim( $project_path, '/\\' );
+		$errors       = [];
+
+		// 1. Block registry.
+		$registry_dir = $project_path . '/src/lib';
+		if ( ! is_dir( $registry_dir ) ) {
+			mkdir( $registry_dir, 0755, true );
+		}
+		$registry_path = $registry_dir . '/block-registry.tsx';
+		if ( false === file_put_contents( $registry_path, $this->generateBlockRegistry() ) ) {
+			$errors[] = "Failed to write {$registry_path}";
+		}
+
+		// 2. Server component.
+		$slug_dir = $project_path . '/src/app/[slug]';
+		if ( ! is_dir( $slug_dir ) ) {
+			mkdir( $slug_dir, 0755, true );
+		}
+		$server_path = $slug_dir . '/page.tsx';
+		if ( false === file_put_contents( $server_path, $this->generateCatchAllServerPage() ) ) {
+			$errors[] = "Failed to write {$server_path}";
+		}
+
+		// 3. Client component.
+		$client_path = $slug_dir . '/DynamicPage.tsx';
+		if ( false === file_put_contents( $client_path, $this->generateDynamicPageClientComponent() ) ) {
+			$errors[] = "Failed to write {$client_path}";
+		}
+
+		// 4. Empty JSON (only if not already present).
+		$json_path = $this->getPublishedPagesJsonPath();
+		if ( ! file_exists( $json_path ) ) {
+			if ( false === file_put_contents( $json_path, '{}' ) ) {
+				$errors[] = "Failed to write {$json_path}";
+			}
+		}
+
+		if ( ! empty( $errors ) ) {
+			return [
+				'success' => false,
+				'message' => 'Setup errors: ' . implode( '; ', $errors ),
+			];
+		}
+
+		update_option( 'seo_nextjs_dynamic_setup_done', true );
+
+		return [
+			'success' => true,
+			'message' => 'Dynamic route files generated. Run pnpm build on the server, then publish pages instantly.',
+			'files'   => [ $registry_path, $server_path, $client_path, $json_path ],
+		];
+	}
+
+	/**
+	 * Publish a page by writing to published-pages.json (no build needed).
+	 */
+	private function publishDynamic( string $page_slug, array $block_order, string $output_slug ): array {
+		$json_path = $this->getPublishedPagesJsonPath();
+
+		// Read existing pages.
+		$pages = [];
+		if ( file_exists( $json_path ) ) {
+			$raw = file_get_contents( $json_path );
+			if ( false !== $raw ) {
+				$pages = json_decode( $raw, true ) ?: [];
+			}
+		}
+
+		// Upsert.
+		$pages[ $output_slug ] = [
+			'pageTemplate' => $page_slug,
+			'blocks'       => $block_order,
+			'metadata'     => null,
+		];
+
+		// Atomic write: .tmp → rename.
+		$tmp_path = $json_path . '.tmp';
+		$json     = json_encode( $pages, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );
+
+		if ( false === file_put_contents( $tmp_path, $json ) ) {
+			return [
+				'success' => false,
+				'message' => "Failed to write temporary file: {$tmp_path}",
+			];
+		}
+
+		if ( ! rename( $tmp_path, $json_path ) ) {
+			@unlink( $tmp_path );
+			return [
+				'success' => false,
+				'message' => "Failed to update JSON: {$json_path}",
+			];
+		}
+
+		// Clean up old static page.tsx if it exists.
+		$old_page = $this->getOutputFilePath( $output_slug );
+		if ( file_exists( $old_page ) ) {
+			copy( $old_page, $old_page . '.backup-dynamic-' . date( 'Y-m-d-His' ) );
+			unlink( $old_page );
+		}
+
+		$this->saveSlug( $page_slug, $output_slug );
+		update_option( "seo_nextjs_block_order_{$page_slug}", $block_order );
+
+		return [
+			'success'      => true,
+			'message'      => "Published to /{$output_slug} — live now!",
+			'path'         => $json_path,
+			'build_status' => 'not_needed',
 		];
 	}
 }

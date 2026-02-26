@@ -20,6 +20,7 @@
 	const BLOCK_GROUPS  = cfg.blockGroups || {};
 	const PAGES         = cfg.pages || {};
 	const RESERVED      = cfg.reservedSlugs || [];
+	let   DYNAMIC_SETUP = cfg.dynamicSetupDone || false;
 
 	// ─── State ────────────────────────────────────────────────────
 	let activePage    = Object.keys( PAGES )[0] || 'homepage';
@@ -420,7 +421,9 @@
 					PAGES[ activePage ].currentOrder = order;
 					PAGES[ activePage ].outputSlug = slug;
 				}
-				if ( json.data.build_status === 'started' ) {
+				if ( json.data.build_status === 'not_needed' ) {
+					showStatus( saveStatus, '✓ Published to /' + slug + ' — live now!', 'success' );
+				} else if ( json.data.build_status === 'started' ) {
 					showStatus( saveStatus, '✓ Published! Building & restarting — may take a few minutes.', 'success' );
 				} else {
 					showStatus( saveStatus, '✓ Published! Run npm run build on the server to go live.', 'success' );
@@ -456,6 +459,40 @@
 			} catch ( e ) {
 				showStatus( settingsStatus, '✕ ' + e.message, 'error' );
 			}
+		} );
+	}
+
+	// ─── Dynamic Route Setup ──────────────────────────────────────
+
+	var setupDynamicBtn = document.getElementById( 'setup-dynamic-btn' );
+	var setupStatus     = document.getElementById( 'setup-dynamic-status' );
+
+	if ( setupDynamicBtn ) {
+		setupDynamicBtn.addEventListener( 'click', async function () {
+			setupDynamicBtn.disabled = true;
+			setupDynamicBtn.textContent = 'Setting up...';
+
+			var fd = new FormData();
+			fd.append( 'action', 'nextjs_setup_dynamic' );
+			fd.append( 'nonce', NONCE );
+
+			try {
+				var res = await fetch( AJAX_URL, { method: 'POST', body: fd } );
+				var json = await res.json();
+				if ( json.success ) {
+					DYNAMIC_SETUP = true;
+					showStatus( setupStatus, '✓ ' + json.data.message, 'success' );
+					setupDynamicBtn.textContent = 'Re-generate Files';
+				} else {
+					showStatus( setupStatus, '✕ ' + ( json.data?.message || 'Setup failed' ), 'error' );
+					setupDynamicBtn.textContent = 'Setup Dynamic Route';
+				}
+			} catch ( e ) {
+				showStatus( setupStatus, '✕ ' + e.message, 'error' );
+				setupDynamicBtn.textContent = 'Setup Dynamic Route';
+			}
+
+			setupDynamicBtn.disabled = false;
 		} );
 	}
 

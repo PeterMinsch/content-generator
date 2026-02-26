@@ -212,6 +212,25 @@ $first_slug   = array_key_first( $pages );
 					</td>
 				</tr>
 			</table>
+			<table class="form-table" style="margin-top: 0;">
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Dynamic Route', 'seo-generator' ); ?></th>
+					<td>
+						<?php if ( get_option( 'seo_nextjs_dynamic_setup_done', false ) ) : ?>
+							<span style="color: #00a32a; font-weight: 600;">&#10003; <?php esc_html_e( 'Set up', 'seo-generator' ); ?></span>
+							<button type="button" id="setup-dynamic-btn" class="seo-btn-secondary" style="margin-left: 10px;">
+								<?php esc_html_e( 'Re-generate Files', 'seo-generator' ); ?>
+							</button>
+						<?php else : ?>
+							<button type="button" id="setup-dynamic-btn" class="seo-btn-primary">
+								<?php esc_html_e( 'Setup Dynamic Route', 'seo-generator' ); ?>
+							</button>
+						<?php endif; ?>
+						<span id="setup-dynamic-status" class="page-builder-save-status" style="margin-left: 10px;"></span>
+						<p class="description"><?php esc_html_e( 'Generate the [slug] catch-all route. After setup, run pnpm build once — then every publish is instant.', 'seo-generator' ); ?></p>
+					</td>
+				</tr>
+			</table>
 			<button type="button" id="save-settings-btn" class="seo-btn-secondary"><?php esc_html_e( 'Save Settings', 'seo-generator' ); ?></button>
 			<span id="settings-status" class="page-builder-save-status" style="margin-left: 10px;"></span>
 		</div>
