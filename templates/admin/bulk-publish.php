@@ -64,8 +64,7 @@ custom wedding bands orange county,custom-wedding-bands-orange-county</pre>
 						<?php esc_html_e( 'Page Template:', 'seo-generator' ); ?>
 					</label>
 					<select id="page-template-select">
-						<option value="homepage"><?php esc_html_e( 'Homepage', 'seo-generator' ); ?></option>
-						<option value="about"><?php esc_html_e( 'About Us', 'seo-generator' ); ?></option>
+						<!-- Populated by JS from bulkPublishData.pageTemplates -->
 					</select>
 				</div>
 

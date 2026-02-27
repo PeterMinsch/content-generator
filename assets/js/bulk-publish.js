@@ -13,6 +13,18 @@
 
   const { ajaxUrl, nonce, pageTemplates, siteUrl } = bulkPublishData;
 
+  // Populate template dropdown from DB data.
+  const $templateSelect = $('#page-template-select');
+  if ($templateSelect.length && pageTemplates) {
+    $templateSelect.empty();
+    Object.keys(pageTemplates).forEach(function (slug) {
+      $templateSelect.append(
+        '<option value="' + escapeHtml(slug) + '">' +
+        escapeHtml(pageTemplates[slug].label) + '</option>'
+      );
+    });
+  }
+
   let uploadedRows = [];
   let uploadedHeaders = [];
 
