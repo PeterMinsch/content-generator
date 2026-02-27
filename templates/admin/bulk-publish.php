@@ -78,6 +78,32 @@ custom wedding bands orange county,custom-wedding-bands-orange-county</pre>
 				</div>
 			</div>
 
+			<!-- Template Preview -->
+			<div id="template-preview-panel" style="margin-bottom: 20px;">
+				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+					<label style="font-weight: 600; font-size: 13px;">
+						<?php esc_html_e( 'Template Preview', 'seo-generator' ); ?>
+					</label>
+					<div class="device-toggle-buttons" id="bulk-device-toggle">
+						<button type="button" class="device-toggle-btn active" data-device="desktop">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+							<span class="device-label"><?php esc_html_e( 'Desktop', 'seo-generator' ); ?></span>
+						</button>
+						<button type="button" class="device-toggle-btn" data-device="mobile">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+							<span class="device-label"><?php esc_html_e( 'Mobile', 'seo-generator' ); ?></span>
+						</button>
+					</div>
+				</div>
+				<div id="bulk-preview-container" style="background: #f6f7f7; border-radius: 4px; display: flex; justify-content: center; align-items: flex-start; padding: 30px 20px; min-height: 500px;">
+					<div class="device-frame desktop-frame" id="bulk-device-frame">
+						<div class="device-screen">
+							<iframe id="bulk-preview-iframe" style="width: 100%; min-height: 500px; border: none; display: block; background: #fff;"></iframe>
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<!-- CSV Preview Table -->
 			<div style="overflow-x: auto; max-height: 400px; overflow-y: auto; margin-bottom: 16px;">
 				<table class="wp-list-table widefat striped" id="csv-preview-table">

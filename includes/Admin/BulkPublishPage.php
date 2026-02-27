@@ -62,6 +62,13 @@ class BulkPublishPage {
 			SEO_GENERATOR_VERSION
 		);
 
+		wp_enqueue_style(
+			'seo-admin-block-preview',
+			SEO_GENERATOR_PLUGIN_URL . 'assets/css/admin-block-preview.css',
+			[],
+			SEO_GENERATOR_VERSION
+		);
+
 		wp_enqueue_script(
 			'seo-bulk-publish',
 			SEO_GENERATOR_PLUGIN_URL . 'assets/js/bulk-publish.js',

@@ -25,6 +25,41 @@
     });
   }
 
+  // ── Template Preview ───────────────────────────────────────
+
+  let currentDevice = 'desktop';
+
+  function updateTemplatePreview() {
+    var slug = $templateSelect.val();
+    if (!slug || !pageTemplates[slug] || !siteUrl) return;
+
+    var blocks = pageTemplates[slug].defaultOrder;
+    if (!blocks || !blocks.length) return;
+
+    var url = siteUrl + '/preview?blocks=' + blocks.join(',');
+    $('#bulk-preview-iframe').attr('src', url);
+  }
+
+  function setDevice(device) {
+    currentDevice = device;
+    var $frame = $('#bulk-device-frame');
+    $frame.removeClass('desktop-frame mobile-frame').addClass(device + '-frame');
+
+    $('#bulk-device-toggle .device-toggle-btn').removeClass('active');
+    $('#bulk-device-toggle .device-toggle-btn[data-device="' + device + '"]').addClass('active');
+  }
+
+  // Device toggle click handler.
+  $(document).on('click', '#bulk-device-toggle .device-toggle-btn', function () {
+    setDevice($(this).data('device'));
+  });
+
+  // Update preview when template changes.
+  $templateSelect.on('change', updateTemplatePreview);
+
+  // Load initial preview on page load.
+  updateTemplatePreview();
+
   let uploadedRows = [];
   let uploadedHeaders = [];
 
