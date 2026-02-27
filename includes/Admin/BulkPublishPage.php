@@ -112,9 +112,9 @@ class BulkPublishPage {
 			wp_send_json_error( [ 'message' => 'Invalid file type. Please upload a CSV file.' ] );
 		}
 
-		// Move to temp location.
+		// Move to current month's upload directory (CSVParser validates path is within it).
 		$upload_dir = wp_upload_dir();
-		$tmp_path   = $upload_dir['basedir'] . '/seo-generator-tmp/';
+		$tmp_path   = $upload_dir['path'] . '/';
 
 		if ( ! is_dir( $tmp_path ) ) {
 			wp_mkdir_p( $tmp_path );
