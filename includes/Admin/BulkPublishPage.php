@@ -82,7 +82,7 @@ class BulkPublishPage {
 
 		$template_repo    = new \SEOGenerator\Repositories\TemplateRepository();
 		$template_service = new \SEOGenerator\Services\TemplateService( $template_repo );
-		$db_templates     = $template_service->getAll( 'active' );
+		$db_templates     = $template_service->getAll();
 
 		if ( ! empty( $db_templates ) ) {
 			foreach ( $db_templates as $t ) {
