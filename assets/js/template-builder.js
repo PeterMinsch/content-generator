@@ -698,6 +698,15 @@
 
 	// ─── Init ─────────────────────────────────────────────────────
 
+	// Auto-collapse WP sidebar to maximize preview space.
+	var wasFolded = document.body.classList.contains( 'folded' );
+	document.body.classList.add( 'folded' );
+
+	// Restore original sidebar state when leaving the page.
+	window.addEventListener( 'pagehide', function () {
+		if ( ! wasFolded ) document.body.classList.remove( 'folded' );
+	} );
+
 	populateCategorySelect();
 	renderFilterPills();
 	renderBlockLibrary();

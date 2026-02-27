@@ -7,6 +7,24 @@
  * @package SEOGenerator
  */
 
+/* ─── Flush Sidebar Layout ─────────────────────────────────── */
+/* Expand content area when sidebar is auto-collapsed (folded). */
+
+body.folded #wpcontent,
+body.folded #wpbody-content {
+	margin-left: 36px;
+}
+
+body.folded #template-builder-app.wrap {
+	margin: 10px 12px 10px 0;
+	max-width: none;
+}
+
+#template-builder-app.wrap {
+	max-width: none;
+	padding: 0;
+}
+
 /* ─── Top Bar ──────────────────────────────────────────────── */
 
 .tb-top-bar {
