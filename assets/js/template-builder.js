@@ -221,8 +221,12 @@
 				( groupLabel ? ' <span class="tb-block-group-badge">' + esc( groupLabel ) + '</span>' : '' ) +
 			'</div>' +
 			'<div class="tb-block-actions">' +
+				'<button type="button" class="tb-block-action-btn tb-override-block-btn" title="Block rule overrides" data-block="' + esc( blockId ) + '">&#9881;</button>' +
 				'<button type="button" class="tb-block-action-btn tb-preview-block-btn" title="Preview this block" data-block="' + esc( blockId ) + '">&#128065;</button>' +
 				'<button type="button" class="tb-block-action-btn tb-remove-block-btn" title="Remove">&times;</button>' +
+			'</div>' +
+			'<div class="tb-override-panel" data-block="' + esc( blockId ) + '" style="display:none;">' +
+				'<div class="tb-override-loading">Loading rules...</div>' +
 			'</div>';
 
 		if ( ! skipAnimation ) {
@@ -298,6 +302,37 @@
 				previewMode = 'block';
 				updatePreviewModeUI();
 				updatePreview();
+				return;
+			}
+
+			// Block rule override gear icon.
+			var overrideBtn = e.target.closest( '.tb-override-block-btn' );
+			if ( overrideBtn ) {
+				var blockId = overrideBtn.dataset.block;
+				var panel = sortableList.querySelector( '.tb-override-panel[data-block="' + blockId + '"]' );
+				if ( panel ) {
+					var isOpen = panel.style.display !== 'none';
+					if ( isOpen ) {
+						panel.style.display = 'none';
+					} else {
+						panel.style.display = 'block';
+						loadOverridePanel( blockId, panel );
+					}
+				}
+				return;
+			}
+
+			// Override panel save/clear buttons.
+			var saveOverrideBtn = e.target.closest( '.tb-save-override-btn' );
+			if ( saveOverrideBtn ) {
+				saveBlockOverride( saveOverrideBtn.dataset.block );
+				return;
+			}
+
+			var clearOverrideBtn = e.target.closest( '.tb-clear-override-btn' );
+			if ( clearOverrideBtn ) {
+				clearBlockOverride( clearOverrideBtn.dataset.block );
+				return;
 			}
 		} );
 	}
@@ -676,6 +711,134 @@
 			}
 			setupBtn.disabled = false;
 		} );
+	}
+
+	// ─── Block Rule Overrides ─────────────────────────────────────
+
+	function loadOverridePanel( blockId, panel ) {
+		if ( ! activeTemplateId ) {
+			panel.innerHTML = '<p class="tb-override-msg">Save the template first to enable overrides.</p>';
+			return;
+		}
+
+		panel.innerHTML = '<div class="tb-override-loading">Loading resolved rules...</div>';
+
+		// Fetch resolved rules for this block + template.
+		var fd = new FormData();
+		fd.append( 'action', 'tb_get_block_resolved_rules' );
+		fd.append( 'nonce', NONCE );
+		fd.append( 'template_id', activeTemplateId );
+		fd.append( 'block_id', blockId );
+
+		fetch( AJAX_URL, { method: 'POST', body: fd } )
+			.then( function ( r ) { return r.json(); } )
+			.then( function ( resp ) {
+				if ( ! resp.success ) {
+					panel.innerHTML = '<p class="tb-override-msg">' + esc( resp.data.message || 'Error' ) + '</p>';
+					return;
+				}
+
+				var rules = resp.data.rules || {};
+				var hasOverride = resp.data.has_override || false;
+				var slots = rules.content_slots || {};
+
+				var html = '<div class="tb-override-header">' +
+					( hasOverride
+						? '<span class="tb-override-badge tb-override-badge-active">Has Override</span>'
+						: '<span class="tb-override-badge tb-override-badge-default">Using Defaults</span>'
+					) +
+				'</div>';
+
+				html += '<div class="tb-override-slots">';
+				for ( var slotName in slots ) {
+					var slot = slots[ slotName ];
+					html += '<div class="tb-override-slot">' +
+						'<label class="tb-override-slot-label">' + esc( slotName ) + '</label>' +
+						'<div class="tb-override-fields">' +
+							'<label><small>Max Length</small>' +
+								'<input type="number" class="tb-override-input" data-slot="' + esc( slotName ) + '" data-key="max_length" value="' + ( slot.max_length || '' ) + '">' +
+							'</label>' +
+							'<label><small>Mobile Max</small>' +
+								'<input type="number" class="tb-override-input" data-slot="' + esc( slotName ) + '" data-key="mobile_max_length" value="' + ( slot.mobile_max_length || '' ) + '">' +
+							'</label>' +
+							'<label><small>Over Limit</small>' +
+								'<select class="tb-override-input" data-slot="' + esc( slotName ) + '" data-key="over_limit_action">' +
+									'<option value="truncate"' + ( slot.over_limit_action === 'truncate' ? ' selected' : '' ) + '>Truncate</option>' +
+									'<option value="flag"' + ( slot.over_limit_action === 'flag' ? ' selected' : '' ) + '>Flag</option>' +
+								'</select>' +
+							'</label>' +
+						'</div>' +
+					'</div>';
+				}
+				html += '</div>';
+
+				html += '<div class="tb-override-actions">' +
+					'<button type="button" class="seo-btn-primary tb-save-override-btn" data-block="' + esc( blockId ) + '">Save Override</button>' +
+					'<button type="button" class="seo-btn-secondary tb-clear-override-btn" data-block="' + esc( blockId ) + '">Clear Override</button>' +
+				'</div>';
+
+				panel.innerHTML = html;
+			} );
+	}
+
+	function saveBlockOverride( blockId ) {
+		if ( ! activeTemplateId ) return;
+
+		var panel = sortableList.querySelector( '.tb-override-panel[data-block="' + blockId + '"]' );
+		if ( ! panel ) return;
+
+		// Collect override values from inputs.
+		var override = { content_slots: {} };
+		var inputs = panel.querySelectorAll( '.tb-override-input' );
+		inputs.forEach( function ( input ) {
+			var slot = input.dataset.slot;
+			var key  = input.dataset.key;
+			if ( ! override.content_slots[ slot ] ) override.content_slots[ slot ] = {};
+			var val = input.type === 'number' ? parseInt( input.value, 10 ) || 0 : input.value;
+			override.content_slots[ slot ][ key ] = val;
+		} );
+
+		var fd = new FormData();
+		fd.append( 'action', 'tb_save_block_override' );
+		fd.append( 'nonce', NONCE );
+		fd.append( 'template_id', activeTemplateId );
+		fd.append( 'block_id', blockId );
+		fd.append( 'override_json', JSON.stringify( override ) );
+
+		fetch( AJAX_URL, { method: 'POST', body: fd } )
+			.then( function ( r ) { return r.json(); } )
+			.then( function ( resp ) {
+				if ( resp.success ) {
+					loadOverridePanel( blockId, panel );
+					showStatus( saveStatus, 'Override saved.', 'success' );
+				} else {
+					showStatus( saveStatus, resp.data.message || 'Save failed.', 'error' );
+				}
+			} );
+	}
+
+	function clearBlockOverride( blockId ) {
+		if ( ! activeTemplateId ) return;
+		if ( ! confirm( 'Clear override for this block? It will revert to default rules.' ) ) return;
+
+		var panel = sortableList.querySelector( '.tb-override-panel[data-block="' + blockId + '"]' );
+
+		var fd = new FormData();
+		fd.append( 'action', 'tb_delete_block_override' );
+		fd.append( 'nonce', NONCE );
+		fd.append( 'template_id', activeTemplateId );
+		fd.append( 'block_id', blockId );
+
+		fetch( AJAX_URL, { method: 'POST', body: fd } )
+			.then( function ( r ) { return r.json(); } )
+			.then( function ( resp ) {
+				if ( resp.success ) {
+					if ( panel ) loadOverridePanel( blockId, panel );
+					showStatus( saveStatus, 'Override cleared.', 'success' );
+				} else {
+					showStatus( saveStatus, resp.data.message || 'Clear failed.', 'error' );
+				}
+			} );
 	}
 
 	// ─── Dirty State ──────────────────────────────────────────────

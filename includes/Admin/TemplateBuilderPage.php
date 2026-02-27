@@ -14,6 +14,9 @@ defined( 'ABSPATH' ) || exit;
 
 use SEOGenerator\Services\TemplateService;
 use SEOGenerator\Services\NextJSPageGenerator;
+use SEOGenerator\Services\BlockRuleService;
+use SEOGenerator\Repositories\BlockRuleProfileRepository;
+use SEOGenerator\Repositories\TemplateBlockOverrideRepository;
 
 class TemplateBuilderPage {
 
@@ -41,6 +44,18 @@ class TemplateBuilderPage {
 		// Settings + dynamic route (carried over from PageBuilder).
 		add_action( 'wp_ajax_tb_save_settings', [ $this, 'ajaxSaveSettings' ] );
 		add_action( 'wp_ajax_tb_setup_dynamic', [ $this, 'ajaxSetupDynamic' ] );
+
+		// Block rule overrides (Stage 2).
+		add_action( 'wp_ajax_tb_get_block_override', [ $this, 'ajaxGetBlockOverride' ] );
+		add_action( 'wp_ajax_tb_save_block_override', [ $this, 'ajaxSaveBlockOverride' ] );
+		add_action( 'wp_ajax_tb_delete_block_override', [ $this, 'ajaxDeleteBlockOverride' ] );
+		add_action( 'wp_ajax_tb_get_block_resolved_rules', [ $this, 'ajaxGetBlockResolvedRules' ] );
+	}
+
+	private function getBlockRuleService(): BlockRuleService {
+		$profile_repo  = new BlockRuleProfileRepository();
+		$override_repo = new TemplateBlockOverrideRepository();
+		return new BlockRuleService( $profile_repo, $override_repo );
 	}
 
 	public function render(): void {
@@ -368,5 +383,107 @@ class TemplateBuilderPage {
 		} else {
 			wp_send_json_error( $result );
 		}
+	}
+
+	// ─── Block Rule Override AJAX (Stage 2) ──────────────────────
+
+	public function ajaxGetBlockOverride(): void {
+		check_ajax_referer( 'template-builder', 'nonce' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
+		}
+
+		$template_id = isset( $_POST['template_id'] ) ? absint( $_POST['template_id'] ) : 0;
+		$block_id    = isset( $_POST['block_id'] ) ? sanitize_text_field( wp_unslash( $_POST['block_id'] ) ) : '';
+
+		if ( ! $template_id || empty( $block_id ) ) {
+			wp_send_json_error( [ 'message' => 'Template ID and Block ID required.' ] );
+		}
+
+		$override_repo = new TemplateBlockOverrideRepository();
+		$override      = $override_repo->findByTemplateAndBlock( $template_id, $block_id );
+
+		wp_send_json_success( [
+			'override'     => $override ? $override['override_json'] : null,
+			'has_override' => ! empty( $override ),
+		] );
+	}
+
+	public function ajaxSaveBlockOverride(): void {
+		check_ajax_referer( 'template-builder', 'nonce' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
+		}
+
+		$template_id   = isset( $_POST['template_id'] ) ? absint( $_POST['template_id'] ) : 0;
+		$block_id      = isset( $_POST['block_id'] ) ? sanitize_text_field( wp_unslash( $_POST['block_id'] ) ) : '';
+		$override_raw  = isset( $_POST['override_json'] ) ? wp_unslash( $_POST['override_json'] ) : '';
+
+		if ( ! $template_id || empty( $block_id ) ) {
+			wp_send_json_error( [ 'message' => 'Template ID and Block ID required.' ] );
+		}
+
+		$override = json_decode( $override_raw, true );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			wp_send_json_error( [ 'message' => 'Invalid JSON.' ] );
+		}
+
+		$override_repo = new TemplateBlockOverrideRepository();
+		$user_id       = get_current_user_id() ?: 1;
+		$result        = $override_repo->saveOverride( $template_id, $block_id, $override, $user_id );
+
+		if ( $result ) {
+			wp_send_json_success( [ 'message' => 'Override saved.' ] );
+		} else {
+			wp_send_json_error( [ 'message' => 'Failed to save override.' ] );
+		}
+	}
+
+	public function ajaxDeleteBlockOverride(): void {
+		check_ajax_referer( 'template-builder', 'nonce' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
+		}
+
+		$template_id = isset( $_POST['template_id'] ) ? absint( $_POST['template_id'] ) : 0;
+		$block_id    = isset( $_POST['block_id'] ) ? sanitize_text_field( wp_unslash( $_POST['block_id'] ) ) : '';
+
+		if ( ! $template_id || empty( $block_id ) ) {
+			wp_send_json_error( [ 'message' => 'Template ID and Block ID required.' ] );
+		}
+
+		$override_repo = new TemplateBlockOverrideRepository();
+		$result        = $override_repo->deleteOverride( $template_id, $block_id );
+
+		wp_send_json_success( [ 'message' => 'Override cleared.' ] );
+	}
+
+	public function ajaxGetBlockResolvedRules(): void {
+		check_ajax_referer( 'template-builder', 'nonce' );
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error( [ 'message' => 'Insufficient permissions.' ] );
+		}
+
+		$template_id = isset( $_POST['template_id'] ) ? absint( $_POST['template_id'] ) : 0;
+		$block_id    = isset( $_POST['block_id'] ) ? sanitize_text_field( wp_unslash( $_POST['block_id'] ) ) : '';
+
+		if ( empty( $block_id ) ) {
+			wp_send_json_error( [ 'message' => 'Block ID required.' ] );
+		}
+
+		$rule_service = $this->getBlockRuleService();
+		$rules        = $rule_service->getResolvedRules( $block_id, $template_id ?: null );
+
+		$override_repo = new TemplateBlockOverrideRepository();
+		$has_override  = false;
+		if ( $template_id ) {
+			$override = $override_repo->findByTemplateAndBlock( $template_id, $block_id );
+			$has_override = ! empty( $override );
+		}
+
+		wp_send_json_success( [
+			'rules'        => $rules,
+			'has_override' => $has_override,
+		] );
 	}
 }

@@ -12,6 +12,7 @@ namespace SEOGenerator\Services;
 defined( 'ABSPATH' ) || exit;
 
 use SEOGenerator\Repositories\TemplateRepository;
+use SEOGenerator\Repositories\TemplateBlockOverrideRepository;
 
 class TemplateService {
 
@@ -97,6 +98,12 @@ class TemplateService {
 		}
 
 		$result = $this->repository->delete( $id );
+
+		if ( $result ) {
+			// Cascade delete block rule overrides for this template.
+			$override_repo = new TemplateBlockOverrideRepository();
+			$override_repo->deleteAllByTemplateId( $id );
+		}
 
 		return $result
 			? [ 'success' => true, 'message' => 'Template deleted.' ]

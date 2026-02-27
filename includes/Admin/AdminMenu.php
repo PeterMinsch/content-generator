@@ -56,6 +56,13 @@ class AdminMenu {
 	private $geo_titles_page;
 
 	/**
+	 * Block rule editor page instance.
+	 *
+	 * @var BlockRuleEditorPage
+	 */
+	private $block_rule_editor_page;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param SettingsPage                  $settings_page Settings page instance.
@@ -63,13 +70,15 @@ class AdminMenu {
 	 * @param ImportPage                    $import_page Import page instance.
 	 * @param QueueStatusPage               $queue_status_page Queue status page instance.
 	 * @param GeographicTitleGeneratorPage  $geo_titles_page Geographic title generator page instance.
+	 * @param BlockRuleEditorPage|null      $block_rule_editor_page Block rule editor page instance.
 	 */
-	public function __construct( SettingsPage $settings_page, ImageLibraryPage $image_library_page, ImportPage $import_page, QueueStatusPage $queue_status_page, GeographicTitleGeneratorPage $geo_titles_page ) {
-		$this->settings_page       = $settings_page;
-		$this->image_library_page  = $image_library_page;
-		$this->import_page         = $import_page;
-		$this->queue_status_page   = $queue_status_page;
-		$this->geo_titles_page     = $geo_titles_page;
+	public function __construct( SettingsPage $settings_page, ImageLibraryPage $image_library_page, ImportPage $import_page, QueueStatusPage $queue_status_page, GeographicTitleGeneratorPage $geo_titles_page, ?BlockRuleEditorPage $block_rule_editor_page = null ) {
+		$this->settings_page            = $settings_page;
+		$this->image_library_page       = $image_library_page;
+		$this->import_page              = $import_page;
+		$this->queue_status_page        = $queue_status_page;
+		$this->geo_titles_page          = $geo_titles_page;
+		$this->block_rule_editor_page   = $block_rule_editor_page;
 	}
 
 	/**
@@ -176,6 +185,16 @@ class AdminMenu {
 			'edit_posts',
 			'seo-template-builder',
 			array( $this, 'renderTemplateBuilderPage' )
+		);
+
+		// Add "Block Rules" submenu (Stage 2).
+		add_submenu_page(
+			self::MENU_SLUG,
+			__( 'Block Rules', 'seo-generator' ),
+			__( 'Block Rules', 'seo-generator' ),
+			'manage_options',
+			'seo-block-rules',
+			array( $this, 'renderBlockRuleEditorPage' )
 		);
 
 		// Keep old Page Builder slug as redirect for bookmarks.
@@ -340,5 +359,22 @@ class AdminMenu {
 	public function renderBulkPublishPage(): void {
 		$bulk_publish = new BulkPublishPage();
 		$bulk_publish->render();
+	}
+
+	/**
+	 * Render the Block Rule Editor page.
+	 *
+	 * @return void
+	 */
+	public function renderBlockRuleEditorPage(): void {
+		if ( $this->block_rule_editor_page ) {
+			$this->block_rule_editor_page->render();
+		} else {
+			$block_rule_repo    = new \SEOGenerator\Repositories\BlockRuleProfileRepository();
+			$override_repo      = new \SEOGenerator\Repositories\TemplateBlockOverrideRepository();
+			$block_rule_service = new \SEOGenerator\Services\BlockRuleService( $block_rule_repo, $override_repo );
+			$editor = new BlockRuleEditorPage( $block_rule_service );
+			$editor->render();
+		}
 	}
 }

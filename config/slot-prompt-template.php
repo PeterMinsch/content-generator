@@ -34,6 +34,9 @@ For each block below, generate the specified content slots. Follow these rules:
 - Respect the max_length character limits strictly (this is the DESKTOP limit)
 - Each slot also has a mobile_max_length — front-load the most important information within this shorter limit, as mobile shows fewer characters
 - If a slot has mobile_hidden: true, the content won't appear on mobile devices — write it for desktop-only context
+- If a slot has required: true, you MUST generate content for it — never leave it empty
+- If a slot has min_length, ensure your content meets this minimum character count
+- If a slot has over_limit_action: "flag", still respect max_length but know that exceeding slightly is flagged for review rather than truncated
 - image_specs (if present) describe the block's image containers — note dimensions when selecting or cropping images
 - Write compelling, unique copy — no generic filler
 - Each slot should make sense in the context of its block

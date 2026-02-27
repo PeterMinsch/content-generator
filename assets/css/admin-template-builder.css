@@ -644,6 +644,109 @@ body.folded #template-builder-app.wrap {
 	}
 }
 
+/* ─── Block Rule Override Panel (Stage 2) ─────────────────── */
+
+.tb-override-block-btn {
+	font-size: 14px;
+}
+
+.tb-override-panel {
+	width: 100%;
+	padding: 12px 16px;
+	background: #f9f9f9;
+	border-top: 1px solid #eee;
+	box-sizing: border-box;
+}
+
+.tb-override-header {
+	margin-bottom: 8px;
+}
+
+.tb-override-badge {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 3px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+.tb-override-badge-default {
+	background: #d4edda;
+	color: #155724;
+}
+
+.tb-override-badge-active {
+	background: #fef3cd;
+	color: #856404;
+}
+
+.tb-override-slots {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.tb-override-slot {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.tb-override-slot-label {
+	font-size: 12px;
+	font-weight: 600;
+	min-width: 100px;
+	color: #333;
+}
+
+.tb-override-fields {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.tb-override-fields label {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 11px;
+	color: #666;
+}
+
+.tb-override-input {
+	padding: 4px 6px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	font-size: 12px;
+	width: 80px;
+}
+
+.tb-override-input:focus {
+	border-color: #2271b1;
+	outline: none;
+}
+
+.tb-override-actions {
+	margin-top: 10px;
+	display: flex;
+	gap: 6px;
+}
+
+.tb-override-msg {
+	color: #666;
+	font-size: 12px;
+	font-style: italic;
+	margin: 4px 0;
+}
+
+.tb-override-loading {
+	color: #999;
+	font-size: 12px;
+	padding: 8px 0;
+}
+
 /* ─── Utility ──────────────────────────────────────────────── */
 
 .text-muted { color: #646970; }

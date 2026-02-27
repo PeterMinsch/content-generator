@@ -30,6 +30,11 @@ class SlotContentGenerator {
 	private NextJSPageGenerator $page_generator;
 
 	/**
+	 * @var BlockRuleService|null
+	 */
+	private ?BlockRuleService $rule_service;
+
+	/**
 	 * Prompt templates loaded from config.
 	 *
 	 * @var array
@@ -39,26 +44,29 @@ class SlotContentGenerator {
 	/**
 	 * Constructor.
 	 *
-	 * @param OpenAIService       $openai         OpenAI service instance.
-	 * @param NextJSPageGenerator $page_generator Page generator for slot schemas.
+	 * @param OpenAIService           $openai         OpenAI service instance.
+	 * @param NextJSPageGenerator     $page_generator Page generator for slot schemas.
+	 * @param BlockRuleService|null   $rule_service   Block rule service (optional for backward compat).
 	 */
-	public function __construct( OpenAIService $openai, NextJSPageGenerator $page_generator ) {
+	public function __construct( OpenAIService $openai, NextJSPageGenerator $page_generator, ?BlockRuleService $rule_service = null ) {
 		$this->openai         = $openai;
 		$this->page_generator = $page_generator;
+		$this->rule_service   = $rule_service;
 		$this->prompts        = require SEO_GENERATOR_PLUGIN_DIR . 'config/slot-prompt-template.php';
 	}
 
 	/**
 	 * Generate slot content for all blocks on a page.
 	 *
-	 * @param array $block_order Block IDs on this page.
-	 * @param array $context     Generation context:
-	 *                           - focus_keyword (required)
-	 *                           - page_title (optional, derived from keyword if empty)
-	 *                           - business_name, business_description, service_area (from settings)
+	 * @param array    $block_order Block IDs on this page.
+	 * @param array    $context     Generation context:
+	 *                              - focus_keyword (required)
+	 *                              - page_title (optional, derived from keyword if empty)
+	 *                              - business_name, business_description, service_area (from settings)
+	 * @param int|null $template_id Template ID for block rule overrides (optional).
 	 * @return array { block_id => { slot_name => generated_value } }
 	 */
-	public function generateForPage( array $block_order, array $context ): array {
+	public function generateForPage( array $block_order, array $context, ?int $template_id = null ): array {
 		// Build context with business settings.
 		$context = $this->buildContext( $context );
 
@@ -66,10 +74,17 @@ class SlotContentGenerator {
 		$blocks_with_slots = [];
 		$block_images_map  = [];
 		foreach ( $block_order as $block_id ) {
-			$schema = $this->page_generator->getSlotSchema( $block_id );
+			// Use rule service when available, else fallback to config.
+			if ( $this->rule_service ) {
+				$schema = $this->rule_service->getResolvedSlotSchema( $block_id, $template_id );
+				$images = $this->rule_service->getResolvedImageSpecs( $block_id, $template_id );
+			} else {
+				$schema = $this->page_generator->getSlotSchema( $block_id );
+				$images = $this->page_generator->getBlockImages( $block_id );
+			}
+
 			if ( ! empty( $schema ) ) {
 				$blocks_with_slots[ $block_id ] = $schema;
-				$images = $this->page_generator->getBlockImages( $block_id );
 				if ( ! empty( $images ) ) {
 					$block_images_map[ $block_id ] = $images;
 				}
@@ -81,12 +96,19 @@ class SlotContentGenerator {
 		}
 
 		// Split into batches.
-		$batches    = array_chunk( $blocks_with_slots, self::BATCH_SIZE, true );
+		$batches     = array_chunk( $blocks_with_slots, self::BATCH_SIZE, true );
 		$all_content = [];
 
 		foreach ( $batches as $batch ) {
 			$batch_result = $this->generateBatch( $batch, $context, $block_images_map );
 			$all_content  = array_merge( $all_content, $batch_result );
+		}
+
+		// Post-generation auto-fix via ValidationService when rule service is available.
+		if ( $this->rule_service && ! empty( $all_content ) ) {
+			$validation_service = new ValidationService( $this->rule_service );
+			$fix_result   = $validation_service->autoFix( $all_content, $block_order, $template_id );
+			$all_content  = $fix_result['fixed'];
 		}
 
 		return $all_content;
@@ -140,13 +162,24 @@ class SlotContentGenerator {
 			$slot_details = [];
 			foreach ( $slots as $slot_name => $slot_def ) {
 				$slot_details[ $slot_name ] = [
-					'type'              => $slot_def['type'],
-					'max_length'        => $slot_def['max_length'],
-					'mobile_max_length' => $slot_def['mobile_max_length'] ?? $slot_def['max_length'],
-					'hint'              => $slot_def['ai_hint'],
+					'type'              => $slot_def['type'] ?? 'text',
+					'max_length'        => $slot_def['max_length'] ?? 100,
+					'mobile_max_length' => $slot_def['mobile_max_length'] ?? ( $slot_def['max_length'] ?? 100 ),
+					'hint'              => $slot_def['ai_hint'] ?? '',
 				];
 				if ( ! empty( $slot_def['mobile_hidden'] ) ) {
 					$slot_details[ $slot_name ]['mobile_hidden'] = true;
+				}
+				// Include rule-service fields when available.
+				if ( isset( $slot_def['required'] ) ) {
+					$slot_details[ $slot_name ]['required'] = $slot_def['required'];
+				}
+				if ( isset( $slot_def['over_limit_action'] ) ) {
+					$slot_details[ $slot_name ]['over_limit_action'] = $slot_def['over_limit_action'];
+				}
+				$validation = $slot_def['validation'] ?? [];
+				if ( ! empty( $validation['min_length'] ) ) {
+					$slot_details[ $slot_name ]['min_length'] = $validation['min_length'];
 				}
 			}
 			$schema_for_prompt[ $block_id ] = $slot_details;
@@ -178,7 +211,7 @@ class SlotContentGenerator {
 				return [];
 			}
 
-			// Validate and enforce max_length constraints.
+			// Validate and enforce max_length constraints (respecting over_limit_action).
 			$validated = [];
 			foreach ( $batch as $block_id => $slots ) {
 				if ( ! isset( $parsed[ $block_id ] ) || ! is_array( $parsed[ $block_id ] ) ) {
@@ -187,9 +220,15 @@ class SlotContentGenerator {
 				$validated[ $block_id ] = [];
 				foreach ( $slots as $slot_name => $slot_def ) {
 					if ( isset( $parsed[ $block_id ][ $slot_name ] ) ) {
-						$value = (string) $parsed[ $block_id ][ $slot_name ];
-						$max   = $slot_def['max_length'] ?? 500;
-						$validated[ $block_id ][ $slot_name ] = mb_substr( $value, 0, $max );
+						$value  = (string) $parsed[ $block_id ][ $slot_name ];
+						$max    = $slot_def['max_length'] ?? 500;
+						$action = $slot_def['over_limit_action'] ?? 'truncate';
+
+						// Only truncate here if action is 'truncate'; other actions are handled by ValidationService.
+						if ( $action === 'truncate' && mb_strlen( $value ) > $max ) {
+							$value = mb_substr( $value, 0, $max );
+						}
+						$validated[ $block_id ][ $slot_name ] = $value;
 					}
 				}
 			}

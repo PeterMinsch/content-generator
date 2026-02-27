@@ -31,16 +31,23 @@ class BulkPublishService {
 	private ?TemplateService $template_service;
 
 	/**
+	 * @var ValidationService|null
+	 */
+	private ?ValidationService $validation_service;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param SlotContentGenerator $slot_generator  Slot content generator.
-	 * @param NextJSPageGenerator  $page_generator  Page generator.
-	 * @param TemplateService|null $template_service Template service (optional).
+	 * @param SlotContentGenerator    $slot_generator      Slot content generator.
+	 * @param NextJSPageGenerator     $page_generator      Page generator.
+	 * @param TemplateService|null    $template_service    Template service (optional).
+	 * @param ValidationService|null  $validation_service  Validation service (optional).
 	 */
-	public function __construct( SlotContentGenerator $slot_generator, NextJSPageGenerator $page_generator, ?TemplateService $template_service = null ) {
-		$this->slot_generator   = $slot_generator;
-		$this->page_generator   = $page_generator;
-		$this->template_service = $template_service;
+	public function __construct( SlotContentGenerator $slot_generator, NextJSPageGenerator $page_generator, ?TemplateService $template_service = null, ?ValidationService $validation_service = null ) {
+		$this->slot_generator     = $slot_generator;
+		$this->page_generator     = $page_generator;
+		$this->template_service   = $template_service;
+		$this->validation_service = $validation_service;
 	}
 
 	/**
@@ -68,6 +75,7 @@ class BulkPublishService {
 		}
 
 		// Determine block order: try DB template first, then config fallback.
+		$template_id = null;
 		if ( ! empty( $row['blocks'] ) ) {
 			$block_order = array_map( 'trim', explode( ',', $row['blocks'] ) );
 		} else {
@@ -78,6 +86,7 @@ class BulkPublishService {
 				$db_template = $this->template_service->getBySlug( $page_template );
 				if ( $db_template ) {
 					$block_order = $db_template['block_order'] ?? [];
+					$template_id = (int) $db_template['id'];
 				}
 			}
 
@@ -97,12 +106,26 @@ class BulkPublishService {
 			'page_title'    => ucwords( $keyword ),
 		] );
 
-		// Generate slot content via AI.
+		// Generate slot content via AI (passes template_id for rule overrides).
 		try {
-			$slot_content = $this->slot_generator->generateForPage( $block_order, $context );
+			$slot_content = $this->slot_generator->generateForPage( $block_order, $context, $template_id );
 		} catch ( \Exception $e ) {
 			error_log( "[SEO Generator] Slot generation failed for '{$keyword}': " . $e->getMessage() );
 			$slot_content = [];
+		}
+
+		// Post-generation validation (if ValidationService available).
+		$validation_issues = [];
+		if ( $this->validation_service && ! empty( $slot_content ) ) {
+			$validation_result = $this->validation_service->validatePage(
+				$slot_content,
+				$block_order,
+				$template_id,
+				$keyword
+			);
+			if ( ! empty( $validation_result->issues ) ) {
+				$validation_issues = $validation_result->toArray()['issues'];
+			}
 		}
 
 		// Generate SEO metadata via AI.
@@ -124,6 +147,10 @@ class BulkPublishService {
 
 		if ( $result['success'] ) {
 			$result['slug'] = $slug;
+		}
+
+		if ( ! empty( $validation_issues ) ) {
+			$result['validation_issues'] = $validation_issues;
 		}
 
 		return $result;

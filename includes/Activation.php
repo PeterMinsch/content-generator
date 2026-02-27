@@ -103,6 +103,12 @@ class Activation {
 
 		// Create template table (Template Builder).
 		self::createTemplateTable();
+
+		// Create block rule profile table (Stage 2).
+		self::createBlockRuleProfileTable();
+
+		// Create template block override table (Stage 2).
+		self::createTemplateBlockOverrideTable();
 	}
 
 	/**
@@ -363,6 +369,22 @@ class Activation {
 	private static function createTemplateTable(): void {
 		$template_repository = new Repositories\TemplateRepository();
 		$template_repository->createTable();
+	}
+
+	/**
+	 * Create block rule profile table (Stage 2).
+	 */
+	private static function createBlockRuleProfileTable(): void {
+		$repo = new Repositories\BlockRuleProfileRepository();
+		$repo->createTable();
+	}
+
+	/**
+	 * Create template block override table (Stage 2).
+	 */
+	private static function createTemplateBlockOverrideTable(): void {
+		$repo = new Repositories\TemplateBlockOverrideRepository();
+		$repo->createTable();
 	}
 
 	/**

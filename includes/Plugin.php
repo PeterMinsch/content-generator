@@ -86,8 +86,30 @@ class Plugin {
 		$test_links_page = new Admin\InternalLinkingTestPage();
 		$this->container->set( 'admin.test_links', $test_links_page );
 
-		// Register admin menu (depends on settings, image library, import, queue status, and geo titles pages).
-		$admin_menu = new Admin\AdminMenu( $settings_page, $image_library_page, $import_page, $queue_status_page, $geo_titles_page );
+		// Register template repository and service.
+		$template_repository = new Repositories\TemplateRepository();
+		$template_service    = new Services\TemplateService( $template_repository );
+		$this->container->set( 'repository.template', $template_repository );
+		$this->container->set( 'service.template', $template_service );
+
+		// Register block rule repositories and service (Stage 2).
+		$block_rule_repo    = new Repositories\BlockRuleProfileRepository();
+		$override_repo      = new Repositories\TemplateBlockOverrideRepository();
+		$block_rule_service = new Services\BlockRuleService( $block_rule_repo, $override_repo );
+		$this->container->set( 'repository.block_rule_profile', $block_rule_repo );
+		$this->container->set( 'repository.template_block_override', $override_repo );
+		$this->container->set( 'service.block_rule', $block_rule_service );
+
+		// Register validation service (Stage 2).
+		$validation_service = new Services\ValidationService( $block_rule_service );
+		$this->container->set( 'service.validation', $validation_service );
+
+		// Register block rule editor page (Stage 2).
+		$block_rule_editor = new Admin\BlockRuleEditorPage( $block_rule_service );
+		$this->container->set( 'admin.block_rule_editor', $block_rule_editor );
+
+		// Register admin menu (depends on settings, image library, import, queue status, geo titles, and block rule editor pages).
+		$admin_menu = new Admin\AdminMenu( $settings_page, $image_library_page, $import_page, $queue_status_page, $geo_titles_page, $block_rule_editor );
 		$this->container->set( 'admin.menu', $admin_menu );
 
 		// Register page editor.
@@ -97,12 +119,6 @@ class Plugin {
 		// Register page builder (Next.js) — kept for backwards compat.
 		$page_builder = new Admin\PageBuilderPage();
 		$this->container->set( 'admin.page_builder', $page_builder );
-
-		// Register template repository and service.
-		$template_repository = new Repositories\TemplateRepository();
-		$template_service    = new Services\TemplateService( $template_repository );
-		$this->container->set( 'repository.template', $template_repository );
-		$this->container->set( 'service.template', $template_service );
 
 		// Register template builder page.
 		$template_builder = new Admin\TemplateBuilderPage( $template_service );
@@ -234,8 +250,14 @@ class Plugin {
 		// Register template builder AJAX handlers.
 		$this->container->get( 'admin.template_builder' )->register();
 
+		// Register block rule editor AJAX handlers (Stage 2).
+		$this->container->get( 'admin.block_rule_editor' )->register();
+
 		// DB upgrade hook for template table.
 		add_action( 'admin_init', array( $this, 'checkTemplateDbUpgrade' ) );
+
+		// DB upgrade hook for block rules tables (Stage 2).
+		add_action( 'admin_init', array( $this, 'checkBlockRulesDbUpgrade' ) );
 
 		// Register bulk publish AJAX handlers.
 		$this->container->get( 'admin.bulk_publish' )->register();
@@ -421,10 +443,14 @@ class Plugin {
 		$settings_service = new Services\SettingsService();
 		$openai_service   = new Services\OpenAIService( $settings_service );
 		$page_generator   = new Services\NextJSPageGenerator();
-		$slot_generator   = new Services\SlotContentGenerator( $openai_service, $page_generator );
+		$block_rule_repo    = new Repositories\BlockRuleProfileRepository();
+		$override_repo      = new Repositories\TemplateBlockOverrideRepository();
+		$block_rule_service = new Services\BlockRuleService( $block_rule_repo, $override_repo );
+		$validation_service = new Services\ValidationService( $block_rule_service );
+		$slot_generator   = new Services\SlotContentGenerator( $openai_service, $page_generator, $block_rule_service );
 		$template_repo    = new Repositories\TemplateRepository();
 		$template_service = new Services\TemplateService( $template_repo );
-		$bulk_service     = new Services\BulkPublishService( $slot_generator, $page_generator, $template_service );
+		$bulk_service     = new Services\BulkPublishService( $slot_generator, $page_generator, $template_service, $validation_service );
 
 		$result = $bulk_service->processQueuedJob( $job['job_data'] );
 
@@ -446,6 +472,23 @@ class Plugin {
 
 			$service = $this->container->get( 'service.template' );
 			$service->seedSystemTemplates();
+		}
+	}
+
+	/**
+	 * Check if block rules DB tables need creation/upgrade and seed from config.
+	 */
+	public function checkBlockRulesDbUpgrade(): void {
+		$current = get_option( 'seo_block_rule_db_version', '0' );
+		if ( version_compare( $current, '1.0', '<' ) ) {
+			$block_rule_repo = $this->container->get( 'repository.block_rule_profile' );
+			$block_rule_repo->createTable();
+
+			$override_repo = $this->container->get( 'repository.template_block_override' );
+			$override_repo->createTable();
+
+			$block_rule_service = $this->container->get( 'service.block_rule' );
+			$block_rule_service->seedFromConfig();
 		}
 	}
 
