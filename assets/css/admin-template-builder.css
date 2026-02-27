@@ -584,14 +584,6 @@ body.folded #template-builder-app.wrap {
 }
 
 /* Reuse device frame styles from admin-block-preview.css */
-#tb-preview-container .tablet-frame {
-	max-width: 100%;
-	width: 100%;
-}
-
-#tb-preview-container .tablet-frame .device-screen {
-	padding: 20px 10px;
-}
 
 #tb-preview-container .mobile-frame {
 	max-width: 375px;
