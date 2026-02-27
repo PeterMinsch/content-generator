@@ -122,7 +122,7 @@ body.folded #template-builder-app.wrap {
 
 .tb-three-col-layout {
 	display: grid;
-	grid-template-columns: 280px 1fr 1.5fr;
+	grid-template-columns: 280px 1fr 420px;
 	gap: 16px;
 	margin-bottom: 20px;
 }
@@ -584,7 +584,7 @@ body.folded #template-builder-app.wrap {
 }
 
 /* Reuse device frame styles from admin-block-preview.css */
-/* All device frames scale-to-fit inside the preview panel.  */
+/* All device frames scale-to-fit inside the 420px preview panel. */
 
 #tb-preview-container .device-frame {
 	max-width: 100% !important;
@@ -592,7 +592,7 @@ body.folded #template-builder-app.wrap {
 }
 
 #tb-preview-container .device-screen {
-	transform-origin: top left;
+	transform-origin: top center;
 }
 
 #tb-preview-iframe {
@@ -601,7 +601,7 @@ body.folded #template-builder-app.wrap {
 	background: #fff;
 }
 
-/* Native widths — JS calculates the scale factor from these. */
+/* Native widths — JS scales all of these to fit the panel. */
 #tb-preview-container .mobile-frame .device-screen,
 #tb-preview-container .mobile-frame #tb-preview-iframe {
 	width: 375px;
