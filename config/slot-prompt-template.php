@@ -31,7 +31,10 @@ Page title: {page_title}
 
 For each block below, generate the specified content slots. Follow these rules:
 - Naturally incorporate the target keyword where appropriate (do NOT force it into every slot)
-- Respect the max_length character limits strictly
+- Respect the max_length character limits strictly (this is the DESKTOP limit)
+- Each slot also has a mobile_max_length — front-load the most important information within this shorter limit, as mobile shows fewer characters
+- If a slot has mobile_hidden: true, the content won't appear on mobile devices — write it for desktop-only context
+- image_specs (if present) describe the block's image containers — note dimensions when selecting or cropping images
 - Write compelling, unique copy — no generic filler
 - Each slot should make sense in the context of its block
 - Headings should be attention-grabbing and concise

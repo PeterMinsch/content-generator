@@ -75,6 +75,17 @@ class NextJSPageGenerator {
 	}
 
 	/**
+	 * Get the images definition for a single block.
+	 *
+	 * @param string $block_id Block identifier.
+	 * @return array Image specs (empty array if none defined).
+	 */
+	public function getBlockImages( string $block_id ): array {
+		$all = $this->getAllBlocks();
+		return $all[ $block_id ]['images'] ?? [];
+	}
+
+	/**
 	 * Get slot schemas for ALL blocks that have non-empty content_slots.
 	 *
 	 * @return array { block_id => { slot_name => { type, max_length, ai_hint } } }

@@ -62,12 +62,17 @@ class SlotContentGenerator {
 		// Build context with business settings.
 		$context = $this->buildContext( $context );
 
-		// Collect blocks that have content slots.
+		// Collect blocks that have content slots + image specs.
 		$blocks_with_slots = [];
+		$block_images_map  = [];
 		foreach ( $block_order as $block_id ) {
 			$schema = $this->page_generator->getSlotSchema( $block_id );
 			if ( ! empty( $schema ) ) {
 				$blocks_with_slots[ $block_id ] = $schema;
+				$images = $this->page_generator->getBlockImages( $block_id );
+				if ( ! empty( $images ) ) {
+					$block_images_map[ $block_id ] = $images;
+				}
 			}
 		}
 
@@ -80,7 +85,7 @@ class SlotContentGenerator {
 		$all_content = [];
 
 		foreach ( $batches as $batch ) {
-			$batch_result = $this->generateBatch( $batch, $context );
+			$batch_result = $this->generateBatch( $batch, $context, $block_images_map );
 			$all_content  = array_merge( $all_content, $batch_result );
 		}
 
@@ -123,23 +128,33 @@ class SlotContentGenerator {
 	/**
 	 * Generate content for a batch of blocks.
 	 *
-	 * @param array $batch   { block_id => slot_schema }
-	 * @param array $context Generation context.
+	 * @param array $batch        { block_id => slot_schema }
+	 * @param array $context      Generation context.
+	 * @param array $block_images { block_id => images_array } Image specs per block.
 	 * @return array { block_id => { slot_name => value } }
 	 */
-	private function generateBatch( array $batch, array $context ): array {
+	private function generateBatch( array $batch, array $context, array $block_images = [] ): array {
 		// Build the blocks schema for the prompt.
 		$schema_for_prompt = [];
 		foreach ( $batch as $block_id => $slots ) {
 			$slot_details = [];
 			foreach ( $slots as $slot_name => $slot_def ) {
 				$slot_details[ $slot_name ] = [
-					'type'       => $slot_def['type'],
-					'max_length' => $slot_def['max_length'],
-					'hint'       => $slot_def['ai_hint'],
+					'type'              => $slot_def['type'],
+					'max_length'        => $slot_def['max_length'],
+					'mobile_max_length' => $slot_def['mobile_max_length'] ?? $slot_def['max_length'],
+					'hint'              => $slot_def['ai_hint'],
 				];
+				if ( ! empty( $slot_def['mobile_hidden'] ) ) {
+					$slot_details[ $slot_name ]['mobile_hidden'] = true;
+				}
 			}
 			$schema_for_prompt[ $block_id ] = $slot_details;
+
+			// Append image specs if available for this block.
+			if ( ! empty( $block_images[ $block_id ] ) ) {
+				$schema_for_prompt[ $block_id ]['_image_specs'] = $block_images[ $block_id ];
+			}
 		}
 
 		$blocks_json = wp_json_encode( $schema_for_prompt, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES );

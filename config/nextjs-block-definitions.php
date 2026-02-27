@@ -8,7 +8,11 @@
  *
  * content_slots define overridable text content per block for dynamic pages.
  * Slot types: text | textarea | html
- * Each slot has: type, max_length (char limit for AI), ai_hint (generation instruction)
+ * Each slot has: type, max_length (desktop char limit), mobile_max_length (mobile char limit),
+ *                ai_hint (generation instruction), mobile_hidden (optional, true if hidden on mobile)
+ *
+ * images define the block's image containers for AI awareness and future dynamic image support.
+ * Each image entry: label, desktop [w, h], mobile [w, h]
  *
  * @package SEOGenerator
  */
@@ -35,10 +39,18 @@ return [
 					'export_name' => 'HeroSlider',
 					'props'       => " page='default'",
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Main hero headline, compelling and keyword-rich' ],
-						'subheading'  => [ 'type' => 'text',     'max_length' => 120, 'ai_hint' => 'Supporting subtitle that expands on the headline' ],
-						'cta_text'    => [ 'type' => 'text',     'max_length' => 30,  'ai_hint' => 'Call-to-action button text' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Brief paragraph below the hero' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 35,  'ai_hint' => 'Main hero headline, compelling and keyword-rich' ],
+						'subheading'  => [ 'type' => 'text',     'max_length' => 66,  'mobile_max_length' => 44,  'ai_hint' => 'Supporting subtitle that expands on the headline' ],
+						'cta_text'    => [ 'type' => 'text',     'max_length' => 25,  'mobile_max_length' => 22,  'ai_hint' => 'Call-to-action button text' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 176, 'ai_hint' => 'Brief paragraph below the hero' ],
+					],
+					'images' => [
+						[ 'label' => 'Hero background',  'desktop' => [ 508, 635 ], 'mobile' => [ 400, 500 ] ],
+						[ 'label' => 'Accent image 1',   'desktop' => [ 150, 150 ], 'mobile' => null ],
+						[ 'label' => 'Accent image 2',   'desktop' => [ 116, 116 ], 'mobile' => null ],
+						[ 'label' => 'Accent image 3',   'desktop' => [ 130, 130 ], 'mobile' => null ],
+						[ 'label' => 'Accent image 4',   'desktop' => [ 140, 140 ], 'mobile' => null ],
+						[ 'label' => 'Accent image 5',   'desktop' => [ 120, 120 ], 'mobile' => null ],
 					],
 				],
 				'about_bravo' => [
@@ -48,9 +60,15 @@ return [
 					'export_name' => 'AboutBravo',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Section heading about the jeweler' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Company story paragraph highlighting expertise, family heritage, and trust' ],
-						'cta_text'    => [ 'type' => 'text',     'max_length' => 30,  'ai_hint' => 'CTA button text like "Learn More" or "Our Story"' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Section heading about the jeweler' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 330, 'mobile_max_length' => 275, 'ai_hint' => 'Company story paragraph highlighting expertise, family heritage, and trust' ],
+						'cta_text'    => [ 'type' => 'text',     'max_length' => 25,  'mobile_max_length' => 22,  'ai_hint' => 'CTA button text like "Learn More" or "Our Story"' ],
+					],
+					'images' => [
+						[ 'label' => 'Icon 1', 'desktop' => [ 66, 66 ], 'mobile' => [ 48, 48 ] ],
+						[ 'label' => 'Icon 2', 'desktop' => [ 66, 66 ], 'mobile' => [ 48, 48 ] ],
+						[ 'label' => 'Icon 3', 'desktop' => [ 66, 66 ], 'mobile' => [ 48, 48 ] ],
+						[ 'label' => 'Icon 4', 'desktop' => [ 66, 66 ], 'mobile' => [ 48, 48 ] ],
 					],
 				],
 				'featured_services' => [
@@ -60,8 +78,16 @@ return [
 					'export_name' => 'FeaturedServices',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Section heading for services offered' ],
-						'subheading'  => [ 'type' => 'text',     'max_length' => 120, 'ai_hint' => 'Brief subtitle about service quality' ],
+						'heading'     => [ 'type' => 'text', 'max_length' => 55,  'mobile_max_length' => 35, 'ai_hint' => 'Section heading for services offered' ],
+						'subheading'  => [ 'type' => 'text', 'max_length' => 110, 'mobile_hidden' => true,   'ai_hint' => 'Brief subtitle about service quality' ],
+					],
+					'images' => [
+						[ 'label' => 'Service thumbnail 1', 'desktop' => [ 148, 80 ], 'mobile' => [ 84, 48 ] ],
+						[ 'label' => 'Service thumbnail 2', 'desktop' => [ 148, 80 ], 'mobile' => [ 84, 48 ] ],
+						[ 'label' => 'Service thumbnail 3', 'desktop' => [ 148, 80 ], 'mobile' => [ 84, 48 ] ],
+						[ 'label' => 'Service thumbnail 4', 'desktop' => [ 148, 80 ], 'mobile' => [ 84, 48 ] ],
+						[ 'label' => 'Service thumbnail 5', 'desktop' => [ 148, 80 ], 'mobile' => [ 84, 48 ] ],
+						[ 'label' => 'Service thumbnail 6', 'desktop' => [ 148, 80 ], 'mobile' => [ 84, 48 ] ],
 					],
 				],
 				'shop_categories' => [
@@ -71,7 +97,14 @@ return [
 					'export_name' => 'ShopCategories',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Section heading for shopping categories' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Section heading for shopping categories' ],
+					],
+					'images' => [
+						[ 'label' => 'Category card 1', 'desktop' => [ 300, 400 ], 'mobile' => [ 280, 370 ] ],
+						[ 'label' => 'Category card 2', 'desktop' => [ 300, 400 ], 'mobile' => [ 280, 370 ] ],
+						[ 'label' => 'Category card 3', 'desktop' => [ 300, 400 ], 'mobile' => [ 280, 370 ] ],
+						[ 'label' => 'Category card 4', 'desktop' => [ 300, 400 ], 'mobile' => [ 280, 370 ] ],
+						[ 'label' => 'Category card 5', 'desktop' => [ 300, 400 ], 'mobile' => [ 280, 370 ] ],
 					],
 				],
 				'new_collection' => [
@@ -81,8 +114,11 @@ return [
 					'export_name' => 'NewCollection',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Collection name or spotlight heading' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 250, 'ai_hint' => 'Brief description of the featured collection' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Collection name or spotlight heading' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 220, 'mobile_max_length' => 176, 'ai_hint' => 'Brief description of the featured collection' ],
+					],
+					'images' => [
+						[ 'label' => 'Product image', 'desktop' => [ 872, 872 ], 'mobile' => [ 375, 375 ] ],
 					],
 				],
 				'diamond_explore' => [
@@ -92,7 +128,7 @@ return [
 					'export_name' => 'DiamondExplore',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for diamond exploration section' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for diamond exploration section' ],
 					],
 				],
 				'top_rated' => [
@@ -102,9 +138,12 @@ return [
 					'export_name' => 'TopRated',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading emphasizing top ratings and reviews' ],
-						'subheading'  => [ 'type' => 'text',     'max_length' => 120, 'ai_hint' => 'Subtitle about customer satisfaction or rating count' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Brief paragraph about why customers love this jeweler' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading emphasizing top ratings and reviews' ],
+						'subheading'  => [ 'type' => 'text',     'max_length' => 110, 'mobile_max_length' => 88,  'ai_hint' => 'Subtitle about customer satisfaction or rating count' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Brief paragraph about why customers love this jeweler' ],
+					],
+					'images' => [
+						[ 'label' => 'Review avatar', 'desktop' => [ 66, 96 ], 'mobile' => [ 66, 96 ] ],
 					],
 				],
 				'own_design' => [
@@ -114,9 +153,12 @@ return [
 					'export_name' => 'OwnDesign',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Compelling heading about designing your own ring' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 250, 'ai_hint' => 'Brief description of the custom design experience' ],
-						'cta_text'    => [ 'type' => 'text',     'max_length' => 30,  'ai_hint' => 'CTA button text like "Start Designing"' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Compelling heading about designing your own ring' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 220, 'mobile_max_length' => 176, 'ai_hint' => 'Brief description of the custom design experience' ],
+						'cta_text'    => [ 'type' => 'text',     'max_length' => 25,  'mobile_max_length' => 22,  'ai_hint' => 'CTA button text like "Start Designing"' ],
+					],
+					'images' => [
+						[ 'label' => 'Illustration', 'desktop' => [ 400, 400 ], 'mobile' => [ 300, 300 ] ],
 					],
 				],
 				'handcrafted' => [
@@ -126,7 +168,10 @@ return [
 					'export_name' => 'Handcrafted',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading about handcrafted jewelry and local craftsmanship' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading about handcrafted jewelry and local craftsmanship' ],
+					],
+					'images' => [
+						[ 'label' => 'Carousel slide', 'desktop' => [ 800, 600 ], 'mobile' => [ 375, 280 ] ],
 					],
 				],
 				'intro_gallery' => [
@@ -144,8 +189,8 @@ return [
 					'export_name' => 'WeHere',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Welcoming heading about availability and service' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 250, 'ai_hint' => 'Brief paragraph inviting visitors to book an appointment' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Welcoming heading about availability and service' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 220, 'mobile_max_length' => 176, 'ai_hint' => 'Brief paragraph inviting visitors to book an appointment' ],
 					],
 				],
 			],
@@ -169,8 +214,8 @@ return [
 					'export_name' => 'HeroSlider',
 					'props'       => " page='about' className='-mt-[5.75rem] md:-mt-[6.75rem] lg:-mt-[7.25rem]'",
 					'content_slots' => [
-						'heading'    => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'About page hero headline' ],
-						'subheading' => [ 'type' => 'text',     'max_length' => 120, 'ai_hint' => 'About page hero subtitle' ],
+						'heading'    => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'About page hero headline' ],
+						'subheading' => [ 'type' => 'text', 'max_length' => 66, 'mobile_max_length' => 44, 'ai_hint' => 'About page hero subtitle' ],
 					],
 				],
 				'mission_statement' => [
@@ -180,9 +225,9 @@ return [
 					'export_name' => 'MissionStatement',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Mission statement heading' ],
-						'mission'     => [ 'type' => 'textarea', 'max_length' => 500, 'ai_hint' => 'Company mission statement paragraph about values and commitment' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Supporting text about company philosophy and approach' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Mission statement heading' ],
+						'mission'     => [ 'type' => 'textarea', 'max_length' => 440, 'mobile_max_length' => 330, 'ai_hint' => 'Company mission statement paragraph about values and commitment' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Supporting text about company philosophy and approach' ],
 					],
 				],
 				'why_custom_founders' => [
@@ -192,8 +237,8 @@ return [
 					'export_name' => 'WhyCustom',
 					'props'       => " titlePart='THE ' titleAccent='FOUNDERS' title='MEET '",
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about the founders or team leaders' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Description of the founders, their background and vision' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about the founders or team leaders' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Description of the founders, their background and vision' ],
 					],
 				],
 				'video_block' => [
@@ -203,7 +248,7 @@ return [
 					'export_name' => 'VideoBlock',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Video section heading' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Video section heading' ],
 					],
 				],
 				'piece_mind' => [
@@ -213,8 +258,19 @@ return [
 					'export_name' => 'PieceMind',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Trust/assurance section heading' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Text about quality guarantees, warranties, and customer peace of mind' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Trust/assurance section heading' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Text about quality guarantees, warranties, and customer peace of mind' ],
+					],
+					'images' => [
+						[ 'label' => 'Trust icon 1',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Trust icon 2',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Trust icon 3',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Trust icon 4',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Trust icon 5',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Trust icon 6',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Trust icon 7',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Trust icon 8',  'desktop' => [ 34, 85 ], 'mobile' => [ 34, 85 ] ],
+						[ 'label' => 'Banner',        'desktop' => [ 520, 0 ], 'mobile' => [ 360, 0 ] ],
 					],
 				],
 				'beyond_adornment' => [
@@ -224,8 +280,14 @@ return [
 					'export_name' => 'BeyondAdornment',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about jewelry being more than decoration' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Philosophical text about jewelry craftsmanship and meaning' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about jewelry being more than decoration' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Philosophical text about jewelry craftsmanship and meaning' ],
+					],
+					'images' => [
+						[ 'label' => 'Corner image top-left',     'desktop' => [ 460, 460 ], 'mobile' => [ 230, 230 ] ],
+						[ 'label' => 'Corner image top-right',    'desktop' => [ 200, 300 ], 'mobile' => [ 120, 180 ] ],
+						[ 'label' => 'Corner image bottom-left',  'desktop' => [ 300, 200 ], 'mobile' => [ 180, 120 ] ],
+						[ 'label' => 'Corner image bottom-right', 'desktop' => [ 400, 400 ], 'mobile' => [ 200, 200 ] ],
 					],
 				],
 				'beyond_adornment_gem' => [
@@ -235,8 +297,8 @@ return [
 					'export_name' => 'BeyondAdornmentGem',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about gemstone quality and sourcing' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Text about gemstone expertise, sourcing, and quality standards' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about gemstone quality and sourcing' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Text about gemstone expertise, sourcing, and quality standards' ],
 					],
 				],
 				'our_team' => [
@@ -246,8 +308,8 @@ return [
 					'export_name' => 'OurTeam',
 					'props'       => '',
 					'content_slots' => [
-						'heading'    => [ 'type' => 'text', 'max_length' => 80,  'ai_hint' => 'Team section heading' ],
-						'subheading' => [ 'type' => 'text', 'max_length' => 120, 'ai_hint' => 'Subtitle about the team expertise and dedication' ],
+						'heading'    => [ 'type' => 'text', 'max_length' => 55,  'mobile_max_length' => 44, 'ai_hint' => 'Team section heading' ],
+						'subheading' => [ 'type' => 'text', 'max_length' => 110, 'mobile_max_length' => 88, 'ai_hint' => 'Subtitle about the team expertise and dedication' ],
 					],
 				],
 				'our_experts' => [
@@ -257,8 +319,8 @@ return [
 					'export_name' => 'OurExperts',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about expert gemologists and jewelers' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Brief text about expert qualifications and certifications' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about expert gemologists and jewelers' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Brief text about expert qualifications and certifications' ],
 					],
 				],
 				'our_instagram' => [
@@ -282,8 +344,8 @@ return [
 					'export_name' => 'CsOfDiamonds',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about the 4 Cs of diamond quality' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Introduction to diamond grading: cut, color, clarity, carat' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about the 4 Cs of diamond quality' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Introduction to diamond grading: cut, color, clarity, carat' ],
 					],
 				],
 				'diamond_shapes' => [
@@ -293,7 +355,7 @@ return [
 					'export_name' => 'DiamondShapes',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for diamond shapes guide' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for diamond shapes guide' ],
 					],
 				],
 				'natural_vs_labgrown' => [
@@ -303,8 +365,8 @@ return [
 					'export_name' => 'NaturalVsLabgrown',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading for natural vs lab-grown comparison' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Balanced comparison of natural and lab-grown diamonds' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading for natural vs lab-grown comparison' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Balanced comparison of natural and lab-grown diamonds' ],
 					],
 				],
 				'perfect_diamond' => [
@@ -314,9 +376,9 @@ return [
 					'export_name' => 'PerfectDiamond',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about finding the perfect diamond' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Guide text about selecting the right diamond' ],
-						'cta_text'    => [ 'type' => 'text',     'max_length' => 30,  'ai_hint' => 'CTA button text' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about finding the perfect diamond' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Guide text about selecting the right diamond' ],
+						'cta_text'    => [ 'type' => 'text',     'max_length' => 25,  'mobile_max_length' => 22,  'ai_hint' => 'CTA button text' ],
 					],
 				],
 				'diamonds_price' => [
@@ -326,7 +388,7 @@ return [
 					'export_name' => 'DiamondsPrice',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for diamond pricing section' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for diamond pricing section' ],
 					],
 				],
 				'beyond_the_five' => [
@@ -336,8 +398,8 @@ return [
 					'export_name' => 'Beyond',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about advanced diamond quality factors' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Text about factors beyond the basic 4 Cs' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about advanced diamond quality factors' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Text about factors beyond the basic 4 Cs' ],
 					],
 				],
 				'assurance_block' => [
@@ -347,8 +409,8 @@ return [
 					'export_name' => 'Assurance',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about diamond certification and assurance' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Text about GIA certification, quality guarantees' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about diamond certification and assurance' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Text about GIA certification, quality guarantees' ],
 					],
 				],
 				'shop_engagement_rings' => [
@@ -358,8 +420,8 @@ return [
 					'export_name' => 'EngagementRings',
 					'props'       => '',
 					'content_slots' => [
-						'heading'  => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'CTA heading for shopping engagement rings' ],
-						'cta_text' => [ 'type' => 'text', 'max_length' => 30, 'ai_hint' => 'Button text like "Shop Now" or "Browse Collection"' ],
+						'heading'  => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'CTA heading for shopping engagement rings' ],
+						'cta_text' => [ 'type' => 'text', 'max_length' => 25, 'mobile_max_length' => 22, 'ai_hint' => 'Button text like "Shop Now" or "Browse Collection"' ],
 					],
 				],
 			],
@@ -375,8 +437,8 @@ return [
 					'export_name' => 'WhyCustom',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about benefits of custom jewelry' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Text explaining why custom design is worth it' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about benefits of custom jewelry' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Text explaining why custom design is worth it' ],
 					],
 				],
 				'bravo_difference' => [
@@ -386,8 +448,8 @@ return [
 					'export_name' => 'BravoDifference',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about what makes this jeweler unique' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Text about differentiators: craftsmanship, service, expertise' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about what makes this jeweler unique' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Text about differentiators: craftsmanship, service, expertise' ],
 					],
 				],
 				'crafts_manship' => [
@@ -397,8 +459,8 @@ return [
 					'export_name' => 'CraftsManship',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about artisan craftsmanship' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Text about handcrafted techniques and quality materials' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about artisan craftsmanship' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Text about handcrafted techniques and quality materials' ],
 					],
 				],
 				'process_section' => [
@@ -408,8 +470,8 @@ return [
 					'export_name' => 'ProcessSection',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about the custom design process' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Brief intro to the step-by-step design journey' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about the custom design process' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Brief intro to the step-by-step design journey' ],
 					],
 				],
 				'master_piece' => [
@@ -419,7 +481,7 @@ return [
 					'export_name' => 'MasterPiece',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for masterpiece gallery section' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for masterpiece gallery section' ],
 					],
 				],
 				'comparison_rings' => [
@@ -429,8 +491,8 @@ return [
 					'export_name' => 'ComparisonRings',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading comparing custom vs mass-produced rings' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Text explaining the advantages of custom over mass-produced' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading comparing custom vs mass-produced rings' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Text explaining the advantages of custom over mass-produced' ],
 					],
 				],
 				'describe_your_design' => [
@@ -440,8 +502,8 @@ return [
 					'export_name' => 'DescribeDesign',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading inviting users to describe their dream design' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 250, 'ai_hint' => 'Brief text encouraging users to share their vision' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading inviting users to describe their dream design' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 220, 'mobile_max_length' => 176, 'ai_hint' => 'Brief text encouraging users to share their vision' ],
 					],
 				],
 				'calculator' => [
@@ -451,7 +513,7 @@ return [
 					'export_name' => 'CustomCalculator',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for the price calculator tool' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for the price calculator tool' ],
 					],
 				],
 			],
@@ -471,8 +533,8 @@ return [
 					],
 					'props'        => " categories={ringsCategories} viewStoreHref='/shop'",
 					'content_slots' => [
-						'heading'    => [ 'type' => 'text', 'max_length' => 80,  'ai_hint' => 'Heading for ring style selection' ],
-						'subheading' => [ 'type' => 'text', 'max_length' => 120, 'ai_hint' => 'Subtitle about finding the perfect style' ],
+						'heading'    => [ 'type' => 'text', 'max_length' => 55,  'mobile_max_length' => 44, 'ai_hint' => 'Heading for ring style selection' ],
+						'subheading' => [ 'type' => 'text', 'max_length' => 110, 'mobile_max_length' => 88, 'ai_hint' => 'Subtitle about finding the perfect style' ],
 					],
 				],
 				'choose_your_diamond' => [
@@ -486,7 +548,7 @@ return [
 					],
 					'props'        => ' categories={diamondCategories}',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for diamond selection guide' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for diamond selection guide' ],
 					],
 				],
 				'choose_diamond_color' => [
@@ -500,7 +562,7 @@ return [
 					],
 					'props'        => ' groups={diamondColorGroups}',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for diamond color guide' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for diamond color guide' ],
 					],
 				],
 				'metals_selector' => [
@@ -514,7 +576,7 @@ return [
 					],
 					'props'        => ' metals={METALS}',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading for metal type selection' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading for metal type selection' ],
 					],
 				],
 				'simple_buying' => [
@@ -524,8 +586,8 @@ return [
 					'export_name' => 'SimpleBuying',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about easy ring buying' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Brief text about the simplified buying process' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about easy ring buying' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Brief text about the simplified buying process' ],
 					],
 				],
 				'rings_why_choose' => [
@@ -536,8 +598,8 @@ return [
 					'import_type' => 'default',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about advantages of choosing this jeweler' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 400, 'ai_hint' => 'Text about key advantages: expertise, quality, value' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about advantages of choosing this jeweler' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 355, 'mobile_max_length' => 275, 'ai_hint' => 'Text about key advantages: expertise, quality, value' ],
 					],
 				],
 				'complete_experience' => [
@@ -547,8 +609,8 @@ return [
 					'export_name' => 'CompleteExperience',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about the complete ring shopping experience' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Text about the end-to-end experience from selection to delivery' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about the complete ring shopping experience' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Text about the end-to-end experience from selection to delivery' ],
 					],
 				],
 				'currently_trending' => [
@@ -558,8 +620,8 @@ return [
 					'export_name' => 'CurrentlyTrend',
 					'props'       => '',
 					'content_slots' => [
-						'heading'    => [ 'type' => 'text', 'max_length' => 80,  'ai_hint' => 'Heading about trending ring styles' ],
-						'subheading' => [ 'type' => 'text', 'max_length' => 120, 'ai_hint' => 'Subtitle about current jewelry trends' ],
+						'heading'    => [ 'type' => 'text', 'max_length' => 55,  'mobile_max_length' => 44, 'ai_hint' => 'Heading about trending ring styles' ],
+						'subheading' => [ 'type' => 'text', 'max_length' => 110, 'mobile_max_length' => 88, 'ai_hint' => 'Subtitle about current jewelry trends' ],
 					],
 				],
 				'custom_design_cta' => [
@@ -569,9 +631,16 @@ return [
 					'export_name' => 'CustomDesign',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'CTA heading about custom engagement ring design' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 250, 'ai_hint' => 'Brief text encouraging custom design consultation' ],
-						'cta_text'    => [ 'type' => 'text',     'max_length' => 30,  'ai_hint' => 'Button text like "Design Yours" or "Get Started"' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'CTA heading about custom engagement ring design' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 220, 'mobile_max_length' => 176, 'ai_hint' => 'Brief text encouraging custom design consultation' ],
+						'cta_text'    => [ 'type' => 'text',     'max_length' => 25,  'mobile_max_length' => 22,  'ai_hint' => 'Button text like "Design Yours" or "Get Started"' ],
+					],
+					'images' => [
+						[ 'label' => 'Banner image', 'desktop' => [ 710, 500 ], 'mobile' => [ 375, 264 ] ],
+						[ 'label' => 'Step icon 1',  'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 2',  'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 3',  'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 4',  'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
 					],
 				],
 				'financing_available' => [
@@ -581,8 +650,12 @@ return [
 					'export_name' => 'FinancingAvailable',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about financing options' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Text about flexible payment plans and financing' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about financing options' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Text about flexible payment plans and financing' ],
+					],
+					'images' => [
+						[ 'label' => 'Financing logo 1', 'desktop' => [ 120, 32 ], 'mobile' => [ 120, 32 ] ],
+						[ 'label' => 'Financing logo 2', 'desktop' => [ 140, 32 ], 'mobile' => [ 140, 32 ] ],
 					],
 				],
 				'lifestyle' => [
@@ -609,9 +682,18 @@ return [
 					'export_name' => 'BookAppointment',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading inviting to book an appointment' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 250, 'ai_hint' => 'Text about the in-store consultation experience' ],
-						'cta_text'    => [ 'type' => 'text',     'max_length' => 30,  'ai_hint' => 'Button text like "Book Now" or "Schedule Visit"' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading inviting to book an appointment' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 220, 'mobile_max_length' => 176, 'ai_hint' => 'Text about the in-store consultation experience' ],
+						'cta_text'    => [ 'type' => 'text',     'max_length' => 25,  'mobile_max_length' => 22,  'ai_hint' => 'Button text like "Book Now" or "Schedule Visit"' ],
+					],
+					'images' => [
+						[ 'label' => 'Banner image',  'desktop' => [ 720, 636 ], 'mobile' => [ 375, 331 ] ],
+						[ 'label' => 'Step icon 1',   'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 2',   'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 3',   'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 4',   'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 5',   'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
+						[ 'label' => 'Step icon 6',   'desktop' => [ 48, 48 ],   'mobile' => [ 36, 36 ] ],
 					],
 				],
 				'bravo_faq' => [
@@ -621,7 +703,7 @@ return [
 					'export_name' => 'BravoFAQ',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'FAQ section heading' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'FAQ section heading' ],
 					],
 				],
 			],
@@ -645,8 +727,8 @@ return [
 					'export_name' => 'Covered',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading about services coverage area' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Text about service areas and coverage' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading about services coverage area' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Text about service areas and coverage' ],
 					],
 				],
 				'discover' => [
@@ -656,8 +738,8 @@ return [
 					'export_name' => 'Discover',
 					'props'       => '',
 					'content_slots' => [
-						'heading'     => [ 'type' => 'text',     'max_length' => 80,  'ai_hint' => 'Heading inviting visitors to discover the store' ],
-						'description' => [ 'type' => 'textarea', 'max_length' => 300, 'ai_hint' => 'Text about what visitors can discover at the store' ],
+						'heading'     => [ 'type' => 'text',     'max_length' => 55,  'mobile_max_length' => 44,  'ai_hint' => 'Heading inviting visitors to discover the store' ],
+						'description' => [ 'type' => 'textarea', 'max_length' => 275, 'mobile_max_length' => 220, 'ai_hint' => 'Text about what visitors can discover at the store' ],
 					],
 				],
 				'loves_us' => [
@@ -667,7 +749,7 @@ return [
 					'export_name' => 'LoveUs',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading about customer love and testimonials' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading about customer love and testimonials' ],
 					],
 				],
 				'need_us' => [
@@ -677,7 +759,7 @@ return [
 					'export_name' => 'NeedUs',
 					'props'       => '',
 					'content_slots' => [
-						'heading' => [ 'type' => 'text', 'max_length' => 80, 'ai_hint' => 'Heading about how to reach the store' ],
+						'heading' => [ 'type' => 'text', 'max_length' => 55, 'mobile_max_length' => 44, 'ai_hint' => 'Heading about how to reach the store' ],
 					],
 				],
 			],
