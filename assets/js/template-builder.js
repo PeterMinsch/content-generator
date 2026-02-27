@@ -468,26 +468,22 @@
 			if ( frame ) frame.className = 'device-frame ' + device + '-frame';
 			previewContainer.dataset.device = device;
 
-			setTimeout( updatePreviewScale, 50 );
+			if ( device === 'desktop' ) setTimeout( updateDesktopScale, 50 );
+			else previewContainer.style.minHeight = '';
 		} );
 	} );
 
-	var DEVICE_NATIVE = { mobile: { w: 375, h: 667 }, tablet: { w: 768, h: 700 }, desktop: { w: 1440, h: 900 } };
-
-	function updatePreviewScale() {
-		if ( ! previewContainer ) return;
-		var device = previewContainer.dataset.device || 'tablet';
-		var screen = previewContainer.querySelector( '.device-screen' );
+	function updateDesktopScale() {
+		var screen = previewContainer ? previewContainer.querySelector( '.desktop-frame .device-screen' ) : null;
 		if ( ! screen ) return;
-		var native = DEVICE_NATIVE[ device ] || DEVICE_NATIVE.tablet;
 		var pw = previewContainer.offsetWidth - 40;
-		var scale = Math.min( pw / native.w, 1 );
+		var scale = Math.min( pw / 1440, 1 );
 		screen.style.transform = 'scale(' + scale + ')';
-		previewContainer.style.minHeight = ( native.h * scale + 40 ) + 'px';
+		previewContainer.style.minHeight = ( 900 * scale + 40 ) + 'px';
 	}
 
 	window.addEventListener( 'resize', function () {
-		if ( previewContainer ) updatePreviewScale();
+		if ( previewContainer && previewContainer.dataset.device === 'desktop' ) updateDesktopScale();
 	} );
 
 	// ─── Template Management ─────────────────────────────────────
@@ -721,6 +717,5 @@
 	}
 
 	initSortable();
-	setTimeout( updatePreviewScale, 100 );
 
 } )();
