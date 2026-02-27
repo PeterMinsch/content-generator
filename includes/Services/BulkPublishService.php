@@ -11,6 +11,8 @@ namespace SEOGenerator\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use SEOGenerator\Repositories\TemplateRepository;
+
 class BulkPublishService {
 
 	/**
@@ -24,14 +26,21 @@ class BulkPublishService {
 	private NextJSPageGenerator $page_generator;
 
 	/**
+	 * @var TemplateService|null
+	 */
+	private ?TemplateService $template_service;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param SlotContentGenerator $slot_generator Slot content generator.
-	 * @param NextJSPageGenerator  $page_generator Page generator.
+	 * @param SlotContentGenerator $slot_generator  Slot content generator.
+	 * @param NextJSPageGenerator  $page_generator  Page generator.
+	 * @param TemplateService|null $template_service Template service (optional).
 	 */
-	public function __construct( SlotContentGenerator $slot_generator, NextJSPageGenerator $page_generator ) {
-		$this->slot_generator = $slot_generator;
-		$this->page_generator = $page_generator;
+	public function __construct( SlotContentGenerator $slot_generator, NextJSPageGenerator $page_generator, ?TemplateService $template_service = null ) {
+		$this->slot_generator   = $slot_generator;
+		$this->page_generator   = $page_generator;
+		$this->template_service = $template_service;
 	}
 
 	/**
@@ -58,11 +67,24 @@ class BulkPublishService {
 			return [ 'success' => false, 'message' => "Slug \"{$slug}\" is reserved." ];
 		}
 
-		// Determine block order.
+		// Determine block order: try DB template first, then config fallback.
 		if ( ! empty( $row['blocks'] ) ) {
 			$block_order = array_map( 'trim', explode( ',', $row['blocks'] ) );
 		} else {
-			$block_order = $this->page_generator->getDefaultOrder( $page_template );
+			$block_order = [];
+
+			// Try DB template.
+			if ( $this->template_service ) {
+				$db_template = $this->template_service->getBySlug( $page_template );
+				if ( $db_template ) {
+					$block_order = $db_template['block_order'] ?? [];
+				}
+			}
+
+			// Fallback to config.
+			if ( empty( $block_order ) ) {
+				$block_order = $this->page_generator->getDefaultOrder( $page_template );
+			}
 		}
 
 		if ( empty( $block_order ) ) {

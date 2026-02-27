@@ -70,13 +70,28 @@ class BulkPublishPage {
 			true
 		);
 
-		// Available page templates with their default block orders.
+		// Load templates from DB first, fallback to config.
 		$templates = [];
-		foreach ( $this->page_generator->getPages() as $slug => $page ) {
-			$templates[ $slug ] = [
-				'label'        => $page['label'],
-				'defaultOrder' => $page['default_order'] ?? [],
-			];
+
+		$template_repo    = new \SEOGenerator\Repositories\TemplateRepository();
+		$template_service = new \SEOGenerator\Services\TemplateService( $template_repo );
+		$db_templates     = $template_service->getAll( 'active' );
+
+		if ( ! empty( $db_templates ) ) {
+			foreach ( $db_templates as $t ) {
+				$templates[ $t['slug'] ] = [
+					'label'        => $t['name'],
+					'defaultOrder' => $t['block_order'] ?? [],
+				];
+			}
+		} else {
+			// Fallback to config pages.
+			foreach ( $this->page_generator->getPages() as $slug => $page ) {
+				$templates[ $slug ] = [
+					'label'        => $page['label'],
+					'defaultOrder' => $page['default_order'] ?? [],
+				];
+			}
 		}
 
 		wp_localize_script( 'seo-bulk-publish', 'bulkPublishData', [
@@ -212,7 +227,9 @@ class BulkPublishPage {
 		$openai_service   = new OpenAIService( $settings_service );
 		$page_generator   = new NextJSPageGenerator();
 		$slot_generator   = new SlotContentGenerator( $openai_service, $page_generator );
-		$bulk_service     = new BulkPublishService( $slot_generator, $page_generator );
+		$template_repo    = new \SEOGenerator\Repositories\TemplateRepository();
+		$template_service = new \SEOGenerator\Services\TemplateService( $template_repo );
+		$bulk_service     = new BulkPublishService( $slot_generator, $page_generator, $template_service );
 
 		$results   = [];
 		$succeeded = 0;
@@ -257,7 +274,9 @@ class BulkPublishPage {
 		$openai_service   = new OpenAIService( $settings_service );
 		$page_generator   = new NextJSPageGenerator();
 		$slot_generator   = new SlotContentGenerator( $openai_service, $page_generator );
-		$bulk_service     = new BulkPublishService( $slot_generator, $page_generator );
+		$template_repo    = new \SEOGenerator\Repositories\TemplateRepository();
+		$template_service = new \SEOGenerator\Services\TemplateService( $template_repo );
+		$bulk_service     = new BulkPublishService( $slot_generator, $page_generator, $template_service );
 
 		$result = $bulk_service->queueBatch( $rows, $global_context );
 

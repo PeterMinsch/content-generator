@@ -100,6 +100,9 @@ class Activation {
 
 		// Create image cache table (AI Image Generator Bot).
 		self::createImageCacheTable();
+
+		// Create template table (Template Builder).
+		self::createTemplateTable();
 	}
 
 	/**
@@ -350,6 +353,16 @@ class Activation {
 
 		// Log table creation.
 		error_log( '[SEO Generator] Image cache table created/updated' );
+	}
+
+	/**
+	 * Create template table (Template Builder).
+	 *
+	 * @return void
+	 */
+	private static function createTemplateTable(): void {
+		$template_repository = new Repositories\TemplateRepository();
+		$template_repository->createTable();
 	}
 
 	/**

@@ -168,7 +168,17 @@ class AdminMenu {
 			array( $this, 'renderSettingsPage' )
 		);
 
-		// Add "Page Builder" submenu.
+		// Add "Template Builder" submenu (replaces Page Builder).
+		add_submenu_page(
+			self::MENU_SLUG,
+			__( 'Template Builder', 'seo-generator' ),
+			__( 'Template Builder', 'seo-generator' ),
+			'edit_posts',
+			'seo-template-builder',
+			array( $this, 'renderTemplateBuilderPage' )
+		);
+
+		// Keep old Page Builder slug as redirect for bookmarks.
 		add_submenu_page(
 			self::MENU_SLUG,
 			__( 'Page Builder', 'seo-generator' ),
@@ -205,10 +215,19 @@ class AdminMenu {
 	 * @return void
 	 */
 	public function handleRedirects(): void {
-		// Check if we're on the main menu page.
-		if ( isset( $_GET['page'] ) && $_GET['page'] === self::MENU_SLUG ) {
-			// Redirect to the new post page for seo-page post type.
+		if ( ! isset( $_GET['page'] ) ) {
+			return;
+		}
+
+		// Redirect main menu to dashboard.
+		if ( $_GET['page'] === self::MENU_SLUG ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=seo-dashboard' ) );
+			exit;
+		}
+
+		// Redirect old Page Builder bookmarks to Template Builder.
+		if ( $_GET['page'] === 'seo-page-builder' ) {
+			wp_safe_redirect( admin_url( 'admin.php?page=seo-template-builder' ) );
 			exit;
 		}
 	}
@@ -264,11 +283,24 @@ class AdminMenu {
 	}
 
 	/**
+	 * Render the Template Builder page.
+	 *
+	 * @return void
+	 */
+	public function renderTemplateBuilderPage(): void {
+		$template_repo    = new \SEOGenerator\Repositories\TemplateRepository();
+		$template_service = new \SEOGenerator\Services\TemplateService( $template_repo );
+		$template_builder = new TemplateBuilderPage( $template_service );
+		$template_builder->render();
+	}
+
+	/**
 	 * Render the Page Builder page.
 	 *
 	 * @return void
 	 */
 	public function renderPageBuilderPage(): void {
+		// Redirect handled in handleRedirects(), this is a fallback.
 		$page_builder = new PageBuilderPage();
 		$page_builder->render();
 	}

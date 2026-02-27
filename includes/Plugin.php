@@ -94,9 +94,19 @@ class Plugin {
 		$page_editor = new Admin\PageEditor();
 		$this->container->set( 'admin.page_editor', $page_editor );
 
-		// Register page builder (Next.js).
+		// Register page builder (Next.js) — kept for backwards compat.
 		$page_builder = new Admin\PageBuilderPage();
 		$this->container->set( 'admin.page_builder', $page_builder );
+
+		// Register template repository and service.
+		$template_repository = new Repositories\TemplateRepository();
+		$template_service    = new Services\TemplateService( $template_repository );
+		$this->container->set( 'repository.template', $template_repository );
+		$this->container->set( 'service.template', $template_service );
+
+		// Register template builder page.
+		$template_builder = new Admin\TemplateBuilderPage( $template_service );
+		$this->container->set( 'admin.template_builder', $template_builder );
 
 		// Register bulk publish page.
 		$bulk_publish_page = new Admin\BulkPublishPage();
@@ -220,6 +230,12 @@ class Plugin {
 
 		// Register page builder AJAX handlers.
 		$this->container->get( 'admin.page_builder' )->register();
+
+		// Register template builder AJAX handlers.
+		$this->container->get( 'admin.template_builder' )->register();
+
+		// DB upgrade hook for template table.
+		add_action( 'admin_init', array( $this, 'checkTemplateDbUpgrade' ) );
 
 		// Register bulk publish AJAX handlers.
 		$this->container->get( 'admin.bulk_publish' )->register();
@@ -406,7 +422,9 @@ class Plugin {
 		$openai_service   = new Services\OpenAIService( $settings_service );
 		$page_generator   = new Services\NextJSPageGenerator();
 		$slot_generator   = new Services\SlotContentGenerator( $openai_service, $page_generator );
-		$bulk_service     = new Services\BulkPublishService( $slot_generator, $page_generator );
+		$template_repo    = new Repositories\TemplateRepository();
+		$template_service = new Services\TemplateService( $template_repo );
+		$bulk_service     = new Services\BulkPublishService( $slot_generator, $page_generator, $template_service );
 
 		$result = $bulk_service->processQueuedJob( $job['job_data'] );
 
@@ -414,6 +432,20 @@ class Plugin {
 			$queue->updateDynamicPublishStatus( $slug, 'completed' );
 		} else {
 			$queue->updateDynamicPublishStatus( $slug, 'failed', $result['message'] );
+		}
+	}
+
+	/**
+	 * Check if template DB table needs creation/upgrade.
+	 */
+	public function checkTemplateDbUpgrade(): void {
+		$current = get_option( 'seo_template_db_version', '0' );
+		if ( version_compare( $current, '1.0', '<' ) ) {
+			$repo = $this->container->get( 'repository.template' );
+			$repo->createTable();
+
+			$service = $this->container->get( 'service.template' );
+			$service->seedSystemTemplates();
 		}
 	}
 

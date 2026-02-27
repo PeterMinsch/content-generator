@@ -90,6 +90,23 @@ class NextJSPageGenerator {
 		return $schemas;
 	}
 
+	/**
+	 * Convert a DB template row to page config format (for code generation).
+	 */
+	public function getPageConfigFromTemplate( array $template ): array {
+		$wrapper = $template['wrapper_config'] ?? [];
+		return [
+			'label'            => $template['name'],
+			'original_path'    => '',
+			'preview_route'    => $wrapper['preview_route'] ?? '/preview',
+			'use_client'       => ! empty( $wrapper['use_client'] ),
+			'wrapper_open'     => $wrapper['wrapper_open'] ?? '',
+			'wrapper_close'    => $wrapper['wrapper_close'] ?? '',
+			'default_order'    => $template['block_order'] ?? [],
+			'default_metadata' => $template['default_metadata'] ?? null,
+		];
+	}
+
 	// ─── Slug Management ──────────────────────────────────────────
 
 	public function getSavedSlug( string $page_slug ): string {
@@ -479,6 +496,64 @@ class NextJSPageGenerator {
 		$out .= "};\n";
 
 		return $out;
+	}
+
+	/**
+	 * Generate block registry with templates from DB instead of hardcoded pages.
+	 *
+	 * @param array $db_templates Array of template rows from DB.
+	 */
+	public function generateBlockRegistryWithTemplates( array $db_templates ): string {
+		$all_blocks = $this->getAllBlocks();
+
+		// Import lines + registry entries are the same as generateBlockRegistry().
+		// Only wrappers + metadata differ (come from DB templates).
+		$base = $this->generateBlockRegistry();
+
+		// Replace the pageWrappers and pageMetadata sections with DB template data.
+		$wrappers = [];
+		$meta_entries = [];
+
+		foreach ( $db_templates as $template ) {
+			$slug    = $template['slug'];
+			$wrapper = $template['wrapper_config'] ?? [];
+			$open    = $wrapper['wrapper_open'] ?? '';
+
+			if ( ! empty( $open ) && preg_match( "/className='([^']*)'/", $open, $m ) ) {
+				$wrappers[] = "  '{$slug}': '{$m[1]}'";
+			} else {
+				$wrappers[] = "  '{$slug}': null";
+			}
+
+			$meta = $template['default_metadata'] ?? null;
+			if ( $meta ) {
+				$title = addslashes( $meta['title'] ?? '' );
+				$desc  = addslashes( $meta['description'] ?? '' );
+				$meta_entries[] = "  '{$slug}': { title: '{$title}', description: '{$desc}' }";
+			} else {
+				$meta_entries[] = "  '{$slug}': null";
+			}
+		}
+
+		// Replace the wrappers section in the base output.
+		$new_wrappers = "export const pageWrappers: Record<string, string | null> = {\n"
+			. implode( ",\n", $wrappers ) . ",\n};\n";
+		$new_metadata = "export const pageMetadata: Record<string, { title: string; description: string } | null> = {\n"
+			. implode( ",\n", $meta_entries ) . ",\n};\n";
+
+		// Replace the sections in the generated output.
+		$base = preg_replace(
+			'/export const pageWrappers.*?};\n/s',
+			$new_wrappers,
+			$base
+		);
+		$base = preg_replace(
+			'/export const pageMetadata.*?};\n/s',
+			$new_metadata,
+			$base
+		);
+
+		return $base;
 	}
 
 	/**
