@@ -40,7 +40,7 @@ los angeles diamond rings,los-angeles-diamond-rings
 custom wedding bands orange county,custom-wedding-bands-orange-county</pre>
 			</div>
 
-			<form id="csv-upload-form" enctype="multipart/form-data">
+			<form id="bulk-publish-upload-form" enctype="multipart/form-data">
 				<input type="file" name="csv_file" id="csv-file-input" accept=".csv,.txt" style="margin-bottom: 12px;" />
 				<br />
 				<button type="submit" class="button button-primary" <?php echo $dynamic_setup_done ? '' : 'disabled'; ?>>

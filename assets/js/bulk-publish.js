@@ -18,7 +18,7 @@
 
   // ── Step 1: CSV Upload ───────────────────────────────────────
 
-  $('#csv-upload-form').on('submit', function (e) {
+  $('#bulk-publish-upload-form').on('submit', function (e) {
     e.preventDefault();
 
     const fileInput = document.getElementById('csv-file-input');
