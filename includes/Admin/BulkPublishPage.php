@@ -85,6 +85,7 @@ class BulkPublishPage {
 			'pageTemplates'    => $templates,
 			'dynamicSetupDone' => (bool) get_option( 'seo_nextjs_dynamic_setup_done', false ),
 			'slotSchemas'      => $this->page_generator->getAllSlotSchemas(),
+			'siteUrl'          => rtrim( get_option( 'seo_nextjs_preview_url', '' ), '/' ),
 		] );
 	}
 

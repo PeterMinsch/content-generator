@@ -11,7 +11,7 @@
 
   if (typeof bulkPublishData === 'undefined') return;
 
-  const { ajaxUrl, nonce, pageTemplates } = bulkPublishData;
+  const { ajaxUrl, nonce, pageTemplates, siteUrl } = bulkPublishData;
 
   let uploadedRows = [];
   let uploadedHeaders = [];
@@ -188,7 +188,9 @@
       $tbody.append(
         '<tr>' +
         '<td>' + escapeHtml(r.keyword) + '</td>' +
-        '<td><code>/' + escapeHtml(r.slug) + '</code></td>' +
+        '<td>' + (r.success && siteUrl
+          ? '<a href="' + siteUrl + '/' + encodeURI(r.slug) + '" target="_blank" rel="noopener"><code>/' + escapeHtml(r.slug) + '</code></a>'
+          : '<code>/' + escapeHtml(r.slug) + '</code>') + '</td>' +
         '<td style="' + statusClass + '">' + statusIcon + '</td>' +
         '<td>' + escapeHtml(r.message) + '</td>' +
         '</tr>'
