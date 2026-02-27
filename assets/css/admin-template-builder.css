@@ -584,32 +584,37 @@ body.folded #template-builder-app.wrap {
 }
 
 /* Reuse device frame styles from admin-block-preview.css */
+/* All device frames scale-to-fit inside the preview panel.  */
 
-#tb-preview-container .mobile-frame {
-	max-width: 375px;
-	width: 375px;
+#tb-preview-container .device-frame {
+	max-width: 100% !important;
+	width: 100% !important;
+}
+
+#tb-preview-container .device-screen {
+	transform-origin: top left;
 }
 
 #tb-preview-iframe {
-	width: 100%;
-	min-height: 500px;
 	border: none;
 	display: block;
 	background: #fff;
 }
 
-/* Desktop in preview panel */
-#tb-preview-container .desktop-frame {
-	max-width: 100% !important;
-	width: 100% !important;
+/* Native widths — JS calculates the scale factor from these. */
+#tb-preview-container .mobile-frame .device-screen,
+#tb-preview-container .mobile-frame #tb-preview-iframe {
+	width: 375px;
+	min-height: 667px;
 }
 
-#tb-preview-container .desktop-frame .device-screen {
-	width: 1440px;
-	transform-origin: top left;
-	transform: scale(var(--tb-desktop-scale, 0.35));
+#tb-preview-container .tablet-frame .device-screen,
+#tb-preview-container .tablet-frame #tb-preview-iframe {
+	width: 768px;
+	min-height: 700px;
 }
 
+#tb-preview-container .desktop-frame .device-screen,
 #tb-preview-container .desktop-frame #tb-preview-iframe {
 	width: 1440px;
 	min-height: 900px;
